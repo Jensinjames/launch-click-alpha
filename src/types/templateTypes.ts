@@ -70,13 +70,39 @@ export interface PromptTemplate {
   output_type: 'text' | 'image' | 'code' | 'audio' | 'logic';
 }
 
+// Composite template step interface
+export interface CompositeTemplateStep {
+  id: string;
+  name: string;
+  step_order: number;
+  template_ref?: string; // Reference to existing template
+  template_data?: ContentTemplate; // Or inline template definition
+  input_mapping: Record<string, string>; // Variable substitution mapping
+  output_mapping: Record<string, string>; // Output variable mapping
+  depends_on: string[]; // Array of step IDs this step depends on
+  is_conditional?: boolean;
+  condition_logic?: Record<string, any>;
+}
+
+// Composite template interface
+export interface CompositeTemplate {
+  steps: CompositeTemplateStep[];
+  global_inputs: BaseField[];
+  final_output: {
+    combine_outputs: string[];
+    output_format: 'multi_part' | 'single' | 'collection';
+  };
+  output_type: 'composite';
+}
+
 // Union type for all templates
 export type ContentTemplate = 
   | TextContentTemplate 
   | ImageContentTemplate 
   | CodeContentTemplate 
   | LogicBuildFlowTemplate 
-  | PromptTemplate;
+  | PromptTemplate
+  | CompositeTemplate;
 
 // Enhanced template data type (for database storage)
 export interface EnhancedTemplateData {
@@ -88,7 +114,7 @@ export interface EnhancedTemplateData {
   validation_schema: Record<string, any>;
   schema_version: string;
   asset_references: string[];
-  output_format: 'text' | 'image' | 'code' | 'logic' | 'build_flow';
+  output_format: 'text' | 'image' | 'code' | 'logic' | 'build_flow' | 'composite';
   is_public: boolean;
   min_plan_type: 'starter' | 'pro' | 'growth' | 'elite';
   tags: string[];
@@ -96,6 +122,61 @@ export interface EnhancedTemplateData {
   created_by: string;
   created_at: string;
   updated_at: string;
+  // New fields for enhanced functionality
+  sharing_credits_earned?: number;
+  download_count?: number;
+  rating?: number;
+  review_count?: number;
+  complexity_level?: 'simple' | 'intermediate' | 'advanced';
+  is_featured?: boolean;
+  category?: string;
+}
+
+// Template review interface
+export interface TemplateReview {
+  id: string;
+  template_id: string;
+  user_id: string;
+  rating: number;
+  review_text?: string;
+  is_verified_usage: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Template search filters
+export interface TemplateSearchFilters {
+  query?: string;
+  type?: string[];
+  output_format?: string[];
+  complexity_level?: string[];
+  min_plan_type?: string[];
+  category?: string[];
+  rating_min?: number;
+  is_featured?: boolean;
+  tags?: string[];
+  sort_by?: 'rating' | 'download_count' | 'created_at' | 'updated_at' | 'usage_count';
+  sort_order?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+// Template search result
+export interface TemplateSearchResult {
+  templates: EnhancedTemplateData[];
+  total_count: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
+// Composite template execution context
+export interface CompositeExecutionContext {
+  user_inputs: Record<string, any>;
+  step_outputs: Record<string, any>;
+  current_step: string;
+  execution_order: string[];
+  variables: Record<string, any>;
 }
 
 // Form field configuration for dynamic rendering

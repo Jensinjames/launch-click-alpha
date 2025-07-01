@@ -70,13 +70,40 @@ export const PromptTemplateValidator = z.object({
   output_type: z.enum(['text', 'image', 'code', 'audio', 'logic'])
 });
 
+// Composite template step validator
+const CompositeTemplateStepValidator = z.object({
+  id: z.string().min(1, 'Step ID is required'),
+  name: z.string().min(1, 'Step name is required'),
+  step_order: z.number().min(0),
+  template_ref: z.string().uuid().optional(),
+  template_data: z.record(z.any()).optional(),
+  input_mapping: z.record(z.string()).default({}),
+  output_mapping: z.record(z.string()).default({}),
+  depends_on: z.array(z.string()).default([]),
+  is_conditional: z.boolean().default(false),
+  condition_logic: z.record(z.any()).optional()
+}).refine(data => data.template_ref || data.template_data, {
+  message: 'Either template_ref or template_data must be provided'
+});
+
+export const CompositeTemplateValidator = z.object({
+  steps: z.array(CompositeTemplateStepValidator).min(1, 'At least one step is required'),
+  global_inputs: z.array(BaseFieldSchema).default([]),
+  final_output: z.object({
+    combine_outputs: z.array(z.string()),
+    output_format: z.enum(['multi_part', 'single', 'collection'])
+  }),
+  output_type: z.literal('composite')
+});
+
 // Union validator for all templates
 export const ContentTemplateValidator = z.discriminatedUnion('output_type', [
   TextContentTemplateValidator,
   ImageContentTemplateValidator,
   CodeContentTemplateValidator,
   LogicBuildFlowTemplateValidator,
-  PromptTemplateValidator
+  PromptTemplateValidator,
+  CompositeTemplateValidator
 ]);
 
 // Enhanced template data validator
@@ -89,7 +116,7 @@ export const EnhancedTemplateDataValidator = z.object({
   validation_schema: z.record(z.any()),
   schema_version: z.string().default('1.0'),
   asset_references: z.array(z.string()).default([]),
-  output_format: z.enum(['text', 'image', 'code', 'logic', 'build_flow']),
+  output_format: z.enum(['text', 'image', 'code', 'logic', 'build_flow', 'composite']),
   is_public: z.boolean().default(false),
   min_plan_type: z.enum(['starter', 'pro', 'growth', 'elite']).default('starter'),
   tags: z.array(z.string()).default([]),
@@ -129,7 +156,7 @@ export const ContentGenerationRequestValidator = z.object({
   template_id: z.string().uuid().optional(),
   template_data: ContentTemplateValidator.optional(),
   user_inputs: z.record(z.any()),
-  output_format: z.enum(['text', 'image', 'code', 'logic', 'build_flow']),
+  output_format: z.enum(['text', 'image', 'code', 'logic', 'build_flow', 'composite']),
   settings: z.object({
     tone: z.string().optional(),
     style: z.string().optional(),
@@ -138,6 +165,31 @@ export const ContentGenerationRequestValidator = z.object({
   }).optional()
 }).refine(data => data.template_id || data.template_data, {
   message: 'Either template_id or template_data must be provided'
+});
+
+// Template search filters validator
+export const TemplateSearchFiltersValidator = z.object({
+  query: z.string().optional(),
+  type: z.array(z.enum(['email_sequence', 'social_post', 'landing_page', 'blog_post', 'ad_copy', 'funnel', 'strategy_brief'])).optional(),
+  output_format: z.array(z.enum(['text', 'image', 'code', 'logic', 'build_flow', 'composite'])).optional(),
+  complexity_level: z.array(z.enum(['simple', 'intermediate', 'advanced'])).optional(),
+  min_plan_type: z.array(z.enum(['starter', 'pro', 'growth', 'elite'])).optional(),
+  category: z.array(z.string()).optional(),
+  rating_min: z.number().min(0).max(5).optional(),
+  is_featured: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
+  sort_by: z.enum(['rating', 'download_count', 'created_at', 'updated_at', 'usage_count']).default('rating'),
+  sort_order: z.enum(['asc', 'desc']).default('desc'),
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(100).default(20)
+});
+
+// Template review validator
+export const TemplateReviewValidator = z.object({
+  template_id: z.string().uuid(),
+  rating: z.number().min(1).max(5),
+  review_text: z.string().max(1000).optional(),
+  is_verified_usage: z.boolean().default(false)
 });
 
 // Template validation utility

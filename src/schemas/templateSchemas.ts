@@ -204,6 +204,77 @@ export const PromptTemplateSchema = {
   }
 } as const;
 
+export const CompositeTemplateSchema = {
+  $schema: "http://json-schema.org/draft-07/schema#",
+  title: "CompositeTemplate",
+  type: "object",
+  required: ["steps", "global_inputs", "final_output", "output_type"],
+  properties: {
+    steps: {
+      type: "array",
+      items: { $ref: "#/definitions/CompositeStep" },
+      minItems: 1
+    },
+    global_inputs: {
+      type: "array",
+      items: { $ref: "#/definitions/Field" }
+    },
+    final_output: {
+      type: "object",
+      required: ["combine_outputs", "output_format"],
+      properties: {
+        combine_outputs: {
+          type: "array",
+          items: { type: "string" }
+        },
+        output_format: {
+          type: "string",
+          enum: ["multi_part", "single", "collection"]
+        }
+      }
+    },
+    output_type: {
+      type: "string",
+      enum: ["composite"]
+    }
+  },
+  definitions: {
+    CompositeStep: {
+      type: "object",
+      required: ["id", "name", "step_order", "input_mapping", "output_mapping"],
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+        step_order: { type: "number" },
+        template_ref: { type: "string" },
+        template_data: { type: "object" },
+        input_mapping: { type: "object" },
+        output_mapping: { type: "object" },
+        depends_on: {
+          type: "array",
+          items: { type: "string" }
+        },
+        is_conditional: { type: "boolean" },
+        condition_logic: { type: "object" }
+      }
+    },
+    Field: {
+      type: "object",
+      required: ["name", "label", "type"],
+      properties: {
+        name: { type: "string" },
+        label: { type: "string" },
+        type: { type: "string" },
+        required: { type: "boolean" },
+        options: {
+          type: "array",
+          items: { type: "string" }
+        }
+      }
+    }
+  }
+} as const;
+
 // Schema registry for easy access
 export const TemplateSchemas = {
   text: TextContentTemplateSchema,
@@ -211,7 +282,8 @@ export const TemplateSchemas = {
   code: CodeContentTemplateSchema,
   logic: LogicBuildFlowTemplateSchema,
   build_flow: LogicBuildFlowTemplateSchema,
-  prompt: PromptTemplateSchema
+  prompt: PromptTemplateSchema,
+  composite: CompositeTemplateSchema
 } as const;
 
 export type TemplateSchemaType = keyof typeof TemplateSchemas;
