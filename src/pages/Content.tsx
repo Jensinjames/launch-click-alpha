@@ -75,10 +75,10 @@ const Content = () => {
         <div className="max-w-6xl mx-auto">
           {/* Page Header */}
           <header className="mb-8">
-            <h1 className="text-4xl font-bold mb-3 text-gray-50">
+            <h1 className="text-4xl font-bold mb-3 text-foreground">
               Content Library
             </h1>
-            <p className="text-lg text-zinc-100">
+            <p className="text-lg text-muted-foreground">
               Manage and organize all your generated content
             </p>
           </header>
@@ -171,7 +171,7 @@ const Content = () => {
                               <Icon className="h-5 w-5 text-purple-600" aria-hidden="true" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 id={`content-title-${item.id}`} className="font-semibold truncate text-gray-100 text-sm my-0 py-0 px-0 mx-0">
+                              <h3 id={`content-title-${item.id}`} className="font-semibold truncate text-foreground text-sm my-0 py-0 px-0 mx-0">
                                 {item.title}
                               </h3>
                               <div className="flex items-center space-x-2 mt-1">
@@ -190,12 +190,12 @@ const Content = () => {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm mb-4 line-clamp-3 text-zinc-200">
+                        <p className="text-sm mb-4 line-clamp-3 text-muted-foreground">
                           {item.content}
                         </p>
                         <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                           <div className="flex items-center space-x-4">
-                            <span className="flex items-center text-base text-zinc-200">
+                            <span className="flex items-center text-base text-muted-foreground">
                               <Calendar className="mr-1 h-4 w-4" aria-hidden="true" />
                               {new Date(item.createdAt).toLocaleDateString()}
                             </span>

@@ -86,10 +86,10 @@ const Generate = () => {
         <div className="max-w-4xl mx-auto py-0">
           {/* Page Header */}
           <header className="mb-8">
-            <h1 className="font-bold mb-3 text-gray-50 text-xl text-left my-0">
+            <h1 className="font-bold mb-3 text-foreground text-xl text-left my-0">
               Generate Content
             </h1>
-            <p className="text-lg text-zinc-50">
+            <p className="text-lg text-muted-foreground">
               Create AI-powered marketing content in seconds
             </p>
           </header>
@@ -116,10 +116,10 @@ const Generate = () => {
                         <Icon className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate text-zinc-300">
+                        <h3 className="font-medium truncate text-foreground">
                           {type.title}
                         </h3>
-                        <p id={`${type.id}-description`} className="text-sm mt-1 text-zinc-100">
+                        <p id={`${type.id}-description`} className="text-sm mt-1 text-muted-foreground">
                           {type.description}
                         </p>
                         <span className="inline-block mt-2 text-xs font-medium text-purple-600">
