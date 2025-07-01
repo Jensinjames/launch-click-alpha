@@ -1,0 +1,45 @@
+<svg viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Main rocket body gradient -->
+    <linearGradient id="rocketGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3F51B5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9C27B0;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Fin gradient -->
+    <linearGradient id="finGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#303F9F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A237E;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Flame gradient -->
+    <linearGradient id="flameGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E91E63;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9C27B0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#673AB7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Left fin -->
+  <path d="M 120 260 Q 80 280 60 320 Q 65 360 90 380 Q 120 350 140 320 L 160 280 Z" 
+        fill="url(#finGradient)" />
+  
+  <!-- Right fin -->
+  <path d="M 280 260 Q 320 280 340 320 Q 335 360 310 380 Q 280 350 260 320 L 240 280 Z" 
+        fill="url(#finGradient)" />
+  
+  <!-- Main rocket body -->
+  <path d="M 200 60 Q 160 80 140 120 L 140 280 L 160 320 L 240 320 L 260 280 L 260 120 Q 240 80 200 60 Z" 
+        fill="url(#rocketGradient)" />
+  
+  <!-- Window/porthole -->
+  <circle cx="200" cy="160" r="25" fill="#1A237E" />
+  
+  <!-- Rocket exhaust flame -->
+  <path d="M 170 320 Q 180 340 185 360 Q 190 380 195 400 Q 200 420 200 440 Q 205 420 210 400 Q 215 380 220 360 Q 225 340 230 320 Z" 
+        fill="url(#flameGradient)" />
+  
+  <!-- Small flame detail -->
+  <ellipse cx="200" cy="380" rx="15" ry="30" fill="#E91E63" opacity="0.8" />
+</svg>
