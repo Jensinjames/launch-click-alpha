@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, BarChart3, CreditCard, Zap, Settings, Menu, X, FileText, Users, Puzzle } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SidebarItem } from "./SidebarItem";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { cn } from "@/lib/utils";
@@ -124,8 +125,11 @@ const Sidebar = () => {
             ))}
           </nav>
 
-          {/* User section with LogoutButton */}
-          <div className="border-t border-border/50 p-4">
+          {/* User section with ThemeToggle and LogoutButton */}
+          <div className="border-t border-border/50 p-4 space-y-2">
+            <div className="flex justify-center">
+              <ThemeToggle />
+            </div>
             <LogoutButton
               variant="ghost"
               showConfirmation={true}

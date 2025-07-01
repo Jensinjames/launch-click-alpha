@@ -17,7 +17,7 @@ const PaymentMethodCard = () => {
             </div>
             <div>
               <p className="font-medium text-primary">•••• •••• •••• 4242</p>
-              <p className="text-sm text-zinc-800">Expires 12/25</p>
+              <p className="text-sm text-muted-foreground">Expires 12/25</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">

@@ -35,7 +35,7 @@ export const ProfileSettings = ({ profile, onUpdate, isLoading }: ProfileSetting
               required 
               aria-describedby="full-name-help" 
             />
-            <p id="full-name-help" className="text-sm text-gray-500">
+            <p id="full-name-help" className="text-sm text-muted-foreground">
               This name will be displayed in your account
             </p>
           </div>
@@ -50,7 +50,7 @@ export const ProfileSettings = ({ profile, onUpdate, isLoading }: ProfileSetting
               required 
               aria-describedby="email-help" 
             />
-            <p id="email-help" className="text-sm text-gray-500">
+            <p id="email-help" className="text-sm text-muted-foreground">
               Used for login and important notifications
             </p>
           </div>
@@ -73,7 +73,7 @@ export const ProfileSettings = ({ profile, onUpdate, isLoading }: ProfileSetting
               value={profile.timezone} 
               onChange={(e) => onUpdate({ timezone: e.target.value })}
               disabled={isLoading}
-              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" 
+              className="w-full h-10 px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
               aria-describedby="timezone-help"
             >
               <option value="UTC">UTC</option>
@@ -85,7 +85,7 @@ export const ProfileSettings = ({ profile, onUpdate, isLoading }: ProfileSetting
               <option value="Europe/Paris">Paris</option>
               <option value="Asia/Tokyo">Tokyo</option>
             </select>
-            <p id="timezone-help" className="text-sm text-gray-500">
+            <p id="timezone-help" className="text-sm text-muted-foreground">
               Used for scheduling and reporting
             </p>
           </div>

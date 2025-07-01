@@ -31,7 +31,7 @@ export const NotificationSettings = ({ notifications, onUpdate, isLoading }: Not
               <Label htmlFor="email-updates" className="text-base font-medium">
                 Email Updates
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Receive important account updates via email
               </p>
             </div>
@@ -49,7 +49,7 @@ export const NotificationSettings = ({ notifications, onUpdate, isLoading }: Not
               <Label htmlFor="credit-alerts" className="text-base font-medium">
                 Credit Alerts
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Get notified when your credits are running low
               </p>
             </div>
@@ -66,7 +66,7 @@ export const NotificationSettings = ({ notifications, onUpdate, isLoading }: Not
               <Label htmlFor="weekly-report" className="text-base font-medium">
                 Weekly Usage Report
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Receive a summary of your weekly activity
               </p>
             </div>
@@ -83,7 +83,7 @@ export const NotificationSettings = ({ notifications, onUpdate, isLoading }: Not
               <Label htmlFor="marketing-emails" className="text-base font-medium">
                 Marketing Emails
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Receive tips, feature updates, and promotions
               </p>
             </div>

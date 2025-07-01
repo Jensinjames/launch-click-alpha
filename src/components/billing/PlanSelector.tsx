@@ -56,7 +56,7 @@ const PlanSelector = () => {
               <CardTitle className="text-lg text-primary">{plan.name}</CardTitle>
               <div className="text-3xl font-bold text-primary">
                 ${isYearly ? plan.yearly : plan.monthly}
-                <span className="text-base font-normal text-pink-500">
+                <span className="text-base font-normal text-muted-foreground">
                   /{isYearly ? "year" : "month"}
                 </span>
               </div>
@@ -65,7 +65,7 @@ const PlanSelector = () => {
               <ul className="space-y-2">
                 {plan.features.map((feature, index) => <li key={index} className="flex items-center text-sm">
                     <Check className="h-4 w-4 text-success mr-2 flex-shrink-0" />
-                    <span className="text-gray-900">{feature}</span>
+                    <span className="text-foreground">{feature}</span>
                   </li>)}
               </ul>
               <Button className={`w-full ${plan.current ? "bg-muted text-muted-foreground cursor-not-allowed" : "gradient-primary text-white hover:opacity-90"}`} disabled={plan.current}>
