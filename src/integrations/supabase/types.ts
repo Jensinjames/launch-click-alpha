@@ -331,6 +331,72 @@ export type Database = {
         }
         Relationships: []
       }
+      composite_template_steps: {
+        Row: {
+          condition_logic: Json | null
+          created_at: string | null
+          depends_on: string[] | null
+          id: string
+          input_mapping: Json | null
+          is_conditional: boolean | null
+          output_mapping: Json | null
+          step_id: string
+          step_name: string
+          step_order: number
+          template_data: Json | null
+          template_id: string
+          template_ref: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          condition_logic?: Json | null
+          created_at?: string | null
+          depends_on?: string[] | null
+          id?: string
+          input_mapping?: Json | null
+          is_conditional?: boolean | null
+          output_mapping?: Json | null
+          step_id: string
+          step_name: string
+          step_order: number
+          template_data?: Json | null
+          template_id: string
+          template_ref?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          condition_logic?: Json | null
+          created_at?: string | null
+          depends_on?: string[] | null
+          id?: string
+          input_mapping?: Json | null
+          is_conditional?: boolean | null
+          output_mapping?: Json | null
+          step_id?: string
+          step_name?: string
+          step_order?: number
+          template_data?: Json | null
+          template_id?: string
+          template_ref?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composite_template_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "content_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composite_template_steps_template_ref_fkey"
+            columns: ["template_ref"]
+            isOneToOne: false
+            referencedRelation: "content_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_analytics: {
         Row: {
           content_id: string
@@ -487,15 +553,22 @@ export type Database = {
       content_templates: {
         Row: {
           asset_references: Json | null
+          category: string | null
+          complexity_level: string | null
           created_at: string
           created_by: string
           description: string | null
+          download_count: number | null
           id: string
+          is_featured: boolean | null
           is_public: boolean | null
           min_plan_type: Database["public"]["Enums"]["plan_type"]
           name: string
           output_format: string | null
+          rating: number | null
+          review_count: number | null
           schema_version: string | null
+          sharing_credits_earned: number | null
           tags: string[] | null
           template_data: Json
           type: Database["public"]["Enums"]["content_type"]
@@ -505,15 +578,22 @@ export type Database = {
         }
         Insert: {
           asset_references?: Json | null
+          category?: string | null
+          complexity_level?: string | null
           created_at?: string
           created_by: string
           description?: string | null
+          download_count?: number | null
           id?: string
+          is_featured?: boolean | null
           is_public?: boolean | null
           min_plan_type?: Database["public"]["Enums"]["plan_type"]
           name: string
           output_format?: string | null
+          rating?: number | null
+          review_count?: number | null
           schema_version?: string | null
+          sharing_credits_earned?: number | null
           tags?: string[] | null
           template_data: Json
           type: Database["public"]["Enums"]["content_type"]
@@ -523,15 +603,22 @@ export type Database = {
         }
         Update: {
           asset_references?: Json | null
+          category?: string | null
+          complexity_level?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
+          download_count?: number | null
           id?: string
+          is_featured?: boolean | null
           is_public?: boolean | null
           min_plan_type?: Database["public"]["Enums"]["plan_type"]
           name?: string
           output_format?: string | null
+          rating?: number | null
+          review_count?: number | null
           schema_version?: string | null
+          sharing_credits_earned?: number | null
           tags?: string[] | null
           template_data?: Json
           type?: Database["public"]["Enums"]["content_type"]
@@ -1006,6 +1093,91 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "template_assets_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "content_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_reviews: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_verified_usage: boolean | null
+          rating: number
+          review_text: string | null
+          template_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_verified_usage?: boolean | null
+          rating: number
+          review_text?: string | null
+          template_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_verified_usage?: boolean | null
+          rating?: number
+          review_text?: string | null
+          template_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_reviews_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "content_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_usage_analytics: {
+        Row: {
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          input_data: Json | null
+          output_quality_score: number | null
+          success: boolean
+          template_id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_data?: Json | null
+          output_quality_score?: number | null
+          success: boolean
+          template_id: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_data?: Json | null
+          output_quality_score?: number | null
+          success?: boolean
+          template_id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_usage_analytics_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "content_templates"
