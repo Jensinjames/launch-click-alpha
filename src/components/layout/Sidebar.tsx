@@ -102,7 +102,7 @@ const Sidebar = () => {
           {/* Logo */}
           <div className="flex items-center px-6 py-8 border-b border-border/50">
             <div className="p-2.5 bg-gradient-to-r from-primary to-primary/80 rounded-xl shadow-lg">
-              <img src="/lovable-uploads/344f8f18-ef30-412b-b049-dd7567e87eb9.png" alt="Launch Click Logo" className="h-7 w-7" />
+              <Zap className="h-7 w-7 text-primary-foreground" />
             </div>
             <span className="ml-3 font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent my-0 px-0 py-0 text-xl">
               Launch Click
