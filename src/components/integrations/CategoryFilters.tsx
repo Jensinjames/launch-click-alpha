@@ -50,14 +50,14 @@ const CategoryFilters = ({
   return <div className="mb-8">
       <h2 className="sr-only">Filter integrations by category</h2>
       <div ref={filtersRef} className="flex flex-wrap gap-3" role="tablist" aria-label="Integration categories">
-        {filters.map((filter, index) => <button key={filter} onClick={() => handleFilterChange(filter)} onKeyDown={e => handleKeyDown(e, filter)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${activeFilter === filter ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`} role="tab" aria-selected={activeFilter === filter} aria-describedby={`filter-${filter.replace(/\s+/g, '-').toLowerCase()}-description`} tabIndex={activeFilter === filter ? 0 : -1}>
+        {filters.map((filter, index) => <button key={filter} onClick={() => handleFilterChange(filter)} onKeyDown={e => handleKeyDown(e, filter)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${activeFilter === filter ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`} role="tab" aria-selected={activeFilter === filter} aria-describedby={`filter-${filter.replace(/\s+/g, '-').toLowerCase()}-description`} tabIndex={activeFilter === filter ? 0 : -1}>
             {filter}
             <span id={`filter-${filter.replace(/\s+/g, '-').toLowerCase()}-description`} className="sr-only">
               {activeFilter === filter ? 'Currently selected filter' : 'Click to filter by'} {filter}
             </span>
           </button>)}
       </div>
-      <div aria-live="polite" aria-atomic="true" className="mt-2 text-sm text-gray-600 bg-transparent">
+      <div aria-live="polite" aria-atomic="true" className="mt-2 text-sm text-muted-foreground bg-transparent">
         {activeFilter === "All" ? "Showing all integrations" : `Showing ${activeFilter} integrations`}
       </div>
     </div>;

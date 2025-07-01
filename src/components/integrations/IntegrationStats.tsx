@@ -17,10 +17,10 @@ const IntegrationStats = () => {
     color: "text-blue-600"
   }];
   return <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 rounded-none">
-      {stats.map((stat, index) => <div key={index} className="p-6 border border-gray-200 bg-inherit rounded-sm py-[17px]">
+      {stats.map((stat, index) => <div key={index} className="p-6 border border-border bg-card rounded-sm py-[17px]">
           <div className="flex items-center space-x-3 mb-2">
             <span className="text-2xl">{stat.icon}</span>
-            <span className="text-sm text-purple-400">{stat.title}</span>
+            <span className="text-sm text-muted-foreground">{stat.title}</span>
           </div>
           <div className={`text-3xl font-bold ${stat.color}`}>
             {stat.value}

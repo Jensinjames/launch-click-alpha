@@ -22,7 +22,7 @@ const CustomIntegrationBanner = () => {
             Submit a request for a new integration to be added
           </div>
           
-          <Button variant="outline" aria-describedby="api-docs-description" className="border-white/30 hover:bg-white/10 font-medium focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-600 text-gray-800">
+          <Button variant="outline" aria-describedby="api-docs-description" className="border-white/30 hover:bg-white/10 font-medium focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-600 text-white">
             <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
             View API Docs
           </Button>
