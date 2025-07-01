@@ -10,7 +10,8 @@ export const addSecurityHeaders = () => {
   // Generate nonce for inline scripts/styles
   const nonce = generateCSPNonce();
   
-  // Enhanced Content Security Policy - removed unsafe directives
+  // Enhanced Content Security Policy - optimized for meta tag delivery
+  // Note: frame-ancestors directive is ignored in meta tags, use server-side headers for clickjacking protection
   const cspDirectives = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
@@ -18,7 +19,6 @@ export const addSecurityHeaders = () => {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
     "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co",
-    "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
@@ -42,9 +42,9 @@ export const addSecurityHeaders = () => {
   document.head.appendChild(cspMeta);
 
   // Add other security meta tags with enhanced settings
+  // Note: X-Frame-Options cannot be set via meta tags - use server-side headers for clickjacking protection
   const securityTags = [
     { httpEquiv: 'X-Content-Type-Options', content: 'nosniff' },
-    { httpEquiv: 'X-Frame-Options', content: 'DENY' },
     { httpEquiv: 'X-XSS-Protection', content: '1; mode=block' },
     { httpEquiv: 'Referrer-Policy', content: 'strict-origin-when-cross-origin' },
     { httpEquiv: 'Permissions-Policy', content: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
