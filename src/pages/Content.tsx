@@ -5,43 +5,54 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, Copy, Eye, Calendar, FileText, Mail, Share2, MoreHorizontal } from "lucide-react";
+import { Search, Filter, Download, Copy, Eye, Calendar, FileText, Mail, Share2, MoreHorizontal, Heart, Trash2 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
+import { useUserContent } from "@/hooks/useUserContent";
+import { useContentMutations } from "@/hooks/useContentMutations";
+import { toast } from "sonner";
 const Content = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  // Mock content data
-  const contentItems = [{
-    id: 1,
-    title: "Summer Sale Email Campaign",
-    type: "email",
-    content: "Get ready for our biggest sale of the year! Summer savings up to 70% off...",
-    createdAt: "2024-06-20",
-    status: "published",
-    views: 1245,
-    icon: Mail
-  }, {
-    id: 2,
-    title: "Product Launch Social Media Post",
-    type: "social",
-    content: "🚀 Introducing our game-changing new product that will revolutionize...",
-    createdAt: "2024-06-19",
-    status: "draft",
-    views: 0,
-    icon: Share2
-  }, {
-    id: 3,
-    title: "Landing Page Hero Copy",
-    type: "landing",
-    content: "Transform Your Business with AI-Powered Solutions. Discover how...",
-    createdAt: "2024-06-18",
-    status: "published",
-    views: 856,
-    icon: FileText
-  }];
+  const { data: contentItems = [], isLoading, error } = useUserContent({
+    type: filterType,
+    search: searchQuery,
+    sortBy: sortBy as any
+  });
+
+  const { toggleFavorite, deleteContent } = useContentMutations();
+
+  const handleToggleFavorite = async (id: string, currentFavorite: boolean) => {
+    try {
+      await toggleFavorite.mutateAsync({ id, is_favorite: !currentFavorite });
+      toast.success(currentFavorite ? 'Removed from favorites' : 'Added to favorites');
+    } catch (error) {
+      toast.error('Failed to update favorite status');
+    }
+  };
+
+  const handleDeleteContent = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+    
+    try {
+      await deleteContent.mutateAsync(id);
+      toast.success('Content deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete content');
+    }
+  };
+
+  const handleCopyContent = async (content: any) => {
+    try {
+      const textToCopy = content?.text || JSON.stringify(content, null, 2);
+      await navigator.clipboard.writeText(textToCopy);
+      toast.success('Content copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to copy content');
+    }
+  };
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published':
@@ -56,18 +67,41 @@ const Content = () => {
   };
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'email':
+      case 'email_sequence':
         return 'Email Campaign';
-      case 'social':
+      case 'social_post':
         return 'Social Media';
-      case 'landing':
+      case 'landing_page':
         return 'Landing Page';
-      case 'blog':
+      case 'blog_post':
         return 'Blog Post';
-      case 'ad':
+      case 'ad_copy':
         return 'Ad Copy';
+      case 'funnel':
+        return 'Sales Funnel';
+      case 'strategy_brief':
+        return 'Strategy Brief';
       default:
-        return type;
+        return type.replace('_', ' ');
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'email_sequence':
+        return Mail;
+      case 'social_post':
+        return Share2;
+      case 'landing_page':
+      case 'blog_post':
+      case 'strategy_brief':
+        return FileText;
+      case 'ad_copy':
+        return MoreHorizontal;
+      case 'funnel':
+        return FileText;
+      default:
+        return FileText;
     }
   };
   return <AuthGuard requireAuth={true}>
@@ -110,14 +144,16 @@ const Content = () => {
                           <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Types</SelectItem>
-                          <SelectItem value="email">Email</SelectItem>
-                          <SelectItem value="social">Social Media</SelectItem>
-                          <SelectItem value="landing">Landing Page</SelectItem>
-                          <SelectItem value="blog">Blog Post</SelectItem>
-                          <SelectItem value="ad">Ad Copy</SelectItem>
-                        </SelectContent>
+                          <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="email_sequence">Email Campaign</SelectItem>
+                            <SelectItem value="social_post">Social Media</SelectItem>
+                            <SelectItem value="landing_page">Landing Page</SelectItem>
+                            <SelectItem value="blog_post">Blog Post</SelectItem>
+                            <SelectItem value="ad_copy">Ad Copy</SelectItem>
+                            <SelectItem value="funnel">Sales Funnel</SelectItem>
+                            <SelectItem value="strategy_brief">Strategy Brief</SelectItem>
+                          </SelectContent>
                       </Select>
                     </div>
                     <div>
@@ -128,12 +164,12 @@ const Content = () => {
                         <SelectTrigger id="content-sort" className="w-32">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="newest">Newest</SelectItem>
-                          <SelectItem value="oldest">Oldest</SelectItem>
-                          <SelectItem value="views">Most Views</SelectItem>
-                          <SelectItem value="title">Title A-Z</SelectItem>
-                        </SelectContent>
+                          <SelectContent>
+                            <SelectItem value="newest">Newest</SelectItem>
+                            <SelectItem value="oldest">Oldest</SelectItem>
+                            <SelectItem value="favorites">Favorites</SelectItem>
+                            <SelectItem value="title">Title A-Z</SelectItem>
+                          </SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -147,81 +183,132 @@ const Content = () => {
             <h2 id="content-grid-heading" className="sr-only">
               Your generated content
             </h2>
-            {contentItems.length === 0 ? <Card>
+            {isLoading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                      <div className="h-3 bg-muted rounded w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-16 bg-muted rounded mb-4" />
+                      <div className="h-8 bg-muted rounded" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : error ? (
+              <Card>
                 <CardContent className="pt-8 pb-8 text-center">
-                  <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" aria-hidden="true" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No content found
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    Error loading content
                   </h3>
-                  <p className="text-gray-500 mb-6">
-                    Get started by generating your first piece of content.
+                  <p className="text-muted-foreground mb-6">
+                    {String(error)}
                   </p>
-                  <Button>
+                </CardContent>
+              </Card>
+            ) : contentItems.length === 0 ? (
+              <Card>
+                <CardContent className="pt-8 pb-8 text-center">
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    {searchQuery || filterType !== 'all' ? 'No content matches your filters' : 'No content found'}
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    {searchQuery || filterType !== 'all' ? 'Try adjusting your search or filters.' : 'Get started by generating your first piece of content.'}
+                  </p>
+                  <Button onClick={() => window.location.href = '/generate'}>
                     Generate Content
                   </Button>
                 </CardContent>
-              </Card> : <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 rounded-none py-0 my-0 mx-0 px-0">
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {contentItems.map(item => {
-              const Icon = item.icon;
-              return <Card key={item.id} tabIndex={0} role="article" aria-labelledby={`content-title-${item.id}`} className="hover:shadow-lg transition-shadow duration-200 my-[2px] py-0 px-0 mx-0">
+                  const Icon = getTypeIcon(item.type);
+                  const contentText = (item.content as any)?.text || JSON.stringify(item.content, null, 2) || 'No content available';
+                  
+                  return (
+                    <Card key={item.id} className="hover:shadow-lg transition-shadow duration-200">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center space-x-3 min-w-0 flex-1">
                             <div className="p-2 bg-purple-100 rounded-lg">
-                              <Icon className="h-5 w-5 text-purple-600" aria-hidden="true" />
+                              <Icon className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 id={`content-title-${item.id}`} className="font-semibold truncate text-foreground text-sm my-0 py-0 px-0 mx-0">
+                              <h3 className="font-semibold truncate text-foreground text-sm">
                                 {item.title}
                               </h3>
                               <div className="flex items-center space-x-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
                                   {getTypeLabel(item.type)}
                                 </Badge>
-                                <Badge className={`text-xs ${getStatusColor(item.status)}`}>
-                                  {item.status}
-                                </Badge>
+                                {item.is_favorite && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    <Heart className="h-3 w-3 mr-1 fill-current" />
+                                    Favorite
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" aria-label={`More options for ${item.title}`}>
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleToggleFavorite(item.id, item.is_favorite || false)}
+                            className={item.is_favorite ? 'text-red-500' : 'text-muted-foreground'}
+                          >
+                            <Heart className={`h-4 w-4 ${item.is_favorite ? 'fill-current' : ''}`} />
                           </Button>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm mb-4 line-clamp-3 text-muted-foreground">
-                          {item.content}
+                          {contentText.substring(0, 150)}...
                         </p>
-                        <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                           <div className="flex items-center space-x-4">
-                            <span className="flex items-center text-base text-muted-foreground">
-                              <Calendar className="mr-1 h-4 w-4" aria-hidden="true" />
-                              {new Date(item.createdAt).toLocaleDateString()}
-                            </span>
                             <span className="flex items-center">
-                              <Eye className="mr-1 h-4 w-4" aria-hidden="true" />
-                              {item.views} views
+                              <Calendar className="mr-1 h-4 w-4" />
+                              {new Date(item.created_at).toLocaleDateString()}
                             </span>
+                            {(item.metadata as any)?.creditsCost && (
+                              <span className="flex items-center">
+                                <span className="mr-1">💳</span>
+                                {(item.metadata as any).creditsCost} credits
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1" aria-label={`View ${item.title}`}>
-                            <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm" aria-label={`Copy ${item.title}`}>
-                            <Copy className="mr-2 h-4 w-4" aria-hidden="true" />
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleCopyContent(item.content)}
+                          >
+                            <Copy className="mr-2 h-4 w-4" />
                             Copy
                           </Button>
-                          <Button variant="outline" size="sm" aria-label={`Download ${item.title}`}>
-                            <Download className="h-4 w-4" aria-hidden="true" />
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeleteContent(item.id, item.title)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </CardContent>
-                    </Card>;
-            })}
-              </div>}
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </section>
         </div>
       </Layout>

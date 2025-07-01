@@ -9,6 +9,10 @@ import { Mail, Share2, FileText, PenTool, Megaphone, TrendingUp, Loader2, Sparkl
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
 import { TemplateSelector } from "@/components/templates/TemplateSelector";
+import { useContentGeneration } from "@/hooks/useUserContent";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type { Database } from '@/integrations/supabase/types';
 
 type ContentTemplate = Database['public']['Tables']['content_templates']['Row'];
@@ -26,8 +30,16 @@ const contentTypeMapping: Record<string, Database['public']['Enums']['content_ty
 const Generate = () => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [prompt, setPrompt] = useState("");
+  const [title, setTitle] = useState("");
+  const [tone, setTone] = useState("");
+  const [audience, setAudience] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ContentTemplate | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<any>(null);
+  
+  const { generateContent } = useContentGeneration();
+  const { plan, hasCreditsRemaining } = useUserPlan();
+  const queryClient = useQueryClient();
   const contentTypes = [{
     id: "email",
     title: "Email Campaign",
@@ -76,10 +88,42 @@ const Generate = () => {
 
   const handleGenerate = async () => {
     if (!selectedType || !prompt.trim()) return;
+    
+    if (!hasCreditsRemaining()) {
+      toast.error('Insufficient credits. Please upgrade your plan or wait for your monthly reset.');
+      return;
+    }
+
     setIsGenerating(true);
-    // Simulate generation process
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsGenerating(false);
+    setGeneratedContent(null);
+
+    try {
+      const result = await generateContent({
+        type: contentTypeMapping[selectedType],
+        prompt,
+        title: title || `${contentTypes.find(t => t.id === selectedType)?.title} - ${new Date().toLocaleDateString()}`,
+        tone,
+        audience
+      });
+
+      if (result.success) {
+        setGeneratedContent(result.content);
+        queryClient.invalidateQueries({ queryKey: ['user-content'] });
+        queryClient.invalidateQueries({ queryKey: ['userPlan'] });
+        toast.success(`Content generated successfully! ${result.creditsUsed} credits used.`);
+      } else {
+        throw new Error(result.error || 'Failed to generate content');
+      }
+    } catch (error: any) {
+      console.error('Generation error:', error);
+      if (error.message?.includes('Insufficient credits')) {
+        toast.error(`Insufficient credits. You need ${error.creditsNeeded} credits but only have ${error.creditsAvailable} remaining.`);
+      } else {
+        toast.error(error.message || 'Failed to generate content. Please try again.');
+      }
+    } finally {
+      setIsGenerating(false);
+    }
   };
   return <AuthGuard requireAuth={true}>
       <Layout>
@@ -187,6 +231,18 @@ const Generate = () => {
                 handleGenerate();
               }} className="space-y-6">
                     <div className="space-y-2">
+                      <Label htmlFor="content-title" className="text-sm font-medium">
+                        Content Title (Optional)
+                      </Label>
+                      <Input 
+                        id="content-title" 
+                        placeholder="Enter a custom title for your content" 
+                        value={title} 
+                        onChange={e => setTitle(e.target.value)} 
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="content-prompt" className="text-sm font-medium">
                         Describe your content requirements *
                       </Label>
@@ -199,7 +255,7 @@ const Generate = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="tone-select">Tone of Voice</Label>
-                        <Select>
+                        <Select value={tone} onValueChange={setTone}>
                           <SelectTrigger id="tone-select">
                             <SelectValue placeholder="Select tone" />
                           </SelectTrigger>
@@ -209,28 +265,101 @@ const Generate = () => {
                             <SelectItem value="friendly">Friendly</SelectItem>
                             <SelectItem value="urgent">Urgent</SelectItem>
                             <SelectItem value="humorous">Humorous</SelectItem>
+                            <SelectItem value="authoritative">Authoritative</SelectItem>
+                            <SelectItem value="conversational">Conversational</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="audience-input">Target Audience</Label>
-                        <Input id="audience-input" placeholder="e.g., B2B decision makers, young professionals" />
+                        <Input 
+                          id="audience-input" 
+                          placeholder="e.g., B2B decision makers, young professionals" 
+                          value={audience}
+                          onChange={e => setAudience(e.target.value)}
+                        />
                       </div>
                     </div>
 
-                    <Button type="submit" className="w-full md:w-auto" disabled={!prompt.trim() || isGenerating} aria-describedby="generate-button-help">
-                      {isGenerating ? <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                          Generating...
-                        </> : `Generate Content (${contentTypes.find(t => t.id === selectedType)?.credits} credits)`}
-                    </Button>
-                    <p id="generate-button-help" className="text-sm text-gray-500">
-                      Generation typically takes 10-30 seconds
-                    </p>
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        type="submit" 
+                        className="w-full md:w-auto" 
+                        disabled={!prompt.trim() || isGenerating || !hasCreditsRemaining()} 
+                        aria-describedby="generate-button-help"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                            Generating...
+                          </>
+                        ) : (
+                          `Generate Content (${contentTypes.find(t => t.id === selectedType)?.credits} credits)`
+                        )}
+                      </Button>
+                      
+                      <div className="text-sm space-y-1">
+                        <p id="generate-button-help" className="text-muted-foreground">
+                          Generation typically takes 10-30 seconds
+                        </p>
+                        {plan && (
+                          <p className="text-muted-foreground">
+                            Credits remaining: {plan.monthlyLimit - plan.creditsUsed} / {plan.monthlyLimit}
+                          </p>
+                        )}
+                        {!hasCreditsRemaining() && (
+                          <p className="text-destructive text-sm">
+                            Insufficient credits. Upgrade your plan or wait for monthly reset.
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
+
+              {/* Generated Content Display */}
+              {generatedContent && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-purple-600" />
+                      Generated Content
+                    </CardTitle>
+                    <CardDescription>
+                      Your AI-generated content is ready! You can copy it or make edits.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 bg-muted rounded-lg">
+                      <h3 className="font-medium mb-2 text-foreground">{generatedContent.title}</h3>
+                      <div className="whitespace-pre-wrap text-muted-foreground">
+                        {generatedContent.content?.text || 'No content generated'}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => navigator.clipboard.writeText(generatedContent.content?.text || '')}
+                      >
+                        Copy to Clipboard
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          setGeneratedContent(null);
+                          setPrompt('');
+                          setTitle('');
+                          setSelectedTemplate(null);
+                        }}
+                      >
+                        Generate New
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </section>}
         </div>
       </Layout>
