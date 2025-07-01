@@ -103,7 +103,11 @@ const Sidebar = () => {
           {/* Logo */}
           <div className="flex items-center px-6 py-8 border-b border-border/50">
             <div className="p-2.5 bg-gradient-to-r from-primary to-primary/80 rounded-xl shadow-lg">
-              <Zap className="h-7 w-7 text-primary-foreground" />
+              <img 
+                src="https://raw.githubusercontent.com/Jensinjames/launch-click-alpha/e318cdc4e48379089e2a0d225b16cce0192df487/src/assets/rocket_svg.svg?token=AZWREYV4WYJRT6JND2EWE2DIMR2GI" 
+                alt="Rocket Logo" 
+                className="h-7 w-7 object-contain"
+              />
             </div>
             <span className="ml-3 font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent my-0 px-0 py-0 text-xl">
               Launch Click
