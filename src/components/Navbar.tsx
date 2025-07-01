@@ -2,18 +2,21 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import launchClickLogo from "@/assets/launchclick-logo.png";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   return <nav className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="p-2 gradient-primary rounded-lg shadow-sm">
-                <Zap className="h-6 w-6 text-white" />
-              </div>
-              <span className="gradient-primary bg-clip-text text-transparent font-display text-xl font-semibold">Launch Click</span>
+            <Link to="/" className="flex items-center space-x-3">
+              <img 
+                src={launchClickLogo} 
+                alt="LaunchClick Logo" 
+                className="w-8 h-8 object-contain"
+              />
+              <span className="text-brand-navy font-display text-xl font-semibold">LaunchClick</span>
             </Link>
           </div>
 

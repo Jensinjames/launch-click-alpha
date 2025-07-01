@@ -10,10 +10,11 @@
 
 @layer base {
   :root {
-    /* Core Brand Colors - Refined */
-    --brand-primary: 258 84% 60%;
-    --brand-secondary: 217 91% 60%;
-    --brand-accent: 275 85% 65%;
+    /* LaunchClick Brand Colors */
+    --brand-primary: 216 100% 62%; /* #3A8DFF - Rocket Gradient Top */
+    --brand-secondary: 258 88% 64%; /* #A146F5 - Rocket Gradient Bottom */
+    --brand-accent: 220 100% 57%; /* #227CFF - Tagline Blue */
+    --brand-navy: 219 69% 15%; /* #0B1D3A - Dark Navy Text */
     
     /* Light Mode - Enhanced Readability & Visual Hierarchy */
     --background: 0 0% 100%;
@@ -28,18 +29,18 @@
     --popover: 0 0% 100%;
     --popover-foreground: 217 19% 27%;
 
-    /* Enhanced Text Hierarchy - Light Mode */
-    --text-primary: 217 19% 27%;
+    /* Enhanced Text Hierarchy - LaunchClick Theme */
+    --text-primary: 219 69% 15%; /* LaunchClick Navy */
     --text-secondary: 215 16% 47%;
     --text-tertiary: 213 13% 65%;
     --text-muted: 210 9% 71%;
     --text-inverse: 0 0% 100%;
 
-    /* Interactive Colors - Refined */
-    --primary: 258 84% 60%;
+    /* Interactive Colors - LaunchClick Theme */
+    --primary: 216 100% 62%; /* LaunchClick Blue */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 258 84% 55%;
-    --primary-active: 258 84% 50%;
+    --primary-hover: 216 100% 58%;
+    --primary-active: 216 100% 54%;
 
     --secondary: 210 17% 93%;
     --secondary-foreground: 217 19% 27%;
@@ -569,9 +570,13 @@
     @apply text-secondary hover:text-primary transition-colors duration-200;
   }
 
-  /* Enhanced Gradient Backgrounds */
+  /* LaunchClick Gradient Backgrounds */
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--brand-secondary)) 100%);
+    background: linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%);
+  }
+
+  .gradient-rocket {
+    background: linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%);
   }
 
   .gradient-accent {

@@ -97,9 +97,10 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))',
 				},
 				brand: {
-					primary: 'hsl(var(--brand-primary))',
-					secondary: 'hsl(var(--brand-secondary))',
-					accent: 'hsl(var(--brand-accent))',
+					primary: 'hsl(var(--brand-primary))', /* LaunchClick Blue */
+					secondary: 'hsl(var(--brand-secondary))', /* Rocket Purple */
+					accent: 'hsl(var(--brand-accent))', /* Tagline Blue */
+					navy: 'hsl(var(--brand-navy))', /* Dark Navy */
 				},
 				// Enhanced semantic text colors
 				text: {

@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Calendar } from "lucide-react";
+import launchClickLogo from "@/assets/launchclick-logo.png";
 
 const Hero = () => {
   return (
@@ -11,14 +12,24 @@ const Hero = () => {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            <span className="block bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              AI Marketing Copilot
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 gradient-rocket rounded-xl flex items-center justify-center shadow-lg">
+              <img 
+                src={launchClickLogo} 
+                alt="LaunchClick" 
+                className="w-10 h-10 object-contain filter brightness-0 invert"
+              />
+            </div>
+          </div>
+          
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <span className="block text-brand-navy">
+              LaunchClick
             </span>
           </h1>
           
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-8">
-            Your All-in-One Marketing Engine — On Autopilot
+          <h2 className="text-2xl md:text-3xl font-semibold mb-8" style={{ color: '#227CFF' }}>
+            Your AI Marketing Copilot
           </h2>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
@@ -27,7 +38,7 @@ const Hero = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <Link to="/signup">
-              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-4 h-auto font-semibold">
+              <Button size="lg" className="gradient-rocket text-white text-lg px-8 py-4 h-auto font-semibold hover:opacity-90 transition-opacity">
                 Try Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -43,7 +54,7 @@ const Hero = () => {
           </div>
           
           <div className="relative max-w-5xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-3xl" />
+            <div className="absolute inset-0 gradient-rocket opacity-20 rounded-2xl blur-3xl" />
             <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 shadow-2xl">
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 text-left">
                 <div className="flex items-center space-x-2 mb-4">
