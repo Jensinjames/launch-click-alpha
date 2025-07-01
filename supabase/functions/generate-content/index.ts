@@ -217,31 +217,46 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
     }
 
     // Save content to database
+    console.log(`Attempting to save content for user ${user.id}, type: ${type}`);
+    
+    const insertData = {
+      user_id: user.id,
+      type,
+      title: title || `${type.replace('_', ' ')} - ${new Date().toLocaleDateString()}`,
+      content: generatedContent,
+      prompt: template_data ? JSON.stringify(template_data) : prompt,
+      metadata: {
+        output_format: output_format,
+        template_used: !!template_data,
+        assets: assets,
+        settings: settings,
+        tone: tone || 'professional',
+        audience: audience || 'general',
+        creditsCost
+      }
+    };
+    
+    console.log('Insert data structure:', JSON.stringify(insertData, null, 2));
+    
     const { data: contentResult, error: contentError } = await supabase
       .from('generated_content')
-      .insert({
-        user_id: user.id,
-        type,
-        title: title || `${type.replace('_', ' ')} - ${new Date().toLocaleDateString()}`,
-        content: generatedContent,
-        prompt: template_data ? JSON.stringify(template_data) : prompt,
-        metadata: {
-          output_format: output_format,
-          template_used: !!template_data,
-          assets: assets,
-          settings: settings,
-          tone: tone || 'professional',
-          audience: audience || 'general',
-          creditsCost
-        }
-      })
+      .insert(insertData)
       .select()
       .single();
 
     if (contentError) {
-      console.error('Error saving content:', contentError);
-      throw new Error('Failed to save generated content');
+      console.error('Database error details:', {
+        error: contentError,
+        code: contentError.code,
+        message: contentError.message,
+        details: contentError.details,
+        hint: contentError.hint,
+        insertData: insertData
+      });
+      throw new Error(`Database error: ${contentError.message} (Code: ${contentError.code})`);
     }
+    
+    console.log(`Content saved successfully with ID: ${contentResult.id}`);
 
     // Deduct credits
     const { error: creditsUpdateError } = await supabase
