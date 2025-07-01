@@ -45,15 +45,15 @@ const Dashboard = () => {
   };
   return <AuthGuard requireAuth={true}>
       <Layout>
-        <div className="space-y-8">
-          <div className="mb-12">
-            <h1 className="text-4xl font-bold mb-3 text-violet-700">
-              Welcome back, {user?.user_metadata?.full_name || "User"}! 👋
-            </h1>
-            <p className="text-lg text-zinc-50">
-              Ready to create some amazing marketing content today?
-            </p>
-          </div>
+      <div className="space-y-8 p-6">
+        <div className="mb-12 p-8 bg-gradient-to-br from-primary/10 via-brand-primary/5 to-brand-accent/10 rounded-2xl border border-primary/20">
+          <h1 className="text-4xl font-bold mb-4 text-primary">
+            Welcome back, {user?.user_metadata?.full_name || "User"}! 👋
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Ready to create some amazing marketing content today?
+          </p>
+        </div>
 
           <DashboardStats credits={credits} assetsCount={recentAssets.length} />
 

@@ -55,36 +55,36 @@ const DashboardStats = React.memo(({
   ], [credits.used, assetsCount]);
 
   return (
-    <section aria-labelledby="dashboard-stats-title" className="mb-12">
+    <section aria-labelledby="dashboard-stats-title" className="mb-16">
       <h2 id="dashboard-stats-title" className="sr-only">Dashboard Statistics</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {statsData.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
             <Card 
               key={index} 
-              className={`surface-elevated hover:shadow-md transition-all duration-200 border-2 ${stat.borderColor} focus-visible`}
+              className={`bg-surface-elevated/80 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-2 ${stat.borderColor} focus-visible hover:-translate-y-1 rounded-xl p-1`}
               role="img"
               aria-label={`${stat.title}: ${stat.value} (${stat.change})`}
               tabIndex={0}
             >
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-4 px-6 pt-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-foreground">
+                  <CardTitle className="text-sm font-semibold text-foreground leading-tight">
                     {stat.title}
                   </CardTitle>
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`} aria-hidden="true">
-                    <IconComponent className={`h-5 w-5 ${stat.color}`} />
+                  <div className={`p-3 rounded-xl ${stat.bgColor} ring-2 ring-white/10`} aria-hidden="true">
+                    <IconComponent className={`h-6 w-6 ${stat.color}`} />
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 px-6 pb-6">
                 <div className="flex items-end justify-between">
                   <div>
-                    <div className="text-3xl font-bold text-foreground mb-1">
+                    <div className="text-3xl font-bold text-foreground mb-2 tracking-tight">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-success font-medium">
+                    <div className="text-sm text-success font-semibold bg-success/10 px-2 py-1 rounded-full">
                       {stat.change}
                     </div>
                   </div>
