@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Menu, X } from "lucide-react";
-import launchClickLogo from "@/assets/launchclick-logo.png";
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   return <nav className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
@@ -12,8 +12,8 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-3">
               <img 
-                src={launchClickLogo} 
-                alt="LaunchClick Logo" 
+                src="https://raw.githubusercontent.com/Jensinjames/launch-click-alpha/e318cdc4e48379089e2a0d225b16cce0192df487/src/assets/rocket_svg.svg?token=AZWREYV4WYJRT6JND2EWE2DIMR2GI" 
+                alt="Rocket Logo" 
                 className="w-8 h-8 object-contain"
               />
               <span className="text-brand-navy font-display text-xl font-semibold">LaunchClick</span>
