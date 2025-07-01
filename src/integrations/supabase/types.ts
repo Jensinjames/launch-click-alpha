@@ -486,6 +486,7 @@ export type Database = {
       }
       content_templates: {
         Row: {
+          asset_references: Json | null
           created_at: string
           created_by: string
           description: string | null
@@ -493,13 +494,17 @@ export type Database = {
           is_public: boolean | null
           min_plan_type: Database["public"]["Enums"]["plan_type"]
           name: string
+          output_format: string | null
+          schema_version: string | null
           tags: string[] | null
           template_data: Json
           type: Database["public"]["Enums"]["content_type"]
           updated_at: string
           usage_count: number | null
+          validation_schema: Json | null
         }
         Insert: {
+          asset_references?: Json | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -507,13 +512,17 @@ export type Database = {
           is_public?: boolean | null
           min_plan_type?: Database["public"]["Enums"]["plan_type"]
           name: string
+          output_format?: string | null
+          schema_version?: string | null
           tags?: string[] | null
           template_data: Json
           type: Database["public"]["Enums"]["content_type"]
           updated_at?: string
           usage_count?: number | null
+          validation_schema?: Json | null
         }
         Update: {
+          asset_references?: Json | null
           created_at?: string
           created_by?: string
           description?: string | null
@@ -521,11 +530,14 @@ export type Database = {
           is_public?: boolean | null
           min_plan_type?: Database["public"]["Enums"]["plan_type"]
           name?: string
+          output_format?: string | null
+          schema_version?: string | null
           tags?: string[] | null
           template_data?: Json
           type?: Database["public"]["Enums"]["content_type"]
           updated_at?: string
           usage_count?: number | null
+          validation_schema?: Json | null
         }
         Relationships: []
       }
