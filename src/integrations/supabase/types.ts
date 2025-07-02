@@ -1550,6 +1550,10 @@ export type Database = {
         Args: { p_team_name: string; p_description?: string }
         Returns: Json
       }
+      emergency_sign_out: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       enhanced_password_validation: {
         Args: { password: string }
         Returns: boolean
@@ -1611,6 +1615,10 @@ export type Database = {
       }
       is_owner: {
         Args: { team_uuid: string; uid?: string }
+        Returns: boolean
+      }
+      is_simple_admin: {
+        Args: { user_id?: string }
         Returns: boolean
       }
       is_super_admin: {
