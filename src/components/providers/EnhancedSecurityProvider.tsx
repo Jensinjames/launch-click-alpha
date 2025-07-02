@@ -1,7 +1,7 @@
-// Enhanced Security Provider with Session Management
+// Enhanced Security Provider with Optimized Session Management
 import { useEffect, ReactNode, useCallback } from 'react';
 import { initializeSecurity } from '@/utils/securityHeaders';
-import { sessionManager } from '@/services/sessionManager';
+import { optimizedSessionManager } from '@/services/optimizedSessionManager';
 import { supabase } from '@/integrations/supabase/client';
 import { logSecurityEvent, setupCSPViolationReporting } from '@/utils/securityLogger';
 
@@ -23,10 +23,10 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       // Set up session management
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        await sessionManager.initializeSession(session.access_token);
+        await optimizedSessionManager.initializeSession(session.access_token);
         
         // Check for suspicious activity
-        const isSuspicious = await sessionManager.detectSuspiciousActivity(session.access_token);
+        const isSuspicious = await optimizedSessionManager.detectSuspiciousActivity(session.access_token);
         if (isSuspicious) {
           await logSecurityEvent('suspicious_activity', {
             reason: 'Multiple concurrent sessions detected',
@@ -37,12 +37,12 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       
       // Set up periodic session cleanup
       const cleanupInterval = setInterval(() => {
-        sessionManager.cleanupExpiredSessions();
+        optimizedSessionManager.cleanupExpiredSessions();
       }, 60 * 60 * 1000); // Every hour
       
       return () => {
         clearInterval(cleanupInterval);
-        sessionManager.stopSessionMonitoring();
+        optimizedSessionManager.stopSessionMonitoring();
       };
       
     } catch (error) {
@@ -53,24 +53,26 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
     }
   }, []);
   
-  // Set up security event listeners
+  // Set up throttled security event listeners (performance optimized)
   const setupSecurityListeners = useCallback(() => {
-    // Listen for visibility change to update session activity
-    const handleVisibilityChange = async () => {
+    // Throttled session activity updates
+    const handleVisibilityChange = () => {
       if (!document.hidden) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          await sessionManager.updateActivity(session.access_token);
-        }
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            optimizedSessionManager.updateActivity(session.access_token);
+          }
+        });
       }
     };
     
-    // Listen for user activity to update session
-    const handleUserActivity = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await sessionManager.updateActivity(session.access_token);
-      }
+    // Passive, throttled user activity tracking
+    const handleUserActivity = () => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          optimizedSessionManager.updateActivity(session.access_token);
+        }
+      });
     };
     
     // Listen for beforeunload to log session end
@@ -80,10 +82,10 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       });
     };
     
-    // Add event listeners
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('click', handleUserActivity);
-    document.addEventListener('keydown', handleUserActivity);
+    // Add passive event listeners with throttling built into updateActivity
+    document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
+    document.addEventListener('click', handleUserActivity, { passive: true });
+    document.addEventListener('keydown', handleUserActivity, { passive: true });
     window.addEventListener('beforeunload', handleBeforeUnload);
     
     return () => {
@@ -111,7 +113,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       switch (event) {
         case 'SIGNED_IN':
           if (session) {
-            await sessionManager.initializeSession(session.access_token);
+            await optimizedSessionManager.initializeSession(session.access_token);
             await logSecurityEvent('signin_success', {
               userId: session.user.id,
               sessionId: session.access_token
@@ -120,7 +122,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
           break;
           
         case 'SIGNED_OUT':
-          sessionManager.stopSessionMonitoring();
+          optimizedSessionManager.stopSessionMonitoring();
           await logSecurityEvent('signout_success', {
             reason: 'User signed out'
           });
@@ -128,7 +130,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
           
         case 'TOKEN_REFRESHED':
           if (session) {
-            await sessionManager.updateActivity(session.access_token);
+            optimizedSessionManager.updateActivity(session.access_token);
           }
           break;
       }
