@@ -308,7 +308,7 @@ function extractStepOutput(result: any, outputMapping: Record<string, string>): 
 }
 
 function extractValueByPath(obj: any, path: string): any {
-  const parts = path.replace('${', '').replace('}', '').split('.');
+  const parts = path.replace(/\$\{/g, '').replace(/\}/g, '').split('.');
   let value = obj;
   
   for (const part of parts) {
