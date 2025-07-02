@@ -219,29 +219,38 @@ export class InvitationService {
     // Check for existing team members
     if (invitations.length > 0) {
       const emails = invitations.map(inv => inv.email.toLowerCase());
-      const { data: existingMembers, error } = await supabase
+      // Check for existing team members by getting their user_ids first
+      const { data: teamMembers, error: teamMembersError } = await supabase
         .from('team_members')
-        .select(`
-          user_id,
-          profiles!inner(email)
-        `)
+        .select('user_id')
         .eq('team_id', teamId)
         .eq('status', 'active');
 
-      if (error) {
+      if (teamMembersError) {
         errors.push('Failed to validate existing members');
-      } else {
-        const existingEmails = new Set(
-          existingMembers
-            .map(member => member.profiles?.email?.toLowerCase())
-            .filter(Boolean)
-        );
+      } else if (teamMembers && teamMembers.length > 0) {
+        // Get profiles for these user_ids
+        const userIds = teamMembers.map(tm => tm.user_id);
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('email')
+          .in('id', userIds);
 
-        emails.forEach(email => {
-          if (existingEmails.has(email)) {
-            errors.push(`User already a team member: ${email}`);
-          }
-        });
+        if (profilesError) {
+          errors.push('Failed to validate existing member profiles');
+        } else {
+          const existingEmails = new Set(
+            profiles
+              ?.map(profile => profile.email?.toLowerCase())
+              .filter(Boolean) || []
+          );
+
+          emails.forEach(email => {
+            if (existingEmails.has(email)) {
+              errors.push(`User already a team member: ${email}`);
+            }
+          });
+        }
       }
     }
 
