@@ -9,7 +9,12 @@ import { Shield, Users, CreditCard, Activity } from "lucide-react";
 
 const Admin = () => {
   return (
-    <AdminSecurityWrapper>
+    <AdminSecurityWrapper 
+      requireRecentAuth={true} 
+      requireFreshSession={true}
+      maxSessionAge={30}
+      sensitiveOperation="admin_panel_access"
+    >
       <div className="container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center space-x-3">
           <Shield className="h-8 w-8 text-purple-600" />

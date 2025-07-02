@@ -13,6 +13,16 @@ export const useUpdateUserRoleMutation = () => {
   return useMutation({
     mutationFn: async (data: { userId: string; newRole: UserRole }) => {
       return addToQueue('admin', async () => {
+        // First validate admin session freshness for sensitive role operations
+        const { data: sessionValid, error: sessionError } = await supabase.rpc('require_fresh_admin_session', {
+          max_age_minutes: 30
+        });
+
+        if (sessionError || !sessionValid) {
+          throw new Error('Fresh admin authentication required for role changes');
+        }
+
+        // Update user role
         const { error } = await supabase
           .from('profiles')
           .update({ 
@@ -23,15 +33,10 @@ export const useUpdateUserRoleMutation = () => {
 
         if (error) throw error;
 
-        // Log the admin action
-        await supabase.rpc('audit_sensitive_operation', {
-          p_action: 'admin_update_user_role',
-          p_table_name: 'profiles',
-          p_record_id: data.userId,
-          p_new_values: { 
-            role: data.newRole,
-            role_updated_at: new Date().toISOString()
-          }
+        // Invalidate all sessions for the user whose role changed (security measure)
+        await supabase.rpc('invalidate_user_sessions', {
+          target_user_id: data.userId,
+          reason: 'role_change'
         });
 
         return data;

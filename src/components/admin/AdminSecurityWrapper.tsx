@@ -1,23 +1,28 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { validateAdminAccessEnhanced } from '@/utils/enhancedAuthSecurity';
 import { logSecurityEvent } from '@/utils/securityLogger';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Shield, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface AdminSecurityWrapperProps {
   children: ReactNode;
   requireRecentAuth?: boolean;
+  requireFreshSession?: boolean;
+  maxSessionAge?: number;
   sensitiveOperation?: string;
 }
 
 export const AdminSecurityWrapper = ({ 
   children, 
   requireRecentAuth = false,
+  requireFreshSession = false,
+  maxSessionAge = 30,
   sensitiveOperation 
 }: AdminSecurityWrapperProps) => {
   const { user } = useAuth();
@@ -47,7 +52,29 @@ export const AdminSecurityWrapper = ({
           email: user.email
         });
 
-        const isValid = await validateAdminAccessEnhanced(requireRecentAuth);
+        // First check basic admin access
+        let isValid = await validateAdminAccessEnhanced(requireRecentAuth);
+        
+        // Additional check for fresh session if required
+        if (isValid && requireFreshSession) {
+          try {
+            const { data: sessionValid, error: sessionError } = await supabase.rpc('require_fresh_admin_session', {
+              max_age_minutes: maxSessionAge
+            });
+            
+            if (sessionError || !sessionValid) {
+              isValid = false;
+              await logSecurityEvent('admin_access_denied', {
+                userId: user.id,
+                sensitiveOperation,
+                error: sessionError?.message || 'Session validation failed'
+              });
+            }
+          } catch (err) {
+            console.error('[AdminSecurityWrapper] Session validation error:', err);
+            isValid = false;
+          }
+        }
         
         if (mounted) {
           setHasAccess(isValid);
@@ -55,15 +82,20 @@ export const AdminSecurityWrapper = ({
           if (!isValid) {
             await logSecurityEvent('admin_access_denied', {
               userId: user.id,
-              requireRecentAuth,
               sensitiveOperation,
-              reason: requireRecentAuth ? 'recent_auth_required' : 'insufficient_privileges'
+              error: requireFreshSession 
+                ? 'fresh_session_required' 
+                : requireRecentAuth 
+                  ? 'recent_auth_required' 
+                  : 'insufficient_privileges'
             });
             
             setError(
-              requireRecentAuth 
-                ? 'This action requires recent authentication. Please sign in again.'
-                : 'Access denied. Insufficient administrative privileges.'
+              requireFreshSession
+                ? `This sensitive operation requires recent authentication (within ${maxSessionAge} minutes). Please sign in again.`
+                : requireRecentAuth 
+                  ? 'This action requires recent authentication. Please sign in again.'
+                  : 'Access denied. Insufficient administrative privileges.'
             );
           }
         }

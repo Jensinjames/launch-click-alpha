@@ -1542,6 +1542,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cleanup_old_security_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       create_team_with_access_control: {
         Args: { p_team_name: string; p_description?: string }
         Returns: Json
@@ -1592,6 +1596,10 @@ export type Database = {
       has_team_plan: {
         Args: { user_uuid?: string }
         Returns: boolean
+      }
+      invalidate_user_sessions: {
+        Args: { target_user_id: string; reason?: string }
+        Returns: undefined
       }
       is_admin_or_super: {
         Args: { user_id?: string }
@@ -1650,6 +1658,10 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: undefined
+      }
+      require_fresh_admin_session: {
+        Args: { max_age_minutes?: number }
+        Returns: boolean
       }
       reset_monthly_credits: {
         Args: Record<PropertyKey, never>
