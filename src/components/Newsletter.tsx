@@ -62,6 +62,8 @@ const Newsletter = () => {
           
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
             <Input
+              id="newsletter-email"
+              name="email"
               type="email"
               placeholder="Enter your email"
               value={email}
@@ -70,6 +72,7 @@ const Newsletter = () => {
               required
               disabled={loading}
               maxLength={254}
+              autoComplete="email"
             />
             <Button 
               type="submit" 

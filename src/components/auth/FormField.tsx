@@ -16,6 +16,7 @@ interface FormFieldProps {
   error?: string;
   autoComplete?: string;
   className?: string;
+  name?: string;
   'aria-describedby'?: string;
 }
 
@@ -32,6 +33,7 @@ const FormField = ({
   error,
   autoComplete,
   className,
+  name,
   'aria-describedby': ariaDescribedBy,
 }: FormFieldProps) => {
   const errorId = `${id}-error`;
@@ -45,6 +47,7 @@ const FormField = ({
       </Label>
       <Input
         id={id}
+        name={name || id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}

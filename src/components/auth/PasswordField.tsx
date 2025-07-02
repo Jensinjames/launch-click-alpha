@@ -14,6 +14,8 @@ interface PasswordFieldProps {
   showStrengthIndicator?: boolean;
   onValidationChange?: (isValid: boolean) => void;
   required?: boolean;
+  name?: string;
+  id?: string;
 }
 
 export const PasswordField = ({ 
@@ -23,16 +25,19 @@ export const PasswordField = ({
   label = "Password",
   showStrengthIndicator = false,
   onValidationChange,
-  required = false
+  required = false,
+  name = "password",
+  id = "password"
 }: PasswordFieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="password">{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
       <div className="relative">
         <Input
-          id="password"
+          id={id}
+          name={name}
           type={showPassword ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
