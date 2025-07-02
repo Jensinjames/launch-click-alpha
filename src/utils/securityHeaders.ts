@@ -15,7 +15,7 @@ export const addSecurityHeaders = () => {
   const cspDirectives = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
-    `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
     "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co",

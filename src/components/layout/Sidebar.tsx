@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SidebarItem } from "./SidebarItem";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { cn } from "@/lib/utils";
+import rocketLogo from "@/assets/rocket_svg.svg";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,7 +105,7 @@ const Sidebar = () => {
           <div className="flex items-center px-6 py-8 border-b border-border/50">
             <div className="p-2.5 bg-gradient-to-r from-primary to-primary/80 rounded-xl shadow-lg">
               <img 
-                src="https://raw.githubusercontent.com/Jensinjames/launch-click-alpha/e318cdc4e48379089e2a0d225b16cce0192df487/src/assets/rocket_svg.svg?token=AZWREYV4WYJRT6JND2EWE2DIMR2GI" 
+                src={rocketLogo} 
                 alt="Rocket Logo" 
                 className="h-7 w-7 object-contain"
               />

@@ -236,6 +236,7 @@ const Generate = () => {
                       </Label>
                       <Input 
                         id="content-title" 
+                        name="title"
                         placeholder="Enter a custom title for your content" 
                         value={title} 
                         onChange={e => setTitle(e.target.value)} 
@@ -246,7 +247,7 @@ const Generate = () => {
                       <Label htmlFor="content-prompt" className="text-sm font-medium">
                         Describe your content requirements *
                       </Label>
-                      <Textarea id="content-prompt" placeholder="Describe what you want to create, your target audience, key messages, tone of voice, etc." value={prompt} onChange={e => setPrompt(e.target.value)} className="min-h-[120px] resize-y" required aria-describedby="prompt-help" />
+                      <Textarea id="content-prompt" name="prompt" placeholder="Describe what you want to create, your target audience, key messages, tone of voice, etc." value={prompt} onChange={e => setPrompt(e.target.value)} className="min-h-[120px] resize-y" required aria-describedby="prompt-help" />
                       <p id="prompt-help" className="text-sm text-gray-500">
                         Be as specific as possible for better results. Include target audience, tone, key points, and any specific requirements.
                       </p>
@@ -275,6 +276,7 @@ const Generate = () => {
                         <Label htmlFor="audience-input">Target Audience</Label>
                         <Input 
                           id="audience-input" 
+                          name="audience"
                           placeholder="e.g., B2B decision makers, young professionals" 
                           value={audience}
                           onChange={e => setAudience(e.target.value)}
