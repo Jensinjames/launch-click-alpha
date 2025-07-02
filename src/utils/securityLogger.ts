@@ -20,7 +20,14 @@ export type SecurityEventType =
   | 'suspicious_activity'
   | 'csp_violation'
   | 'feature_access_denied'
-  | 'unauthorized_api_call';
+  | 'unauthorized_api_call'
+  | 'session_initialized'
+  | 'session_expired'
+  | 'other_sessions_terminated'
+  | 'suspicious_multiple_sessions'
+  | 'suspicious_rapid_sessions'
+  | 'security_initialization_failed'
+  | 'session_ending';
 
 export interface SecurityEventData {
   email?: string;
@@ -32,6 +39,10 @@ export interface SecurityEventData {
   requireRecentAuth?: boolean;
   sensitiveOperation?: string;
   reason?: string;
+  sessionId?: string;
+  currentSessionId?: string;
+  sessionCount?: number;
+  recentSessionCount?: number;
   metadata?: Record<string, any>;
 }
 

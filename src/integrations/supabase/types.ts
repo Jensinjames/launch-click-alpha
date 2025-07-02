@@ -1456,6 +1456,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          ip_address: unknown | null
+          is_active: boolean | null
+          last_activity: string | null
+          session_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          session_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          session_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1499,6 +1535,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_expired_invitations: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_expired_sessions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
@@ -1633,6 +1673,10 @@ export type Database = {
       }
       validate_admin_session: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      validate_admin_session_enhanced: {
+        Args: { require_recent_auth?: boolean }
         Returns: boolean
       }
     }

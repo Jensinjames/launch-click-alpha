@@ -10,12 +10,18 @@ export const addSecurityHeaders = () => {
   // Generate nonce for inline scripts/styles
   const nonce = generateCSPNonce();
   
-  // Enhanced Content Security Policy - relaxed for development
-  // Note: frame-ancestors directive is ignored in meta tags, use server-side headers for clickjacking protection
+  // Determine if we're in production
+  const isProduction = import.meta.env.PROD;
+  
+  // Enhanced Content Security Policy - strict for production, relaxed for development
   const cspDirectives = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
-    `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    isProduction 
+      ? `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`
+      : `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
+    isProduction
+      ? `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`
+      : `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
     "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co",
@@ -24,8 +30,10 @@ export const addSecurityHeaders = () => {
     "object-src 'none'",
     "media-src 'self'",
     "worker-src 'self'",
-    "manifest-src 'self'"
-  ].join('; ');
+    "manifest-src 'self'",
+    "frame-ancestors 'none'",
+    isProduction ? "upgrade-insecure-requests" : ""
+  ].filter(directive => directive !== "").join('; ');
 
   // Create meta tag for CSP
   const cspMeta = document.createElement('meta');
