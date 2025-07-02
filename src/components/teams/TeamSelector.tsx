@@ -6,7 +6,7 @@ import { UserTeam } from "@/hooks/useUserTeams";
 
 interface TeamSelectorProps {
   userTeams: UserTeam[];
-  selectedTeamId: string | null;
+  selectedTeamId: string;
   onTeamChange: (teamId: string) => void;
 }
 
@@ -18,7 +18,7 @@ export const TeamSelector = ({ userTeams, selectedTeamId, onTeamChange }: TeamSe
           <label htmlFor="team-select" className="text-sm font-medium text-gray-700">
             Select Team:
           </label>
-          <Select value={selectedTeamId || ""} onValueChange={onTeamChange}>
+          <Select value={selectedTeamId} onValueChange={onTeamChange}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder="Choose a team..." />
             </SelectTrigger>

@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import { useUserTeams, UserTeam } from '../useUserTeams';
 
 export const useTeamSelection = () => {
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const { data: userTeams, isLoading: teamsLoading } = useUserTeams();
 
   // Auto-select the first team if none is selected
   useEffect(() => {
-    if (userTeams && userTeams.length > 0 && !selectedTeamId) {
+    if (userTeams && userTeams.length > 0 && selectedTeamId === "") {
       setSelectedTeamId(userTeams[0].id);
     }
   }, [userTeams, selectedTeamId]);
