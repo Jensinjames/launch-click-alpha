@@ -9,6 +9,7 @@ const corsHeaders = {
 interface CreateTeamRequest {
   name: string;
   description?: string;
+  templateId?: string;
 }
 
 const supabase = createClient(
@@ -38,7 +39,7 @@ serve(async (req: Request) => {
       throw new Error('Unauthorized');
     }
 
-    const { name, description }: CreateTeamRequest = await req.json();
+    const { name, description, templateId }: CreateTeamRequest = await req.json();
 
     // Validate inputs
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
@@ -84,6 +85,52 @@ serve(async (req: Request) => {
       );
     }
 
+    // Apply team template if provided
+    if (templateId) {
+      try {
+        const { data: template, error: templateError } = await supabase
+          .from('team_templates')
+          .select('template_data')
+          .eq('id', templateId)
+          .single();
+
+        if (template && !templateError) {
+          // Create team settings based on template
+          await supabase
+            .from('team_settings')
+            .insert({
+              team_id: result.team_id,
+              settings: template.template_data
+            });
+
+          // Update template usage count
+          await supabase
+            .from('team_templates')
+            .update({ usage_count: supabase.rpc('increment') })
+            .eq('id', templateId);
+        }
+      } catch (templateError) {
+        console.error('Template application error:', templateError);
+        // Continue without template - don't fail team creation
+      }
+    }
+
+    // Create welcome notification
+    await supabase
+      .from('team_notifications')
+      .insert({
+        team_id: result.team_id,
+        user_id: user.id,
+        type: 'team_created',
+        title: 'Welcome to your new team!',
+        message: `Team "${result.team_name}" has been successfully created.`,
+        data: {
+          team_id: result.team_id,
+          team_name: result.team_name,
+          template_used: !!templateId
+        }
+      });
+
     // Success response
     return new Response(
       JSON.stringify({
@@ -95,7 +142,8 @@ serve(async (req: Request) => {
         usage: {
           teams_used: result.teams_used,
           teams_limit: result.teams_limit
-        }
+        },
+        template_applied: !!templateId
       }),
       { 
         headers: { 

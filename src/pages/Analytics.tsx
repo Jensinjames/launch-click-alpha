@@ -8,6 +8,7 @@ import MetricsRow from "@/components/analytics/MetricsRow";
 import PerformanceChart from "@/components/analytics/PerformanceChart";
 import ContentTypeBreakdown from "@/components/analytics/ContentTypeBreakdown";
 import AdvancedAnalyticsBanner from "@/components/analytics/AdvancedAnalyticsBanner";
+import { TeamAnalyticsSection } from "@/components/analytics/TeamAnalyticsSection";
 
 const Analytics = () => {
   return (
@@ -29,6 +30,10 @@ const Analytics = () => {
             
             <FeatureGate featureName="analytics_advanced" mode="component" graceful={true}>
               <AdvancedAnalyticsBanner />
+            </FeatureGate>
+            
+            <FeatureGate featureName="page_access_teams" mode="component" graceful={true}>
+              <TeamAnalyticsSection />
             </FeatureGate>
           </div>
         </Layout>
