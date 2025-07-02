@@ -4,7 +4,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Zap, Eye, EyeOff, AlertCircle, Mail } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Mail } from "lucide-react";
+import rocketLogo from "@/assets/rocket_svg.svg";
 import { useAuthMutations } from "@/hooks/useAuthMutations";
 import AuthGuard from "@/components/AuthGuard";
 
@@ -75,7 +76,11 @@ const Login = () => {
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center space-x-2 mb-6">
                 <div className="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
-                  <Zap className="h-6 w-6 text-white" />
+                  <img 
+                    src={rocketLogo} 
+                    alt="Rocket Logo" 
+                    className="h-6 w-6 object-contain"
+                  />
                 </div>
                 <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Launch Click
