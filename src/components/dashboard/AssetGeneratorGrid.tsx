@@ -1,11 +1,13 @@
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Share2, FileText, ArrowRight } from "lucide-react";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 
 const AssetGeneratorGrid = () => {
+  const navigate = useNavigate();
   const { containerRef } = useKeyboardNavigation({
     enableArrowKeys: true,
     enableTabNavigation: true,
@@ -13,8 +15,8 @@ const AssetGeneratorGrid = () => {
 
   const assetTypes = React.useMemo(() => [
     {
-      id: 'email-campaign',
-      icon: <Mail className="h-6 w-6" aria-hidden="true" />,
+      id: 'email',
+      icon: <Mail className="h-5 w-5" aria-hidden="true" />,
       title: "Generate Email Campaign",
       description: "Create compelling email content with AI",
       color: "from-info to-primary",
@@ -23,8 +25,8 @@ const AssetGeneratorGrid = () => {
       credits: 15
     },
     {
-      id: 'social-media',
-      icon: <Share2 className="h-6 w-6" aria-hidden="true" />,
+      id: 'social',
+      icon: <Share2 className="h-5 w-5" aria-hidden="true" />,
       title: "Social Media Posts",
       description: "Generate posts for all platforms",
       color: "from-success to-info",
@@ -33,8 +35,8 @@ const AssetGeneratorGrid = () => {
       credits: 5
     },
     {
-      id: 'landing-page',
-      icon: <FileText className="h-6 w-6" aria-hidden="true" />,
+      id: 'landing',
+      icon: <FileText className="h-5 w-5" aria-hidden="true" />,
       title: "Landing Page Copy",
       description: "High-converting page content",
       color: "from-primary to-brand-accent",
@@ -43,6 +45,10 @@ const AssetGeneratorGrid = () => {
       credits: 10
     }
   ], []);
+
+  const handleAssetClick = (assetId: string) => {
+    navigate(`/generate?type=${assetId}`);
+  };
 
   return (
     <section aria-labelledby="quick-actions-title" className="mb-12">
@@ -71,32 +77,32 @@ const AssetGeneratorGrid = () => {
             role="gridcell"
             tabIndex={0}
             aria-label={`${asset.title}: ${asset.description}. Costs ${asset.credits} credits`}
+            onClick={() => handleAssetClick(asset.id)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                // Handle asset selection
-                console.log(`Selected: ${asset.title}`);
+                handleAssetClick(asset.id);
               }
             }}
           >
-            <CardHeader className="pb-4">
-              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${asset.color} text-white mb-4 group-hover:scale-110 transition-transform duration-300 w-fit`}>
+            <CardHeader className="pb-3">
+              <div className={`inline-flex p-2 rounded-lg bg-gradient-to-r ${asset.color} text-white mb-3 group-hover:scale-110 transition-transform duration-300 w-fit`}>
                 {asset.icon}
               </div>
-              <CardTitle className="text-xl font-semibold text-foreground">
+              <CardTitle className="text-lg font-semibold text-foreground">
                 {asset.title}
               </CardTitle>
-              <CardDescription className="text-base text-muted-foreground">
+              <CardDescription className="text-sm text-muted-foreground">
                 {asset.description}
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-primary">
+                <span className="text-xs font-medium text-primary">
                   {asset.credits} credits
                 </span>
                 <ArrowRight 
-                  className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" 
+                  className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" 
                   aria-hidden="true"
                 />
               </div>

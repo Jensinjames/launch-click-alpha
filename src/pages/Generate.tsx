@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ const contentTypeMapping: Record<string, Database['public']['Enums']['content_ty
 };
 
 const Generate = () => {
+  const [searchParams] = useSearchParams();
   const [selectedType, setSelectedType] = useState<string>("");
   const [prompt, setPrompt] = useState("");
   const [title, setTitle] = useState("");
@@ -40,6 +42,14 @@ const Generate = () => {
   const { generateContent } = useContentGeneration();
   const { plan, hasCreditsRemaining } = useUserPlan();
   const queryClient = useQueryClient();
+
+  // Handle URL parameter for pre-selecting content type
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    if (typeParam && !selectedType) {
+      setSelectedType(typeParam);
+    }
+  }, [searchParams, selectedType]);
   const contentTypes = [{
     id: "email",
     title: "Email Campaign",
