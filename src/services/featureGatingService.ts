@@ -35,17 +35,11 @@ export class FeatureGatingService {
     console.log('[FeatureGatingService] Checking access for:', featureName, 'user:', userId);
 
     try {
-      // 1. Check if feature is enabled using new hierarchy-aware function with timeout
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('RPC timeout: can_access_with_contract')), 3000);
-      });
-
-      const rpcPromise = supabase.rpc('can_access_with_contract', {
+      // 1. Check if feature is enabled using new hierarchy-aware function
+      const { data: hasAccess, error: accessError } = await supabase.rpc('can_access_with_contract', {
         feature_name: featureName,
         check_user_id: userId,
       });
-
-      const { data: hasAccess, error: accessError } = await Promise.race([rpcPromise, timeoutPromise]);
 
       if (accessError) {
         console.error('[FeatureGatingService] Error checking feature access:', accessError);
@@ -53,27 +47,17 @@ export class FeatureGatingService {
       }
 
       if (!hasAccess) {
-        console.log('[FeatureGatingService] Access denied for feature:', featureName);
-        // Skip logging for now to prevent additional RPC calls that might hang
         throw new QuotaError(
           `Feature '${featureName}' is not available in your current plan`,
           'PLAN_LIMIT'
         );
       }
 
-      console.log('[FeatureGatingService] Access granted, checking usage limits...');
-
-      // 2. Get current usage and limits with timeout
-      const usageTimeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('RPC timeout: get_feature_usage_with_limits')), 3000);
-      });
-
-      const usageRpcPromise = supabase.rpc('get_feature_usage_with_limits', {
+      // 2. Get current usage and limits
+      const { data: usageData, error: usageError } = await supabase.rpc('get_feature_usage_with_limits', {
         p_user_id: userId,
         p_feature_name: featureName,
       });
-
-      const { data: usageData, error: usageError } = await Promise.race([usageRpcPromise, usageTimeoutPromise]);
 
       if (usageError) {
         console.error('[FeatureGatingService] Error getting feature usage:', usageError);
@@ -141,22 +125,13 @@ export class FeatureGatingService {
         canUse: limit === null || finalUsage < limit,
       };
     } catch (error) {
-      console.error('[FeatureGatingService] Caught error in checkAndIncrementUsage:', error);
+      console.error('[FeatureGatingService] Error in checkAndIncrementUsage:', error);
       
-      // Emergency fallback for critical errors
       if (error instanceof QuotaError) {
         throw error; // Re-throw quota errors
       }
       
-      // For all other errors (timeouts, DB issues), return permissive defaults
-      console.warn('[FeatureGatingService] Returning emergency fallback due to error');
-      return {
-        used: 0,
-        limit: null,
-        remaining: null,
-        resetDate: new Date().toISOString(),
-        canUse: true, // Allow access during emergencies
-      };
+      throw new Error('Failed to check feature usage');
     }
   }
 
