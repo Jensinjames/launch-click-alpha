@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutDashboard, BarChart3, CreditCard, Zap, Settings, Menu, X, FileText, Users, Puzzle } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SidebarItem } from "./SidebarItem";
-import LogoutButton from "@/components/auth/LogoutButton";
+import EmergencyLogoutButton from "@/components/auth/EmergencyLogoutButton";
 import { cn } from "@/lib/utils";
 import rocketLogo from "@/assets/rocket_svg.svg";
 
@@ -135,7 +135,7 @@ const Sidebar = () => {
             <div className="flex justify-center">
               <ThemeToggle />
             </div>
-            <LogoutButton
+            <EmergencyLogoutButton
               variant="ghost"
               showConfirmation={true}
               className="w-full justify-start text-foreground hover:text-accent-foreground hover:bg-accent"

@@ -4,17 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TeamsManagement } from "@/components/admin/TeamsManagement";
 import { CreditsManagement } from "@/components/admin/CreditsManagement";
 import { AuditLogs } from "@/components/admin/AuditLogs";
-import { AdminSecurityWrapper } from "@/components/admin/AdminSecurityWrapper";
+import { EmergencyAdminWrapper } from "@/components/admin/EmergencyAdminWrapper";
 import { Shield, Users, CreditCard, Activity } from "lucide-react";
 
 const Admin = () => {
   return (
-    <AdminSecurityWrapper 
-      requireRecentAuth={true} 
-      requireFreshSession={true}
-      maxSessionAge={30}
-      sensitiveOperation="admin_panel_access"
-    >
+    <EmergencyAdminWrapper>
       <div className="container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center space-x-3">
           <Shield className="h-8 w-8 text-purple-600" />
@@ -53,7 +48,7 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminSecurityWrapper>
+    </EmergencyAdminWrapper>
   );
 };
 
