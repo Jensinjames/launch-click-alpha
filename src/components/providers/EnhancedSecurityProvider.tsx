@@ -1,9 +1,9 @@
-// Enhanced Security Provider with Optimized Session Management
+// Enhanced Security Provider with Optimized Logging
 import { useEffect, ReactNode, useCallback } from 'react';
 import { initializeSecurity } from '@/utils/securityHeaders';
 import { optimizedSessionManager } from '@/services/optimizedSessionManager';
 import { supabase } from '@/integrations/supabase/client';
-import { logSecurityEvent, setupCSPViolationReporting } from '@/utils/securityLogger';
+import { logSecurityEvent, setupCSPViolationReporting } from '@/utils/optimizedSecurityLogger';
 
 interface EnhancedSecurityProviderProps {
   children: ReactNode;
