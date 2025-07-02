@@ -18,7 +18,7 @@ export const TeamSelector = ({ userTeams, selectedTeamId, onTeamChange }: TeamSe
           <label htmlFor="team-select" className="text-sm font-medium text-gray-700">
             Select Team:
           </label>
-          <Select value={selectedTeamId} onValueChange={onTeamChange}>
+          <Select value={selectedTeamId} onValueChange={onTeamChange} name="team-select">
             <SelectTrigger id="team-select" className="w-64">
               <SelectValue placeholder="Choose a team..." />
             </SelectTrigger>

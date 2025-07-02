@@ -34,6 +34,13 @@ export const CreateTeamDialog = ({ trigger, onSuccess }: CreateTeamDialogProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Team creation attempt:', {
+      formData,
+      userPlan,
+      canCreateTeam,
+      canManageTeams: canManageTeams()
+    });
+    
     if (!formData.name.trim()) {
       toast.error("Team name is required");
       return;
@@ -45,10 +52,12 @@ export const CreateTeamDialog = ({ trigger, onSuccess }: CreateTeamDialogProps) 
     }
 
     try {
-      await createTeam.mutateAsync({
+      const result = await createTeam.mutateAsync({
         name: formData.name.trim(),
         description: formData.description.trim() || undefined
       });
+      
+      console.log('Team creation success:', result);
       
       // Reset form and close dialog
       setFormData({ name: "", description: "" });
@@ -56,6 +65,7 @@ export const CreateTeamDialog = ({ trigger, onSuccess }: CreateTeamDialogProps) 
       onSuccess?.();
       
     } catch (error: any) {
+      console.error('Team creation error:', error);
       toast.error(error.message || "Failed to create team");
     }
   };
@@ -91,6 +101,7 @@ export const CreateTeamDialog = ({ trigger, onSuccess }: CreateTeamDialogProps) 
             <Label htmlFor="team-name">Team Name *</Label>
             <Input
               id="team-name"
+              name="team-name"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
               placeholder="e.g., Marketing Team, Product Squad"
@@ -107,6 +118,7 @@ export const CreateTeamDialog = ({ trigger, onSuccess }: CreateTeamDialogProps) 
             <Label htmlFor="team-description">Description (Optional)</Label>
             <Textarea
               id="team-description"
+              name="team-description"
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
               placeholder="Describe what this team does..."

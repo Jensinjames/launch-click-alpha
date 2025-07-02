@@ -10,11 +10,11 @@ export const addSecurityHeaders = () => {
   // Generate nonce for inline scripts/styles
   const nonce = generateCSPNonce();
   
-  // Enhanced Content Security Policy - optimized for meta tag delivery
+  // Enhanced Content Security Policy - relaxed for development
   // Note: frame-ancestors directive is ignored in meta tags, use server-side headers for clickjacking protection
   const cspDirectives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
+    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
     `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
@@ -24,8 +24,7 @@ export const addSecurityHeaders = () => {
     "object-src 'none'",
     "media-src 'self'",
     "worker-src 'self'",
-    "manifest-src 'self'",
-    "upgrade-insecure-requests"
+    "manifest-src 'self'"
   ].join('; ');
 
   // Create meta tag for CSP
