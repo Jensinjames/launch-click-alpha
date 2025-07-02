@@ -25,7 +25,7 @@ export const BulkActionSelector = ({
   return (
     <div className="flex items-center space-x-4">
       <Select value={bulkAction} onValueChange={onActionChange}>
-        <SelectTrigger className="w-48">
+        <SelectTrigger id="bulk-action-select" className="w-48">
           <SelectValue placeholder="Choose action..." />
         </SelectTrigger>
         <SelectContent>
@@ -56,7 +56,7 @@ export const BulkActionSelector = ({
 
       {bulkAction === 'update_role' && (
         <Select value={bulkRole} onValueChange={onRoleChange}>
-          <SelectTrigger className="w-32">
+          <SelectTrigger id="bulk-role-select" className="w-32">
             <SelectValue placeholder="Role..." />
           </SelectTrigger>
           <SelectContent>

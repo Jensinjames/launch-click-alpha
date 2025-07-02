@@ -152,7 +152,7 @@ export const InviteMembersDialog = ({ teamId, currentUserRole, trigger }: Invite
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
             <Select value={role} onValueChange={setRole} disabled={inviteMembers.isPending}>
-              <SelectTrigger>
+              <SelectTrigger id="invite-role-select">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>

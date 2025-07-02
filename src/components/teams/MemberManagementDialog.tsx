@@ -81,7 +81,7 @@ export const MemberManagementDialog = ({
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <Select value={newRole} onValueChange={handleRoleChange}>
-                <SelectTrigger>
+                <SelectTrigger id="member-role-select">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
