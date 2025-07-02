@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Zap } from "lucide-react";
+import rocketLogo from "@/assets/rocket_svg.svg";
 
 const Footer = () => {
   return (
@@ -10,9 +10,13 @@ const Footer = () => {
           <div className="md:col-span-2">
             <div className="flex items-center space-x-2 mb-6">
               <div className="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
-                <Zap className="h-6 w-6 text-white" />
+                <img 
+                  src={rocketLogo} 
+                  alt="Rocket Logo" 
+                  className="h-6 w-6 object-contain"
+                />
               </div>
-              <span className="text-2xl font-bold">AMAP</span>
+              <span className="text-2xl font-bold">Launch Click</span>
             </div>
             <p className="text-gray-400 mb-6 max-w-md">
               The AI-powered marketing platform that helps busy founders generate 
