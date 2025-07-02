@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Calendar } from "lucide-react";
 import launchClickLogo from "@/assets/launchclick-logo.png";
+import MarketingFunnelTerminal from "@/components/MarketingFunnelTerminal";
 
 const Hero = () => {
   return (
@@ -56,21 +57,7 @@ const Hero = () => {
           <div className="relative max-w-5xl mx-auto">
             <div className="absolute inset-0 gradient-rocket opacity-20 rounded-2xl blur-3xl" />
             <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 shadow-2xl">
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 text-left">
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="w-3 h-3 bg-red-500 rounded-full" />
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-                  <div className="w-3 h-3 bg-green-500 rounded-full" />
-                </div>
-                <div className="font-mono text-sm text-green-400">
-                  <div className="mb-2">$ Generate complete marketing funnel for SaaS startup</div>
-                  <div className="mb-2 text-gray-400">→ Analyzing your business model...</div>
-                  <div className="mb-2 text-gray-400">→ Creating email sequences (5 emails)...</div>
-                  <div className="mb-2 text-gray-400">→ Writing Facebook & Google ads...</div>
-                  <div className="mb-2 text-gray-400">→ Building landing page copy...</div>
-                  <div className="text-green-400">✓ Complete funnel generated in 8 seconds</div>
-                </div>
-              </div>
+              <MarketingFunnelTerminal />
             </div>
           </div>
         </div>
