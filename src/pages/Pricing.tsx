@@ -89,13 +89,13 @@ const Pricing = () => {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               Simple, Transparent
               <span className="block bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Pricing
               </span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Choose the perfect plan for your marketing needs. 
               Upgrade or downgrade at any time.
             </p>
@@ -121,15 +121,15 @@ const Pricing = () => {
                 )}
 
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-2xl font-bold text-foreground mb-2">
                     {plan.name}
                   </h3>
-                  <p className="text-gray-600 mb-6">{plan.description}</p>
+                  <p className="text-muted-foreground mb-6">{plan.description}</p>
                   <div className="mb-4">
-                    <span className="text-4xl font-bold text-gray-900">
+                    <span className="text-4xl font-bold text-foreground">
                       {plan.price}
                     </span>
-                    <span className="text-gray-600 ml-2">
+                    <span className="text-muted-foreground ml-2">
                       {plan.period}
                     </span>
                   </div>
@@ -142,7 +142,7 @@ const Pricing = () => {
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
+                      <span className="text-foreground">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -160,10 +160,10 @@ const Pricing = () => {
           </div>
 
           <div className="mt-20 text-center">
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               All plans include a 14-day free trial. No credit card required.
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Questions? <a href="#" className="text-purple-600 hover:text-purple-700">Contact our sales team</a>
             </p>
           </div>
