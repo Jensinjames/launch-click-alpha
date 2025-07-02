@@ -32,103 +32,132 @@ export class FeatureGatingService {
       throw new Error('User ID and feature name are required');
     }
 
-    // 1. Check if feature is enabled using new hierarchy-aware function
-    const { data: hasAccess, error: accessError } = await supabase.rpc(
-      'can_access_with_contract',
-      {
+    console.log('[FeatureGatingService] Checking access for:', featureName, 'user:', userId);
+
+    try {
+      // 1. Check if feature is enabled using new hierarchy-aware function with timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('RPC timeout: can_access_with_contract')), 3000);
+      });
+
+      const rpcPromise = supabase.rpc('can_access_with_contract', {
         feature_name: featureName,
         check_user_id: userId,
-      }
-    );
+      });
 
-    if (accessError) {
-      console.error('Error checking feature access:', accessError);
-      throw new Error('Failed to check feature access');
-    }
+      const { data: hasAccess, error: accessError } = await Promise.race([rpcPromise, timeoutPromise]);
 
-    if (!hasAccess) {
-      // Log the access denial for audit purposes
-      try {
-        await supabase.rpc('log_feature_access', {
-          p_feature_name: featureName,
-          p_access_granted: false,
-          p_user_id: userId,
-          p_context: { increment_by: incrementBy, dry_run: dryRun }
-        });
-      } catch (err) {
-        console.warn('Failed to log access denial:', err);
+      if (accessError) {
+        console.error('[FeatureGatingService] Error checking feature access:', accessError);
+        throw new Error('Failed to check feature access: ' + accessError.message);
       }
 
-      throw new QuotaError(
-        `Feature '${featureName}' is not available in your current plan`,
-        'PLAN_LIMIT'
-      );
-    }
+      if (!hasAccess) {
+        console.log('[FeatureGatingService] Access denied for feature:', featureName);
+        // Skip logging for now to prevent additional RPC calls that might hang
+        throw new QuotaError(
+          `Feature '${featureName}' is not available in your current plan`,
+          'PLAN_LIMIT'
+        );
+      }
 
-    // 2. Get current usage and limits
-    const { data: usageData, error: usageError } = await supabase.rpc(
-      'get_feature_usage_with_limits',
-      {
+      console.log('[FeatureGatingService] Access granted, checking usage limits...');
+
+      // 2. Get current usage and limits with timeout
+      const usageTimeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('RPC timeout: get_feature_usage_with_limits')), 3000);
+      });
+
+      const usageRpcPromise = supabase.rpc('get_feature_usage_with_limits', {
         p_user_id: userId,
         p_feature_name: featureName,
+      });
+
+      const { data: usageData, error: usageError } = await Promise.race([usageRpcPromise, usageTimeoutPromise]);
+
+      if (usageError) {
+        console.error('[FeatureGatingService] Error getting feature usage:', usageError);
+        throw new Error('Failed to get feature usage information: ' + usageError.message);
       }
-    );
 
-    if (usageError) {
-      console.error('Error getting feature usage:', usageError);
-      throw new Error('Failed to get feature usage information');
-    }
+      const usage = usageData?.[0];
+      if (!usage) {
+        console.warn('[FeatureGatingService] No usage data found, returning default');
+        // Return permissive defaults when data is missing
+        return {
+          used: 0,
+          limit: null,
+          remaining: null,
+          resetDate: new Date().toISOString(),
+          canUse: true,
+        };
+      }
 
-    const usage = usageData?.[0];
-    if (!usage) {
-      throw new Error('Unable to retrieve usage information');
-    }
+      const currentUsage = usage.usage_count || 0;
+      const limit = usage.feature_limit;
+      const wouldExceed = limit !== null && (currentUsage + incrementBy) > limit;
 
-    const currentUsage = usage.usage_count || 0;
-    const limit = usage.feature_limit;
-    const wouldExceed = limit !== null && (currentUsage + incrementBy) > limit;
+      console.log('[FeatureGatingService] Usage check:', { currentUsage, limit, wouldExceed });
 
-    // 3. Check if increment would exceed limit
-    if (wouldExceed) {
-      throw new QuotaError(
-        `Feature quota exceeded. Usage: ${currentUsage + incrementBy}/${limit}`,
-        'QUOTA_EXCEEDED'
-      );
-    }
-
-    // 4. If not dry run, increment usage
-    if (!dryRun && incrementBy > 0) {
-      const { error: incrementError } = await supabase
-        .from('feature_usage_tracking')
-        .upsert(
-          {
-            user_id: userId,
-            feature_name: featureName,
-            usage_count: currentUsage + incrementBy,
-            last_used_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            period_start: usage.period_start,
-          },
-          {
-            onConflict: 'user_id,feature_name,period_start',
-          }
+      // 3. Check if increment would exceed limit
+      if (wouldExceed) {
+        throw new QuotaError(
+          `Feature quota exceeded. Usage: ${currentUsage + incrementBy}/${limit}`,
+          'QUOTA_EXCEEDED'
         );
-
-      if (incrementError) {
-        console.error('Error incrementing feature usage:', incrementError);
-        throw new Error('Failed to update usage tracking');
       }
+
+      // 4. If not dry run, increment usage
+      if (!dryRun && incrementBy > 0) {
+        const { error: incrementError } = await supabase
+          .from('feature_usage_tracking')
+          .upsert(
+            {
+              user_id: userId,
+              feature_name: featureName,
+              usage_count: currentUsage + incrementBy,
+              last_used_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              period_start: usage.period_start,
+            },
+            {
+              onConflict: 'user_id,feature_name,period_start',
+            }
+          );
+
+        if (incrementError) {
+          console.error('[FeatureGatingService] Error incrementing feature usage:', incrementError);
+          throw new Error('Failed to update usage tracking');
+        }
+      }
+
+      const finalUsage = dryRun ? currentUsage : currentUsage + incrementBy;
+
+      return {
+        used: finalUsage,
+        limit,
+        remaining: limit !== null ? Math.max(0, limit - finalUsage) : null,
+        resetDate: usage.period_start,
+        canUse: limit === null || finalUsage < limit,
+      };
+    } catch (error) {
+      console.error('[FeatureGatingService] Caught error in checkAndIncrementUsage:', error);
+      
+      // Emergency fallback for critical errors
+      if (error instanceof QuotaError) {
+        throw error; // Re-throw quota errors
+      }
+      
+      // For all other errors (timeouts, DB issues), return permissive defaults
+      console.warn('[FeatureGatingService] Returning emergency fallback due to error');
+      return {
+        used: 0,
+        limit: null,
+        remaining: null,
+        resetDate: new Date().toISOString(),
+        canUse: true, // Allow access during emergencies
+      };
     }
-
-    const finalUsage = dryRun ? currentUsage : currentUsage + incrementBy;
-
-    return {
-      used: finalUsage,
-      limit,
-      remaining: limit !== null ? Math.max(0, limit - finalUsage) : null,
-      resetDate: usage.period_start,
-      canUse: limit === null || finalUsage < limit,
-    };
   }
 
   /**

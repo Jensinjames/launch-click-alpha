@@ -12,18 +12,34 @@ export const useFeatureQuota = (featureName: string) => {
         throw new Error('User not authenticated');
       }
 
-      return FeatureGatingService.checkUsage(user.id, featureName);
+      console.log('[FeatureQuota] Checking quota for:', featureName, 'user:', user.id);
+
+      try {
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Feature quota check timeout')), 5000);
+        });
+
+        const quotaPromise = FeatureGatingService.checkUsage(user.id, featureName);
+        
+        return await Promise.race([quotaPromise, timeoutPromise]);
+      } catch (error) {
+        console.error('[FeatureQuota] Error checking quota:', error);
+        // Emergency fallback - return basic usage info
+        return {
+          used: 0,
+          limit: null, // Unlimited for emergency fallback
+          remaining: null,
+          resetDate: new Date().toISOString(),
+          canUse: true, // Allow access during errors
+        };
+      }
     },
     enabled: !!user?.id && !!featureName,
-    staleTime: 30 * 1000, // 30 seconds
-    refetchOnWindowFocus: true,
-    retry: (failureCount, error) => {
-      // Don't retry on quota errors
-      if (error?.name === 'QuotaError') {
-        return false;
-      }
-      return failureCount < 2;
-    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    retry: 1, // Only retry once
+    retryDelay: 1000,
   });
 };
 

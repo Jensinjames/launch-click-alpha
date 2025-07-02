@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useCanUseFeature } from "@/hooks/useFeatureQuota";
+import { useCanUseFeature } from "@/hooks/useFeatureAccess";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, Zap, Loader2, RefreshCw, AlertCircle } from "lucide-react";
