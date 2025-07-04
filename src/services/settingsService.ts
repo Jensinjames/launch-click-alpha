@@ -53,7 +53,7 @@ export class SettingsService {
         }
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;
@@ -72,7 +72,7 @@ export class SettingsService {
         }
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;
@@ -89,13 +89,27 @@ export class SettingsService {
 
   static async getUserSettings(userId: string) {
     const [profileResult, preferencesResult] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', userId).single(),
-      supabase.from('user_preferences').select('*').eq('user_id', userId).single()
+      supabase.from('profiles').select('*').maybeSingle(),
+      supabase.from('user_preferences').select('*').maybeSingle()
     ]);
+
+    // Create default user_preferences if it doesn't exist
+    let preferences = preferencesResult.data;
+    if (!preferences && !preferencesResult.error) {
+      const { data: newPreferences, error: createError } = await supabase
+        .from('user_preferences')
+        .insert({ user_id: userId })
+        .select()
+        .maybeSingle();
+      
+      if (!createError) {
+        preferences = newPreferences;
+      }
+    }
 
     return {
       profile: profileResult.data,
-      preferences: preferencesResult.data,
+      preferences,
       profileError: profileResult.error,
       preferencesError: preferencesResult.error
     };
