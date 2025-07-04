@@ -8,7 +8,7 @@ export const FeatureAccessMonitor = () => {
 
   // Only show in development mode
   useEffect(() => {
-    const isDev = process.env.NODE_ENV === 'development';
+    const isDev = import.meta.env.DEV;
     setIsVisible(isDev);
   }, []);
 

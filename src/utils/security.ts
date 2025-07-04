@@ -109,7 +109,7 @@ export const getCSPNonce = (): string => {
 
 // Secure logging for production
 export const secureLog = (level: 'info' | 'warn' | 'error', message: string, data?: any) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console[level](`[Security] ${message}`, data);
   } else {
     // In production, only log errors and warnings

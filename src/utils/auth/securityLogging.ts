@@ -46,12 +46,12 @@ export const logSecurityEvent = async (
     await AuthService.logSecurityEvent(eventType, enrichedData);
     
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(`[Security] ${eventType}:`, enrichedData);
     }
   } catch (error) {
     // Silently fail security logging to not disrupt user flow
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.warn('Failed to log security event:', error);
     }
   }

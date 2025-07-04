@@ -121,7 +121,7 @@ const AppContent = () => {
       </Routes>
       
       {/* Development performance monitor */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <Suspense fallback={null}>
           <FeatureAccessMonitor />
         </Suspense>
