@@ -15,7 +15,7 @@ export const useAdminAccess = () => {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       return {
         isAdmin: profile?.role === 'admin' || profile?.role === 'super_admin',

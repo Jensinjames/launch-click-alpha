@@ -24,7 +24,7 @@ export const useUserTeams = () => {
         .select(`
           role,
           created_at,
-          teams!inner (
+          teams!fk_team_members_team (
             id,
             name
           )

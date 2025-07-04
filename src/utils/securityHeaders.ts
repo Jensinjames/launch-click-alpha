@@ -20,9 +20,7 @@ export const addSecurityHeaders = () => {
     isDevelopment 
       ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' https://supabase.co https://*.supabase.co http://localhost:* ws://localhost:* wss://localhost:*`
       : `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
-    isDevelopment
-      ? `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`
-      : `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
     isDevelopment 
       ? "img-src 'self' data: https: blob: http://localhost:*"
@@ -36,7 +34,7 @@ export const addSecurityHeaders = () => {
     "media-src 'self'",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
-    isDevelopment ? "" : "frame-ancestors 'none'",
+    // frame-ancestors removed - cannot be set via meta tag
     isProduction ? "upgrade-insecure-requests" : ""
   ].filter(directive => directive !== "").join('; ');
 

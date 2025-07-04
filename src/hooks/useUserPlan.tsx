@@ -27,11 +27,15 @@ export const useUserPlanQuery = () => {
         .from('user_plans')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (planError) {
         console.error('Error fetching user plan:', planError);
         throw new Error('Failed to fetch plan data');
+      }
+
+      if (!planData) {
+        throw new Error('No plan data found for user');
       }
 
       // Fetch user credits data
@@ -39,11 +43,15 @@ export const useUserPlanQuery = () => {
         .from('user_credits')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (creditsError) {
         console.error('Error fetching user credits:', creditsError);
         throw new Error('Failed to fetch credits data');
+      }
+
+      if (!creditsData) {
+        throw new Error('No credits data found for user');
       }
 
       return {
