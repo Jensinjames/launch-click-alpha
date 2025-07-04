@@ -15,13 +15,21 @@ export const FeatureAccessMonitor = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 right-0 m-4 p-3 bg-background border rounded-lg shadow-lg text-xs space-y-1 z-50 max-w-xs">
+    <div 
+      className="fixed bottom-0 right-0 m-4 p-3 bg-card border rounded-lg shadow-lg text-xs space-y-1 z-40 max-w-xs"
+      role="status" 
+      aria-live="polite"
+      aria-label="Development feature access monitor"
+      aria-hidden="false"
+    >
       <div className="font-semibold text-primary">Feature Access Monitor</div>
       
       <div className="space-y-1">
         <div className="flex justify-between">
           <span>Status:</span>
-          <span className={`font-medium ${isLoading ? 'text-yellow-500' : error ? 'text-red-500' : 'text-green-500'}`}>
+          <span className={`font-medium ${
+            isLoading ? 'text-warning' : error ? 'text-error' : 'text-success'
+          }`}>
             {isLoading ? 'Loading' : error ? 'Error' : 'Ready'}
           </span>
         </div>
@@ -50,7 +58,7 @@ export const FeatureAccessMonitor = () => {
         )}
         
         {error && (
-          <div className="text-red-500 text-xs mt-2 p-1 bg-red-50 rounded">
+          <div className="text-error text-xs mt-2 p-1 bg-error-light rounded" role="alert">
             {error.message || 'Unknown error'}
           </div>
         )}
