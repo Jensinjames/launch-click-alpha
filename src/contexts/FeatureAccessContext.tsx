@@ -41,17 +41,21 @@ const PUBLIC_ROUTES = [
   '/pricing'
 ];
 
-// Core features - always loaded
+// Core features - always loaded (ALL navigation features preloaded)
 const CORE_FEATURES = [
   'page_access_dashboard',
-  'content_generation',
-  'page_access_analytics',
+  'page_access_generate',
+  'page_access_content',
   'page_access_teams',
+  'page_access_analytics',
   'page_access_integrations',
+  'page_access_settings',
   'page_access_admin',
   'page_access_billing',
+  'content_generation',
   'templates',
-  'image_generation'
+  'image_generation',
+  'integrations'
 ];
 
 interface FeatureAccessProviderProps {
@@ -151,7 +155,9 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   }
 
   const hasAccess = useCallback((featureName: string) => {
-    return accessMap[featureName] || false;
+    const result = accessMap[featureName] || false;
+    console.log(`[FeatureAccess] Check '${featureName}':`, result, 'AccessMap:', Object.keys(accessMap));
+    return result;
   }, [accessMap]);
 
   const canUseAny = useCallback((features: string[]) => {

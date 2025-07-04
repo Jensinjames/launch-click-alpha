@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { LucideIcon } from "@/lib/icons";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { useFeatureAccessContext } from "@/contexts/FeatureAccessContext";
 import { cn } from "@/lib/utils";
 
 interface SidebarItemProps {
@@ -13,11 +13,14 @@ interface SidebarItemProps {
 }
 
 export const SidebarItem = ({ name, href, icon: Icon, featureName, isActive, onNavigate }: SidebarItemProps) => {
-  const { data: hasAccess = false, isLoading } = useFeatureAccess(featureName);
-
-  // For basic page access, we assume access unless explicitly denied
-  const canAccess = isLoading || hasAccess;
-  const needsUpgrade = !isLoading && !hasAccess;
+  const { hasAccess, isLoading } = useFeatureAccessContext();
+  
+  // Get access from bulk provider (no individual loading states)
+  const hasFeatureAccess = hasAccess(featureName);
+  const canAccess = hasFeatureAccess;
+  const needsUpgrade = !isLoading && !hasFeatureAccess;
+  
+  console.log(`[SidebarItem] ${name} (${featureName}):`, { hasFeatureAccess, canAccess, isLoading });
 
   return (
     <Link
