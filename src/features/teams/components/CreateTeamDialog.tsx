@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -132,6 +132,9 @@ export const CreateTeamDialog = ({ trigger, onSuccess }: CreateTeamDialogProps) 
             <Crown className="h-5 w-5 mr-2 text-primary" />
             Create New Team
           </DialogTitle>
+          <DialogDescription>
+            Create a new team to collaborate with other members on your projects.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">

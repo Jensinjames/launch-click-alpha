@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,6 +101,9 @@ export const InviteMembersDialog = ({ teamId, currentUserRole, trigger }: Invite
             <Mail className="h-5 w-5 mr-2" />
             Invite Team Members
           </DialogTitle>
+          <DialogDescription>
+            Send invitations to new team members by email. They'll receive an invitation link to join your team.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
