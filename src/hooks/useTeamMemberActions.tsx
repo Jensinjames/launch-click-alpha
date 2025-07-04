@@ -1,6 +1,6 @@
 
-import { useUpdateMemberRole } from './team/mutations/useUpdateMemberRole';
-import { useRemoveMember } from './team/mutations/useRemoveMember';
+import { useUpdateMemberRole } from '@/features/teams/hooks/useUpdateMemberRole';
+import { useRemoveMember } from '@/features/teams/hooks/useRemoveMember';
 
 export const useTeamMemberActions = (teamId: string) => {
   const updateRoleMutation = useUpdateMemberRole();

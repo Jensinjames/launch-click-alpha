@@ -1,14 +1,15 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateTeam } from "@/hooks/team/mutations/useCreateTeam";
-import { useUserPlan } from "@/hooks/useUserPlan";
 import { Users, Loader2, Crown } from "lucide-react";
 import { toast } from "sonner";
+
+import { useCreateTeam } from "../hooks/useCreateTeam";
+import { useUserPlan } from "@/hooks/useUserPlan";
 
 interface CreateTeamDialogProps {
   trigger?: React.ReactNode;

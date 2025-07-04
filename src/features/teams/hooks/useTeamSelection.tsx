@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useUserTeams, UserTeam } from '../useUserTeams';
+import { useUserTeams, UserTeam } from '@/hooks/useUserTeams';
 
 export const useTeamSelection = () => {
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");

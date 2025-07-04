@@ -1,11 +1,11 @@
 
-import { useCreateTeam } from './team/mutations/useCreateTeam';
-import { useUpdateTeam } from './team/mutations/useUpdateTeam';
-import { useDeleteTeam } from './team/mutations/useDeleteTeam';
-import { useInviteMembers } from './team/mutations/useInviteMembers';
-import { useUpdateMemberRole } from './team/mutations/useUpdateMemberRole';
-import { useRemoveMember } from './team/mutations/useRemoveMember';
-import { useTransferOwnership } from './team/mutations/useTransferOwnership';
+import { useCreateTeam } from '@/features/teams/hooks/useCreateTeam';
+import { useUpdateTeam } from '@/features/teams/hooks/useUpdateTeam';
+import { useDeleteTeam } from '@/features/teams/hooks/useDeleteTeam';
+import { useInviteMembers } from '@/features/teams/hooks/useInviteMembers';
+import { useUpdateMemberRole } from '@/features/teams/hooks/useUpdateMemberRole';
+import { useRemoveMember } from '@/features/teams/hooks/useRemoveMember';
+import { useTransferOwnership } from '@/features/teams/hooks/useTransferOwnership';
 
 export const useTeamMutations = () => {
   const createTeam = useCreateTeam();

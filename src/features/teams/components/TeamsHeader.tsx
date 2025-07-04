@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Users } from "lucide-react";
+
 import { CreateTeamDialog } from "./CreateTeamDialog";
 import { InviteMembersDialog } from "./InviteMembersDialog";
 import { useAuth } from "@/hooks/useAuth";
-import { useTeamSelection } from "@/hooks/team/useTeamSelection";
+import { useTeamSelection } from "../hooks/useTeamSelection";
 
 export const TeamsHeader = () => {
   const { user } = useAuth();

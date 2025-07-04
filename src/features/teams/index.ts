@@ -6,6 +6,16 @@ export { TeamAnalytics } from './components/TeamAnalytics';
 export { useTeamMembersWithCredits } from '@/hooks/useTeamMembersWithCredits';
 export { useTeamMutations } from '@/hooks/useTeamMutations';
 
+// Team hooks - local feature hooks
+export { useCreateTeam } from './hooks/useCreateTeam';
+export { useUpdateTeam } from './hooks/useUpdateTeam';
+export { useDeleteTeam } from './hooks/useDeleteTeam';
+export { useInviteMembers } from './hooks/useInviteMembers';
+export { useUpdateMemberRole } from './hooks/useUpdateMemberRole';
+export { useRemoveMember } from './hooks/useRemoveMember';
+export { useTransferOwnership } from './hooks/useTransferOwnership';
+export { useTeamSelection } from './hooks/useTeamSelection';
+
 // Team feature components
 export { TeamMetrics } from './components/TeamMetrics';
 export { TeamAnalyticsChart } from './components/TeamAnalyticsChart';
