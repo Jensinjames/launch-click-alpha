@@ -8,7 +8,7 @@ export interface FeatureAccessResult {
 }
 
 export const useFeatureAccessBulk = (featureNames: string[]) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   return useQuery({
     queryKey: ['featureAccessBulk', user?.id, featureNames.sort()],
@@ -42,10 +42,12 @@ export const useFeatureAccessBulk = (featureNames: string[]) => {
 
       return results;
     },
-    enabled: !!user?.id && featureNames.length > 0,
+    enabled: !loading && featureNames.length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes for stable features
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    retry: 2,
+    retryDelay: 1000,
   });
 };
 

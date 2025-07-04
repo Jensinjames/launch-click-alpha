@@ -30,14 +30,14 @@ const Admin = lazy(() => import("./pages/Admin"));
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <FeatureAccessProvider>
-        <EnhancedSecurityProvider>
+      <EnhancedSecurityProvider>
         <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
           <TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
               <AuthProvider>
+                <FeatureAccessProvider>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/login" element={<Login />} />
@@ -117,12 +117,12 @@ function App() {
                   />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </FeatureAccessProvider>
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>
-        </EnhancedSecurityProvider>
-      </FeatureAccessProvider>
+      </EnhancedSecurityProvider>
     </QueryClientProvider>
   );
 }

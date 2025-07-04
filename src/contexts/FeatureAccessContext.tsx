@@ -1,6 +1,7 @@
 // Feature Access Context - Centralized Caching and State Management
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { useFeatureAccessBulk, FeatureAccessResult } from '@/hooks/useFeatureAccessBulk';
+import { FeatureAccessErrorBoundary } from '@/components/providers/FeatureAccessErrorBoundary';
 
 interface FeatureAccessContextType {
   hasAccess: (featureName: string) => boolean;
@@ -37,6 +38,11 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
 }) => {
   const { data: accessMap = {}, isLoading, error } = useFeatureAccessBulk(preloadFeatures);
 
+  // If there's a critical error, render with empty access map
+  if (error && !accessMap) {
+    console.warn('[FeatureAccess] Provider error, using fallback mode:', error);
+  }
+
   const hasAccess = useCallback((featureName: string) => {
     return accessMap[featureName] || false;
   }, [accessMap]);
@@ -65,9 +71,11 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   }), [hasAccess, canUseAny, canUseAll, isLoading, error, preloadFeaturesFn]);
 
   return (
-    <FeatureAccessContext.Provider value={value}>
-      {children}
-    </FeatureAccessContext.Provider>
+    <FeatureAccessErrorBoundary>
+      <FeatureAccessContext.Provider value={value}>
+        {children}
+      </FeatureAccessContext.Provider>
+    </FeatureAccessErrorBoundary>
   );
 };
 
