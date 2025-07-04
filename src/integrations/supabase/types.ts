@@ -9,259 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      app_38b06dea2963452f9265ca4a0de19e02_audit_logs: {
-        Row: {
-          action: string
-          created_at: string
-          data: Json | null
-          id: string
-          ip_address: unknown | null
-          resource_id: string | null
-          resource_type: string | null
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          data?: Json | null
-          id?: string
-          ip_address?: unknown | null
-          resource_id?: string | null
-          resource_type?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          data?: Json | null
-          id?: string
-          ip_address?: unknown | null
-          resource_id?: string | null
-          resource_type?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      app_38b06dea2963452f9265ca4a0de19e02_generated_content: {
-        Row: {
-          created_at: string
-          credits_used: number | null
-          id: string
-          output: Json
-          prompt: string
-          team_id: string | null
-          type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          credits_used?: number | null
-          id?: string
-          output: Json
-          prompt: string
-          team_id?: string | null
-          type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          credits_used?: number | null
-          id?: string
-          output?: Json
-          prompt?: string
-          team_id?: string | null
-          type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_38b06dea2963452f9265ca4a0de19e02_generated_con_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "app_38b06dea2963452f9265ca4a0de19e02_teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      app_38b06dea2963452f9265ca4a0de19e02_integration_tokens: {
-        Row: {
-          created_at: string
-          expires_at: string | null
-          id: string
-          provider: string
-          refresh_token_encrypted: string | null
-          scopes: string[] | null
-          token_encrypted: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          provider: string
-          refresh_token_encrypted?: string | null
-          scopes?: string[] | null
-          token_encrypted: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          provider?: string
-          refresh_token_encrypted?: string | null
-          scopes?: string[] | null
-          token_encrypted?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      app_38b06dea2963452f9265ca4a0de19e02_team_members: {
-        Row: {
-          created_at: string
-          id: string
-          invited_at: string | null
-          invited_email: string | null
-          joined_at: string | null
-          role: string | null
-          status: string | null
-          team_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          invited_at?: string | null
-          invited_email?: string | null
-          joined_at?: string | null
-          role?: string | null
-          status?: string | null
-          team_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          invited_at?: string | null
-          invited_email?: string | null
-          joined_at?: string | null
-          role?: string | null
-          status?: string | null
-          team_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_38b06dea2963452f9265ca4a0de19e02_team_members_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "app_38b06dea2963452f9265ca4a0de19e02_teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      app_38b06dea2963452f9265ca4a0de19e02_teams: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          owner_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          owner_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          owner_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      app_38b06dea2963452f9265ca4a0de19e02_user_credits: {
-        Row: {
-          created_at: string
-          credits_used: number | null
-          id: string
-          monthly_limit: number | null
-          reset_at: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          credits_used?: number | null
-          id?: string
-          monthly_limit?: number | null
-          reset_at?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          credits_used?: number | null
-          id?: string
-          monthly_limit?: number | null
-          reset_at?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      app_38b06dea2963452f9265ca4a0de19e02_user_plans: {
-        Row: {
-          created_at: string
-          credits: number | null
-          id: string
-          plan: string | null
-          seat_count: number | null
-          status: string | null
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          credits?: number | null
-          id?: string
-          plan?: string | null
-          seat_count?: number | null
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          credits?: number | null
-          id?: string
-          plan?: string | null
-          seat_count?: number | null
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       audit_logs: {
         Row: {
           action: string
@@ -430,6 +177,13 @@ export type Database = {
             referencedRelation: "generated_content"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_content_analytics_content"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "generated_content"
+            referencedColumns: ["id"]
+          },
         ]
       }
       content_collaborations: {
@@ -543,6 +297,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "content_performance_summary_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "generated_content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_content_performance_content"
             columns: ["content_id"]
             isOneToOne: true
             referencedRelation: "generated_content"
@@ -807,7 +568,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_generated_content_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integration_tokens: {
         Row: {
@@ -837,7 +606,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_integration_tokens_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plan_features: {
         Row: {
@@ -1049,6 +826,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_team_activity_log_team"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_team_activity_log_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "team_activity_log_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -1093,6 +884,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_team_invitations_invited_by"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_team_invitations_team"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "team_invitations_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -1133,6 +938,27 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_team_members_invited_by"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_team_members_team"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_team_members_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "team_members_team_id_fkey"
             columns: ["team_id"]
@@ -1280,6 +1106,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_teams_owner_profiles"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_teams_profiles"
             columns: ["owner_id"]
@@ -1478,6 +1311,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_user_credits_user"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_favorites: {
@@ -1544,7 +1384,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_plans_user"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_preferences: {
         Row: {
