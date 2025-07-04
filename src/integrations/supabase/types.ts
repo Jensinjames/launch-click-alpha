@@ -48,102 +48,6 @@ export type Database = {
         }
         Relationships: []
       }
-      billing: {
-        Row: {
-          amount: number | null
-          attrs: Json | null
-          created: string | null
-          currency: string | null
-          customer: string | null
-          id: string | null
-          payment_method: string | null
-        }
-        Insert: {
-          amount?: number | null
-          attrs?: Json | null
-          created?: string | null
-          currency?: string | null
-          customer?: string | null
-          id?: string | null
-          payment_method?: string | null
-        }
-        Update: {
-          amount?: number | null
-          attrs?: Json | null
-          created?: string | null
-          currency?: string | null
-          customer?: string | null
-          id?: string | null
-          payment_method?: string | null
-        }
-        Relationships: []
-      }
-      composite_template_steps: {
-        Row: {
-          condition_logic: Json | null
-          created_at: string | null
-          depends_on: string[] | null
-          id: string
-          input_mapping: Json | null
-          is_conditional: boolean | null
-          output_mapping: Json | null
-          step_id: string
-          step_name: string
-          step_order: number
-          template_data: Json | null
-          template_id: string
-          template_ref: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          condition_logic?: Json | null
-          created_at?: string | null
-          depends_on?: string[] | null
-          id?: string
-          input_mapping?: Json | null
-          is_conditional?: boolean | null
-          output_mapping?: Json | null
-          step_id: string
-          step_name: string
-          step_order: number
-          template_data?: Json | null
-          template_id: string
-          template_ref?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          condition_logic?: Json | null
-          created_at?: string | null
-          depends_on?: string[] | null
-          id?: string
-          input_mapping?: Json | null
-          is_conditional?: boolean | null
-          output_mapping?: Json | null
-          step_id?: string
-          step_name?: string
-          step_order?: number
-          template_data?: Json | null
-          template_id?: string
-          template_ref?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "composite_template_steps_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "content_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "composite_template_steps_template_ref_fkey"
-            columns: ["template_ref"]
-            isOneToOne: false
-            referencedRelation: "content_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       content_analytics: {
         Row: {
           content_id: string
@@ -182,89 +86,6 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: false
             referencedRelation: "generated_content"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      content_collaborations: {
-        Row: {
-          collaborator_id: string
-          content_id: string
-          created_at: string
-          id: string
-          invited_by: string
-          permission_level: Database["public"]["Enums"]["collaboration_permission"]
-          status: Database["public"]["Enums"]["collaboration_status"]
-        }
-        Insert: {
-          collaborator_id: string
-          content_id: string
-          created_at?: string
-          id?: string
-          invited_by: string
-          permission_level?: Database["public"]["Enums"]["collaboration_permission"]
-          status?: Database["public"]["Enums"]["collaboration_status"]
-        }
-        Update: {
-          collaborator_id?: string
-          content_id?: string
-          created_at?: string
-          id?: string
-          invited_by?: string
-          permission_level?: Database["public"]["Enums"]["collaboration_permission"]
-          status?: Database["public"]["Enums"]["collaboration_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "content_collaborations_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: false
-            referencedRelation: "generated_content"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      content_comments: {
-        Row: {
-          comment_text: string
-          content_id: string
-          created_at: string
-          id: string
-          is_resolved: boolean | null
-          parent_comment_id: string | null
-          user_id: string
-        }
-        Insert: {
-          comment_text: string
-          content_id: string
-          created_at?: string
-          id?: string
-          is_resolved?: boolean | null
-          parent_comment_id?: string | null
-          user_id: string
-        }
-        Update: {
-          comment_text?: string
-          content_id?: string
-          created_at?: string
-          id?: string
-          is_resolved?: boolean | null
-          parent_comment_id?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "content_comments_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: false
-            referencedRelation: "generated_content"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "content_comments_parent_comment_id_fkey"
-            columns: ["parent_comment_id"]
-            isOneToOne: false
-            referencedRelation: "content_comments"
             referencedColumns: ["id"]
           },
         ]
@@ -389,85 +210,6 @@ export type Database = {
         }
         Relationships: []
       }
-      content_versions: {
-        Row: {
-          change_summary: string | null
-          content_data: Json
-          content_id: string
-          created_at: string
-          created_by: string
-          id: string
-          version_number: number
-        }
-        Insert: {
-          change_summary?: string | null
-          content_data: Json
-          content_id: string
-          created_at?: string
-          created_by: string
-          id?: string
-          version_number: number
-        }
-        Update: {
-          change_summary?: string | null
-          content_data?: Json
-          content_id?: string
-          created_at?: string
-          created_by?: string
-          id?: string
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "content_versions_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: false
-            referencedRelation: "generated_content"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      email_delivery_logs: {
-        Row: {
-          created_at: string | null
-          id: string
-          invitation_id: string | null
-          provider_response: Json | null
-          recipient_email: string
-          retry_count: number
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          invitation_id?: string | null
-          provider_response?: Json | null
-          recipient_email: string
-          retry_count?: number
-          status: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          invitation_id?: string | null
-          provider_response?: Json | null
-          recipient_email?: string
-          retry_count?: number
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "email_delivery_logs_invitation_id_fkey"
-            columns: ["invitation_id"]
-            isOneToOne: false
-            referencedRelation: "team_invitations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       feature_hierarchy: {
         Row: {
           category: string
@@ -498,36 +240,6 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           min_plan_level?: number
-        }
-        Relationships: []
-      }
-      feature_usage_tracking: {
-        Row: {
-          feature_name: string
-          id: string
-          last_used_at: string | null
-          period_start: string | null
-          updated_at: string | null
-          usage_count: number | null
-          user_id: string
-        }
-        Insert: {
-          feature_name: string
-          id?: string
-          last_used_at?: string | null
-          period_start?: string | null
-          updated_at?: string | null
-          usage_count?: number | null
-          user_id: string
-        }
-        Update: {
-          feature_name?: string
-          id?: string
-          last_used_at?: string | null
-          period_start?: string | null
-          updated_at?: string | null
-          usage_count?: number | null
-          user_id?: string
         }
         Relationships: []
       }
@@ -1044,45 +756,6 @@ export type Database = {
           },
         ]
       }
-      team_templates: {
-        Row: {
-          category: string | null
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          is_public: boolean | null
-          name: string
-          template_data: Json
-          updated_at: string
-          usage_count: number | null
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          is_public?: boolean | null
-          name: string
-          template_data?: Json
-          updated_at?: string
-          usage_count?: number | null
-        }
-        Update: {
-          category?: string | null
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          is_public?: boolean | null
-          name?: string
-          template_data?: Json
-          updated_at?: string
-          usage_count?: number | null
-        }
-        Relationships: []
-      }
       teams: {
         Row: {
           created_at: string
@@ -1118,85 +791,6 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      template_assets: {
-        Row: {
-          asset_data: Json
-          asset_type: Database["public"]["Enums"]["asset_type"]
-          created_at: string
-          id: string
-          position: number
-          template_id: string
-          updated_at: string
-        }
-        Insert: {
-          asset_data: Json
-          asset_type: Database["public"]["Enums"]["asset_type"]
-          created_at?: string
-          id?: string
-          position?: number
-          template_id: string
-          updated_at?: string
-        }
-        Update: {
-          asset_data?: Json
-          asset_type?: Database["public"]["Enums"]["asset_type"]
-          created_at?: string
-          id?: string
-          position?: number
-          template_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "template_assets_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "content_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      template_reviews: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_verified_usage: boolean | null
-          rating: number
-          review_text: string | null
-          template_id: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_verified_usage?: boolean | null
-          rating: number
-          review_text?: string | null
-          template_id: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_verified_usage?: boolean | null
-          rating?: number
-          review_text?: string | null
-          template_id?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "template_reviews_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "content_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -1348,12 +942,9 @@ export type Database = {
         Row: {
           created_at: string
           credits: number
-          current_period_end: string | null
           id: string
           plan_type: Database["public"]["Enums"]["plan_type"]
           status: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
           team_seats: number
           updated_at: string
           user_id: string
@@ -1361,12 +952,9 @@ export type Database = {
         Insert: {
           created_at?: string
           credits?: number
-          current_period_end?: string | null
           id?: string
           plan_type?: Database["public"]["Enums"]["plan_type"]
           status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           team_seats?: number
           updated_at?: string
           user_id: string
@@ -1374,12 +962,9 @@ export type Database = {
         Update: {
           created_at?: string
           credits?: number
-          current_period_end?: string | null
           id?: string
           plan_type?: Database["public"]["Enums"]["plan_type"]
           status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           team_seats?: number
           updated_at?: string
           user_id?: string
