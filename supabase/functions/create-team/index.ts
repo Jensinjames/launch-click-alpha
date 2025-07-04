@@ -219,6 +219,7 @@ serve(async (req: Request) => {
       'create_team_with_access_control',
       {
         p_team_name: sanitizedName,
+        p_user_id: user.id,
         p_description: sanitizedDescription || null
       }
     );

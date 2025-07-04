@@ -1169,7 +1169,9 @@ export type Database = {
         Returns: undefined
       }
       create_team_with_access_control: {
-        Args: { p_team_name: string; p_description?: string }
+        Args:
+          | { p_team_name: string; p_description?: string }
+          | { p_team_name: string; p_user_id: string; p_description?: string }
         Returns: Json
       }
       emergency_sign_out: {
