@@ -1,4 +1,4 @@
-// Enhanced Feature Access Context - Phase 2 Optimizations
+// Fixed Feature Access Context - Eliminates conditional hook calls
 import React, { createContext, useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import { useFeatureAccessBulk, FeatureAccessResult } from '@/hooks/useFeatureAccessBulk';
 import { FeatureAccessErrorBoundary } from '@/components/providers/FeatureAccessErrorBoundary';
@@ -76,12 +76,11 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     lastRefresh?: number;
   }>({});
   
-  // Check if current route is public (doesn't need authentication)
+  // Pre-calculate all values to avoid conditional hook calls
   const isPublicRoute = useMemo(() => {
     return PUBLIC_ROUTES.includes(route || '/');
   }, [route]);
 
-  // Optimize features based on current route
   const optimizedFeatures = useMemo(() => {
     if (preloadFeatures) return preloadFeatures;
     if (route && ROUTE_FEATURES[route as keyof typeof ROUTE_FEATURES]) {
@@ -90,17 +89,17 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     return CORE_FEATURES;
   }, [preloadFeatures, route]);
 
-  // Only start feature access checks when auth is ready
   const shouldStartFeatureChecks = !authLoading && user;
   const startTime = performance.now();
 
+  // ALWAYS call the hook - never conditionally
   const { 
     data: accessMap = {}, 
     isLoading, 
     error,
     dataUpdatedAt,
     isFetching 
-  } = useFeatureAccessBulk(shouldStartFeatureChecks ? optimizedFeatures : []);
+  } = useFeatureAccessBulk(optimizedFeatures);
 
   // Track performance metrics
   useEffect(() => {
@@ -119,7 +118,6 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   const handleError = useCallback((error: any) => {
     console.warn('[FeatureAccess] Provider error, using fallback mode:', error);
     
-    // Return permissive fallback for non-critical errors
     return {
       hasAccess: () => true,
       canUseAny: () => true,
@@ -155,10 +153,15 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   }
 
   const hasAccess = useCallback((featureName: string) => {
+    // If we don't have feature data yet and should start checks, return false for protected features
+    if (shouldStartFeatureChecks && Object.keys(accessMap).length === 0) {
+      return false;
+    }
+    
     const result = accessMap[featureName] || false;
     console.log(`[FeatureAccess] Check '${featureName}':`, result, 'AccessMap:', Object.keys(accessMap));
     return result;
-  }, [accessMap]);
+  }, [accessMap, shouldStartFeatureChecks]);
 
   const canUseAny = useCallback((features: string[]) => {
     return features.some(feature => accessMap[feature]);
@@ -169,8 +172,6 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   }, [accessMap]);
 
   const preloadFeaturesFn = useCallback((features: string[]) => {
-    // This would trigger a new query with additional features
-    // For now, we'll log it for future implementation
     console.log('[FeatureAccess] Preload requested for:', features);
   }, []);
 
@@ -178,12 +179,12 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     hasAccess,
     canUseAny,
     canUseAll,
-    isLoading,
+    isLoading: shouldStartFeatureChecks ? isLoading : false,
     isAuthReady: !authLoading,
     error,
     preloadFeatures: preloadFeaturesFn,
     performanceMetrics,
-  }), [hasAccess, canUseAny, canUseAll, isLoading, authLoading, error, preloadFeaturesFn, performanceMetrics]);
+  }), [hasAccess, canUseAny, canUseAll, isLoading, authLoading, error, preloadFeaturesFn, performanceMetrics, shouldStartFeatureChecks]);
 
   return (
     <FeatureAccessErrorBoundary>
