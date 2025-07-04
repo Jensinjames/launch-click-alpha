@@ -1,17 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
-import { TeamNotification } from '@/features/teams/types';
-
-export interface NotificationPreferences {
-  email: boolean;
-  push: boolean;
-  inApp: boolean;
-  categories: {
-    teamInvites: boolean;
-    memberChanges: boolean;
-    teamUpdates: boolean;
-    mentions: boolean;
-  };
-}
+// Import from centralized types
+import type { TeamNotification, NotificationPreferences } from '@/types/core';
 
 export class NotificationService {
   // Team notifications

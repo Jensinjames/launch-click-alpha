@@ -25,7 +25,7 @@ export const useFeatureAccess = (featureName: string) => {
       return data || false;
     },
     enabled: !!user?.id && !!featureName,
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes for stable features
     refetchOnWindowFocus: false,
   });
 };

@@ -2,15 +2,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logSecurityEvent } from './logger';
 
-export interface SessionInfo {
-  id: string;
-  user_id: string;
-  session_id: string;
-  created_at: string;
-  last_activity: string;
-  expires_at: string;
-  is_active: boolean;
-}
+// Import from centralized types
+import type { SessionInfo } from '@/types/core';
+
+export type { SessionInfo };
 
 class UnifiedSessionManager {
   private sessionUpdateThrottle: Map<string, number> = new Map();

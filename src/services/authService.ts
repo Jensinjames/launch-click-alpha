@@ -2,22 +2,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 
-export interface SignUpData {
-  email: string;
-  password: string;
-  fullName?: string;
-}
+// Import from centralized types
+import type { SignUpData, SignInData, AuthResult } from '@/types/core';
 
-export interface SignInData {
-  email: string;
-  password: string;
-}
-
-export interface AuthResult {
-  user: User | null;
-  session: Session | null;
-  error: AuthError | null;
-}
+export type { SignUpData, SignInData, AuthResult };
 
 export class AuthService {
   // Sign up with email and password

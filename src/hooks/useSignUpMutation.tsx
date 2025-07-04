@@ -5,11 +5,8 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { checkServerRateLimit, recordAttempt, validateEmail, validatePassword, sanitizeInput, logSecurityEvent } from '@/security';
 
-interface SignUpData {
-  email: string;
-  password: string;
-  fullName?: string;
-}
+// Import from centralized types
+import type { SignUpData } from '@/types/core';
 
 export const useSignUpMutation = () => {
   const navigate = useNavigate();

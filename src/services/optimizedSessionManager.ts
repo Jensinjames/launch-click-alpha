@@ -2,17 +2,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logSecurityEvent } from '@/security';
 
-export interface SessionInfo {
-  id: string;
-  user_id: string;
-  session_id: string;
-  created_at: string;
-  last_activity: string;
-  expires_at: string;
-  is_active: boolean;
-  user_agent?: string | null;
-  ip_address?: string | null | unknown;
-}
+// Import from centralized types
+import type { SessionInfo } from '@/types/core';
 
 interface CachedActivity {
   lastActivity: string;

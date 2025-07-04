@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { EnhancedSecurityProvider } from "@/components/providers/EnhancedSecurityProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { FeatureAccessProvider } from '@/contexts/FeatureAccessContext';
 import { queryClient } from "@/lib/queryClient";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -29,7 +30,8 @@ const Admin = lazy(() => import("./pages/Admin"));
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <EnhancedSecurityProvider>
+      <FeatureAccessProvider>
+        <EnhancedSecurityProvider>
         <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
           <TooltipProvider>
             <Toaster />
@@ -119,7 +121,8 @@ function App() {
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>
-      </EnhancedSecurityProvider>
+        </EnhancedSecurityProvider>
+      </FeatureAccessProvider>
     </QueryClientProvider>
   );
 }

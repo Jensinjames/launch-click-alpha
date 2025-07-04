@@ -44,13 +44,13 @@ export { Loader2, RefreshCw } from "lucide-react";
 export { Puzzle, Plug, ExternalLink } from "lucide-react";
 
 // Special Icons
-export { Star, Heart, Sparkles, Home } from "lucide-react";
+export { Star, Heart, Sparkles, Home, ImageIcon } from "lucide-react";
 
 // Database & Data Icons
 export { Database, Workflow, Brain, Bot } from "lucide-react";
 
 // Search Icons
-export { Search } from "lucide-react";
+export { Search, File } from "lucide-react";
 
 // Types (for components that need the LucideIcon type)
 export type { LucideIcon } from "lucide-react";
