@@ -17,7 +17,7 @@ export const SidebarItem = ({ name, href, icon: Icon, featureName, isActive, onN
   
   // Get access from bulk provider (no individual loading states)
   const hasFeatureAccess = hasAccess(featureName);
-  const canAccess = hasFeatureAccess;
+  const canAccess = isLoading || hasFeatureAccess;
   const needsUpgrade = !isLoading && !hasFeatureAccess;
   
   console.log(`[SidebarItem] ${name} (${featureName}):`, { hasFeatureAccess, canAccess, isLoading });
