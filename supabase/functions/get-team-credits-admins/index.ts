@@ -35,9 +35,19 @@ serve(async (req) => {
       )
     }
 
-    // Get team_id from query params
+    // Get team_id from query params or request body
     const url = new URL(req.url)
-    const teamId = url.searchParams.get('team_id')
+    let teamId = url.searchParams.get('team_id')
+    
+    // If not in query params, try to get from request body
+    if (!teamId && req.method === 'POST') {
+      try {
+        const requestBody = await req.json()
+        teamId = requestBody.team_id
+      } catch (error) {
+        // Body parsing failed, continue with null teamId
+      }
+    }
     
     if (!teamId) {
       return new Response(

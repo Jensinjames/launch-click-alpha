@@ -19,7 +19,7 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
       }
 
       const { data, error } = await supabase.functions.invoke('get-team-credits-admins', {
-        method: 'GET',
+        body: { team_id: teamId },
         headers: {
           'Content-Type': 'application/json',
         },
