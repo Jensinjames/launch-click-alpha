@@ -1129,6 +1129,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      bulk_feature_access_check: {
+        Args: { feature_names: string[]; check_user_id?: string }
+        Returns: Json
+      }
       can_access_feature: {
         Args: { feature_name: string; check_user_id?: string }
         Returns: boolean

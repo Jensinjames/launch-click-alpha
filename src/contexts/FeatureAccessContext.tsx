@@ -1,20 +1,39 @@
-// Feature Access Context - Centralized Caching and State Management
-import React, { createContext, useContext, useCallback, useMemo } from 'react';
+// Enhanced Feature Access Context - Phase 2 Optimizations
+import React, { createContext, useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import { useFeatureAccessBulk, FeatureAccessResult } from '@/hooks/useFeatureAccessBulk';
 import { FeatureAccessErrorBoundary } from '@/components/providers/FeatureAccessErrorBoundary';
+import { useAuth } from '@/hooks/useAuth';
+import { PageContentSkeleton } from '@/components/ui/skeleton-loader';
 
 interface FeatureAccessContextType {
   hasAccess: (featureName: string) => boolean;
   canUseAny: (features: string[]) => boolean;
   canUseAll: (features: string[]) => boolean;
   isLoading: boolean;
+  isAuthReady: boolean;
   error: any;
   preloadFeatures: (features: string[]) => void;
+  performanceMetrics: {
+    loadTime?: number;
+    cacheHitRate?: number;
+    lastRefresh?: number;
+  };
 }
 
 const FeatureAccessContext = createContext<FeatureAccessContextType | undefined>(undefined);
 
-// Common features used across the app
+// Route-based feature mapping for lazy loading
+const ROUTE_FEATURES = {
+  '/dashboard': ['dashboard', 'content_generation', 'analytics'],
+  '/generate': ['content_generation', 'templates', 'image_generation'],
+  '/analytics': ['analytics', 'teams'],
+  '/teams': ['teams'],
+  '/integrations': ['integrations'],
+  '/admin': ['admin_panel'],
+  '/billing': ['billing'],
+} as const;
+
+// Core features - always loaded
 const CORE_FEATURES = [
   'dashboard',
   'content_generation',
@@ -30,17 +49,91 @@ const CORE_FEATURES = [
 interface FeatureAccessProviderProps {
   children: React.ReactNode;
   preloadFeatures?: string[];
+  route?: string;
 }
 
 export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({ 
   children, 
-  preloadFeatures = CORE_FEATURES 
+  preloadFeatures,
+  route 
 }) => {
-  const { data: accessMap = {}, isLoading, error } = useFeatureAccessBulk(preloadFeatures);
+  const { user, loading: authLoading } = useAuth();
+  const [performanceMetrics, setPerformanceMetrics] = useState<{
+    loadTime?: number;
+    cacheHitRate?: number;
+    lastRefresh?: number;
+  }>({});
+  
+  // Optimize features based on current route
+  const optimizedFeatures = useMemo(() => {
+    if (preloadFeatures) return preloadFeatures;
+    if (route && ROUTE_FEATURES[route as keyof typeof ROUTE_FEATURES]) {
+      return [...CORE_FEATURES, ...ROUTE_FEATURES[route as keyof typeof ROUTE_FEATURES]];
+    }
+    return CORE_FEATURES;
+  }, [preloadFeatures, route]);
 
-  // If there's a critical error, render with empty access map
-  if (error && !accessMap) {
+  // Only start feature access checks when auth is ready
+  const shouldStartFeatureChecks = !authLoading && user;
+  const startTime = performance.now();
+
+  const { 
+    data: accessMap = {}, 
+    isLoading, 
+    error,
+    dataUpdatedAt,
+    isFetching 
+  } = useFeatureAccessBulk(shouldStartFeatureChecks ? optimizedFeatures : []);
+
+  // Track performance metrics
+  useEffect(() => {
+    if (accessMap && Object.keys(accessMap).length > 0 && !isLoading) {
+      const loadTime = performance.now() - startTime;
+      setPerformanceMetrics(prev => ({
+        ...prev,
+        loadTime,
+        lastRefresh: Date.now(),
+        cacheHitRate: prev.cacheHitRate ? (prev.cacheHitRate + 1) / 2 : 1
+      }));
+    }
+  }, [accessMap, isLoading, startTime]);
+
+  // Enhanced error handling with fallback
+  const handleError = useCallback((error: any) => {
     console.warn('[FeatureAccess] Provider error, using fallback mode:', error);
+    
+    // Return permissive fallback for non-critical errors
+    return {
+      hasAccess: () => true,
+      canUseAny: () => true,
+      canUseAll: () => true,
+      isLoading: false,
+      isAuthReady: !authLoading,
+      error,
+      preloadFeatures: () => {},
+      performanceMetrics: {}
+    };
+  }, [authLoading]);
+
+  // Handle critical errors with fallback
+  if (error && !accessMap && Object.keys(accessMap).length === 0) {
+    const fallbackValue = handleError(error);
+    return (
+      <FeatureAccessErrorBoundary>
+        <FeatureAccessContext.Provider value={fallbackValue}>
+          {children}
+        </FeatureAccessContext.Provider>
+      </FeatureAccessErrorBoundary>
+    );
+  }
+
+  // Show skeleton while auth is loading or initial feature check
+  if (authLoading || (shouldStartFeatureChecks && isLoading && Object.keys(accessMap).length === 0)) {
+    return (
+      <div className="min-h-screen bg-background">
+        <PageContentSkeleton sections={4} />
+      </div>
+    );
   }
 
   const hasAccess = useCallback((featureName: string) => {
@@ -66,9 +159,11 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     canUseAny,
     canUseAll,
     isLoading,
+    isAuthReady: !authLoading,
     error,
     preloadFeatures: preloadFeaturesFn,
-  }), [hasAccess, canUseAny, canUseAll, isLoading, error, preloadFeaturesFn]);
+    performanceMetrics,
+  }), [hasAccess, canUseAny, canUseAll, isLoading, authLoading, error, preloadFeaturesFn, performanceMetrics]);
 
   return (
     <FeatureAccessErrorBoundary>
