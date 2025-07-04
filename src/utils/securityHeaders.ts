@@ -10,28 +10,33 @@ export const addSecurityHeaders = () => {
   // Generate nonce for inline scripts/styles
   const nonce = generateCSPNonce();
   
-  // Determine if we're in production
-  const isProduction = import.meta.env.PROD;
+  // Determine if we're in production - check both NODE_ENV and PROD
+  const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'production';
+  const isDevelopment = import.meta.env.DEV || import.meta.env.MODE === 'development' || !isProduction;
   
-  // Enhanced Content Security Policy - strict for production, relaxed for development
+  // Development-friendly CSP - allow React/Vite to work properly
   const cspDirectives = [
     "default-src 'self'",
-    isProduction 
-      ? `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`
-      : `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
-    isProduction
-      ? `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`
-      : `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    isDevelopment 
+      ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' https://supabase.co https://*.supabase.co http://localhost:* ws://localhost:* wss://localhost:*`
+      : `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
+    isDevelopment
+      ? `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`
+      : `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co",
+    isDevelopment 
+      ? "img-src 'self' data: https: blob: http://localhost:*"
+      : "img-src 'self' data: https: blob:",
+    isDevelopment
+      ? "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co http://localhost:* ws://localhost:* wss://localhost:*"
+      : "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
     "media-src 'self'",
-    "worker-src 'self'",
+    "worker-src 'self' blob:",
     "manifest-src 'self'",
-    "frame-ancestors 'none'",
+    isDevelopment ? "" : "frame-ancestors 'none'",
     isProduction ? "upgrade-insecure-requests" : ""
   ].filter(directive => directive !== "").join('; ');
 
@@ -75,15 +80,28 @@ export const addSecurityHeaders = () => {
 
 // Initialize security headers on app start
 export const initializeSecurity = () => {
+  // Only apply security headers once to avoid duplicates
+  if (document.querySelector('meta[data-security-initialized]')) {
+    console.log('[Security] Headers already initialized, skipping duplicate initialization');
+    return;
+  }
+  
   addSecurityHeaders();
   
-  // Disable right-click context menu in production
-  if (import.meta.env.PROD) {
+  // Mark as initialized
+  const marker = document.createElement('meta');
+  marker.setAttribute('data-security-initialized', 'true');
+  document.head.appendChild(marker);
+  
+  const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'production';
+  
+  // Disable right-click context menu in production only
+  if (isProduction) {
     document.addEventListener('contextmenu', (e) => e.preventDefault());
   }
   
-  // Disable common developer shortcuts in production
-  if (import.meta.env.PROD) {
+  // Disable common developer shortcuts in production only
+  if (isProduction) {
     document.addEventListener('keydown', (e) => {
       if (
         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) ||
@@ -93,4 +111,6 @@ export const initializeSecurity = () => {
       }
     });
   }
+  
+  console.log(`[Security] Headers initialized for ${isProduction ? 'production' : 'development'} environment`);
 };
