@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search, Sparkles, Clock, Eye } from "lucide-react";
+import { Search, Sparkles, Clock, Eye, Info } from "lucide-react";
 import { useTemplates, useUseTemplate } from "@/hooks/templates/useTemplates";
+import { TemplatePreview } from "./TemplatePreview";
 import type { Database } from '@/integrations/supabase/types';
 
 type ContentTemplate = Database['public']['Tables']['content_templates']['Row'];
@@ -20,6 +21,8 @@ interface TemplateSelectorProps {
 export const TemplateSelector = ({ contentType, onTemplateSelect, children }: TemplateSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [previewTemplate, setPreviewTemplate] = useState<ContentTemplate | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { data: templates, isLoading } = useTemplates(contentType);
   const useTemplateMutation = useUseTemplate();
 
@@ -30,9 +33,20 @@ export const TemplateSelector = ({ contentType, onTemplateSelect, children }: Te
   ) || [];
 
   const handleTemplateSelect = async (template: ContentTemplate) => {
-    await useTemplateMutation.mutateAsync(template.id);
-    onTemplateSelect(template);
-    setOpen(false);
+    try {
+      await useTemplateMutation.mutateAsync(template.id);
+      onTemplateSelect(template);
+      setOpen(false);
+      setPreviewOpen(false);
+    } catch (error) {
+      console.error('Failed to use template:', error);
+      // Error is already handled by the mutation's onError
+    }
+  };
+
+  const handlePreviewTemplate = (template: ContentTemplate) => {
+    setPreviewTemplate(template);
+    setPreviewOpen(true);
   };
 
   return (
@@ -133,13 +147,25 @@ export const TemplateSelector = ({ contentType, onTemplateSelect, children }: Te
                         </div>
                       </div>
 
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleTemplateSelect(template)}
-                        disabled={useTemplateMutation.isPending}
-                      >
-                        Use Template
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePreviewTemplate(template)}
+                          className="flex-1"
+                        >
+                          <Info className="h-3 w-3 mr-1" />
+                          Preview
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleTemplateSelect(template)}
+                          disabled={useTemplateMutation.isPending}
+                          className="flex-1"
+                        >
+                          Use Template
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -148,6 +174,14 @@ export const TemplateSelector = ({ contentType, onTemplateSelect, children }: Te
           )}
         </div>
       </DialogContent>
+      
+      <TemplatePreview
+        template={previewTemplate}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        onUseTemplate={handleTemplateSelect}
+        isLoading={useTemplateMutation.isPending}
+      />
     </Dialog>
   );
 };

@@ -10,6 +10,7 @@ import { Mail, Share2, FileText, PenTool, Megaphone, TrendingUp, Loader2, Sparkl
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
 import { TemplateSelector } from "@/components/templates/TemplateSelector";
+import { TemplateBuilder } from "@/components/templates/TemplateBuilder";
 import { useContentGeneration } from "@/hooks/useUserContent";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { useQueryClient } from "@tanstack/react-query";
@@ -199,23 +200,32 @@ const Generate = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Template Selection */}
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border">
-                    <div className="flex items-center gap-3">
-                      <Sparkles className="h-5 w-5 text-purple-600" />
-                      <div>
-                        <h3 className="font-medium text-gray-900">Start with a Template</h3>
-                        <p className="text-sm text-gray-600">Jump start your content with pre-made templates</p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <Sparkles className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <h3 className="font-medium text-gray-900">Start with a Template</h3>
+                          <p className="text-sm text-gray-600">Jump start your content with pre-made templates</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <TemplateSelector 
+                          contentType={contentTypeMapping[selectedType]} 
+                          onTemplateSelect={handleTemplateSelect}
+                        >
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Sparkles className="h-4 w-4" />
+                            Browse Templates
+                          </Button>
+                        </TemplateSelector>
+                        <TemplateBuilder contentType={contentTypeMapping[selectedType]}>
+                          <Button variant="outline" size="sm" className="flex items-center gap-2">
+                            Create Template
+                          </Button>
+                        </TemplateBuilder>
                       </div>
                     </div>
-                    <TemplateSelector 
-                      contentType={contentTypeMapping[selectedType]} 
-                      onTemplateSelect={handleTemplateSelect}
-                    >
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" />
-                        Browse Templates
-                      </Button>
-                    </TemplateSelector>
                   </div>
 
                   {selectedTemplate && (

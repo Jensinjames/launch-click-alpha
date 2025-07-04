@@ -71,9 +71,16 @@ export const useUseTemplate = () => {
         .from('content_templates')
         .select('usage_count')
         .eq('id', templateId)
-        .single();
+        .maybeSingle();
       
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error('Failed to fetch template:', fetchError);
+        throw new Error('Template not found or inaccessible');
+      }
+      
+      if (!template) {
+        throw new Error('Template not found');
+      }
       
       // Then increment it
       const { data, error } = await supabase
@@ -83,13 +90,26 @@ export const useUseTemplate = () => {
         })
         .eq('id', templateId)
         .select()
-        .single();
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Failed to update template usage:', error);
+        throw new Error('Failed to update template usage count');
+      }
+      
+      if (!data) {
+        throw new Error('Failed to update template');
+      }
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['templates'] });
+      toast.success('Template usage tracked successfully');
+    },
+    onError: (error: any) => {
+      console.error('Template usage error:', error);
+      toast.error(error.message || 'Failed to use template');
     }
   });
 };
