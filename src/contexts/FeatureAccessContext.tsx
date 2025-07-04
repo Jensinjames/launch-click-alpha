@@ -24,13 +24,13 @@ const FeatureAccessContext = createContext<FeatureAccessContextType | undefined>
 
 // Route-based feature mapping for lazy loading
 const ROUTE_FEATURES = {
-  '/dashboard': ['dashboard', 'content_generation', 'analytics'],
+  '/dashboard': ['page_access_dashboard', 'content_generation', 'analytics'],
   '/generate': ['content_generation', 'templates', 'image_generation'],
-  '/analytics': ['analytics', 'teams'],
-  '/teams': ['teams'],
-  '/integrations': ['integrations'],
-  '/admin': ['admin_panel'],
-  '/billing': ['billing'],
+  '/analytics': ['page_access_analytics', 'teams'],
+  '/teams': ['page_access_teams'],
+  '/integrations': ['page_access_integrations'],
+  '/admin': ['page_access_admin'],
+  '/billing': ['page_access_billing'],
 } as const;
 
 // Public routes that don't require authentication
@@ -43,13 +43,13 @@ const PUBLIC_ROUTES = [
 
 // Core features - always loaded
 const CORE_FEATURES = [
-  'dashboard',
+  'page_access_dashboard',
   'content_generation',
-  'analytics',
-  'teams',
-  'integrations',
-  'admin_panel',
-  'billing',
+  'page_access_analytics',
+  'page_access_teams',
+  'page_access_integrations',
+  'page_access_admin',
+  'page_access_billing',
   'templates',
   'image_generation'
 ];
