@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Star, Clock, Plus, ArrowRight } from "lucide-react";
@@ -7,7 +8,7 @@ interface RecentAssetsProps {
   assets: any[];
 }
 
-const RecentAssets = ({ assets }: RecentAssetsProps) => {
+const RecentAssets = React.memo(({ assets }: RecentAssetsProps) => {
   if (assets.length === 0) {
     return (
       <div>
@@ -76,6 +77,8 @@ const RecentAssets = ({ assets }: RecentAssetsProps) => {
       </div>
     </div>
   );
-};
+});
+
+RecentAssets.displayName = 'RecentAssets';
 
 export default RecentAssets;

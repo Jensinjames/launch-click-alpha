@@ -1147,6 +1147,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_dashboard_data: {
+        Args: { user_uuid?: string }
+        Returns: Json
+      }
       get_feature_usage_with_limits: {
         Args: { p_user_id: string; p_feature_name: string }
         Returns: {

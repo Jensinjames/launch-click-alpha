@@ -22,22 +22,22 @@ const Dashboard = () => {
   }, [user]);
   const fetchUserData = async () => {
     try {
-      const {
-        data: creditsData
-      } = await supabase.from("user_credits").select("*").single();
-      if (creditsData) {
-        setCredits({
-          used: creditsData.credits_used,
-          limit: creditsData.monthly_limit
-        });
+      // Single batched RPC call instead of multiple queries
+      const { data, error } = await supabase.rpc('get_dashboard_data');
+      
+      if (error) {
+        console.error("Error fetching dashboard data:", error);
+        return;
       }
-      const {
-        data: assetsData
-      } = await supabase.from("generated_content").select("*").order("created_at", {
-        ascending: false
-      }).limit(5);
-      if (assetsData) {
-        setRecentAssets(assetsData);
+      
+      if (data && typeof data === 'object') {
+        const result = data as any;
+        if (result.credits) {
+          setCredits(result.credits);
+        }
+        if (result.recentAssets) {
+          setRecentAssets(result.recentAssets);
+        }
       }
     } catch (error) {
       console.error("Error fetching user data:", error);

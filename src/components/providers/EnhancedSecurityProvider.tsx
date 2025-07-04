@@ -1,6 +1,7 @@
 // Enhanced Security Provider with Optimized Logging
-import { useEffect, ReactNode, useCallback } from 'react';
+import { useEffect, ReactNode, useCallback, useRef } from 'react';
 import { initializeSecurity } from '@/utils/securityHeaders';
+import { throttle } from '@/utils/throttle';
 // Session management now handled by unified security module
 import { supabase } from '@/integrations/supabase/client';
 import { logSecurityEvent, setupCSPViolationReporting, initializeSession, updateSessionActivity, detectSuspiciousActivity, stopSessionMonitoring } from '@/security';
@@ -55,8 +56,8 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
   
   // Set up throttled security event listeners (performance optimized)
   const setupSecurityListeners = useCallback(() => {
-    // Throttled session activity updates
-    const handleVisibilityChange = () => {
+    // Throttled session activity updates (500ms minimum)
+    const handleVisibilityChange = throttle(() => {
       if (!document.hidden) {
         supabase.auth.getSession().then(({ data: { session } }) => {
           if (session) {
@@ -64,16 +65,16 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
           }
         });
       }
-    };
+    }, 500);
     
-    // Passive, throttled user activity tracking
-    const handleUserActivity = () => {
+    // Heavily throttled user activity tracking (2 seconds minimum)
+    const handleUserActivity = throttle(() => {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) {
           updateSessionActivity(session.access_token);
         }
       });
-    };
+    }, 2000);
     
     // Listen for beforeunload to log session end
     const handleBeforeUnload = () => {

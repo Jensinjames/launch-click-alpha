@@ -37,12 +37,12 @@ export const useUserTeams = () => {
         throw new Error('Failed to fetch teams');
       }
 
-      return teamMembers.map(member => ({
-        id: member.teams.id,
-        name: member.teams.name,
+      return teamMembers?.map(member => ({
+        id: (member.teams as any)?.id,
+        name: (member.teams as any)?.name,
         role: member.role,
         created_at: member.created_at
-      }));
+      })) || [];
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
