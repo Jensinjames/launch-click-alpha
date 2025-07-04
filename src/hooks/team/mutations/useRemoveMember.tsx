@@ -8,24 +8,19 @@ export const useRemoveMember = () => {
 
   return useMutation({
     mutationFn: async (data: { teamId: string; memberId: string }) => {
-        const { data: result, error } = await supabase.functions.invoke('manage-team-member', {
-          body: {
-            action: 'remove_member',
-            team_id: data.teamId,
-            member_id: data.memberId
-          }
-        });
-
-        if (error) throw error;
-        return result;
-      }, {
-        priority: 'normal',
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['team-members', data.teamId] });
+      const { data: result, error } = await supabase.functions.invoke('manage-team-member', {
+        body: {
+          action: 'remove_member',
+          team_id: data.teamId,
+          member_id: data.memberId
         }
       });
+
+      if (error) throw error;
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (result, data) => {
+      queryClient.invalidateQueries({ queryKey: ['team-members', data.teamId] });
       toast.success('Member removed successfully');
     },
     onError: (error: any) => {
