@@ -2,8 +2,7 @@
 import { useEffect, useState, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { validateAdminAccessEnhanced } from '@/utils/enhancedAuthSecurity';
-import { logSecurityEvent } from '@/utils/securityLogger';
+import { validateAdminAccessEnhanced, logSecurityEvent } from '@/security';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';

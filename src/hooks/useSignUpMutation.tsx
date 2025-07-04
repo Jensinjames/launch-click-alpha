@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { checkServerRateLimit, recordAttempt, validateEmail, validatePassword, sanitizeInput, logSecurityEvent } from '@/utils/enhancedAuthSecurity';
+import { checkServerRateLimit, recordAttempt, validateEmail, validatePassword, sanitizeInput, logSecurityEvent } from '@/security';
 
 interface SignUpData {
   email: string;

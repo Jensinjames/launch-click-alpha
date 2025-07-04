@@ -902,6 +902,126 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_customers: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          deleted_at: string | null
+          id: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          deleted_at?: string | null
+          id?: never
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          deleted_at?: string | null
+          id?: never
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stripe_orders: {
+        Row: {
+          amount_subtotal: number
+          amount_total: number
+          checkout_session_id: string
+          created_at: string | null
+          currency: string
+          customer_id: string
+          deleted_at: string | null
+          id: number
+          payment_intent_id: string
+          payment_status: string
+          status: Database["public"]["Enums"]["stripe_order_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          amount_subtotal: number
+          amount_total: number
+          checkout_session_id: string
+          created_at?: string | null
+          currency: string
+          customer_id: string
+          deleted_at?: string | null
+          id?: never
+          payment_intent_id: string
+          payment_status: string
+          status?: Database["public"]["Enums"]["stripe_order_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          amount_subtotal?: number
+          amount_total?: number
+          checkout_session_id?: string
+          created_at?: string | null
+          currency?: string
+          customer_id?: string
+          deleted_at?: string | null
+          id?: never
+          payment_intent_id?: string
+          payment_status?: string
+          status?: Database["public"]["Enums"]["stripe_order_status"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      stripe_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string | null
+          current_period_end: number | null
+          current_period_start: number | null
+          customer_id: string
+          deleted_at: string | null
+          id: number
+          payment_method_brand: string | null
+          payment_method_last4: string | null
+          price_id: string | null
+          status: Database["public"]["Enums"]["stripe_subscription_status"]
+          subscription_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: number | null
+          current_period_start?: number | null
+          customer_id: string
+          deleted_at?: string | null
+          id?: never
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          price_id?: string | null
+          status: Database["public"]["Enums"]["stripe_subscription_status"]
+          subscription_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: number | null
+          current_period_start?: number | null
+          customer_id?: string
+          deleted_at?: string | null
+          id?: never
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          price_id?: string | null
+          status?: Database["public"]["Enums"]["stripe_subscription_status"]
+          subscription_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       team_activity_log: {
         Row: {
           action: string
@@ -1494,7 +1614,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      stripe_user_orders: {
+        Row: {
+          amount_subtotal: number | null
+          amount_total: number | null
+          checkout_session_id: string | null
+          currency: string | null
+          customer_id: string | null
+          order_date: string | null
+          order_id: number | null
+          order_status:
+            | Database["public"]["Enums"]["stripe_order_status"]
+            | null
+          payment_intent_id: string | null
+          payment_status: string | null
+        }
+        Relationships: []
+      }
+      stripe_user_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          current_period_end: number | null
+          current_period_start: number | null
+          customer_id: string | null
+          payment_method_brand: string | null
+          payment_method_last4: string | null
+          price_id: string | null
+          subscription_id: string | null
+          subscription_status:
+            | Database["public"]["Enums"]["stripe_subscription_status"]
+            | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_team_invitation: {
@@ -1720,6 +1872,17 @@ export type Database = {
         | "mailerlite"
       invitation_status: "pending" | "accepted" | "expired" | "cancelled"
       plan_type: "starter" | "pro" | "growth" | "elite"
+      stripe_order_status: "pending" | "completed" | "canceled"
+      stripe_subscription_status:
+        | "not_started"
+        | "incomplete"
+        | "incomplete_expired"
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "canceled"
+        | "unpaid"
+        | "paused"
       team_role: "owner" | "admin" | "editor" | "viewer"
       user_role: "user" | "admin" | "super_admin"
     }
@@ -1858,6 +2021,18 @@ export const Constants = {
       ],
       invitation_status: ["pending", "accepted", "expired", "cancelled"],
       plan_type: ["starter", "pro", "growth", "elite"],
+      stripe_order_status: ["pending", "completed", "canceled"],
+      stripe_subscription_status: [
+        "not_started",
+        "incomplete",
+        "incomplete_expired",
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "unpaid",
+        "paused",
+      ],
       team_role: ["owner", "admin", "editor", "viewer"],
       user_role: ["user", "admin", "super_admin"],
     },

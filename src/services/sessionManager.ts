@@ -1,6 +1,6 @@
 // Enhanced Session Management Service
 import { supabase } from '@/integrations/supabase/client';
-import { logSecurityEvent } from '@/utils/securityLogger';
+import { logSecurityEvent } from '@/security';
 
 export interface SessionInfo {
   id: string;

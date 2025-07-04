@@ -2,8 +2,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { isRateLimited, recordAttempt } from '@/utils/authSecurity';
-import { logSecurityEvent } from '@/utils/authLogging';
+import { isRateLimited, recordAttempt, logSecurityEvent } from '@/security';
 
 export const useResendConfirmationMutation = () => {
   return useMutation({

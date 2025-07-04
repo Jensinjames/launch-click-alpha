@@ -1,6 +1,6 @@
 // Optimized Session Management Service with Performance Improvements
 import { supabase } from '@/integrations/supabase/client';
-import { logSecurityEvent } from '@/utils/optimizedSecurityLogger';
+import { logSecurityEvent } from '@/security';
 
 export interface SessionInfo {
   id: string;

@@ -1,8 +1,19 @@
-
+// Unified Auth Security - Rate Limiting & Validation
 import { supabase } from '@/integrations/supabase/client';
+import { logSecurityEvent } from './logger';
+import type { RateLimitState } from './types';
 
-// Enhanced rate limiting with server-side validation
-export const checkServerRateLimit = async (identifier: string, maxAttempts = 5, timeWindowMinutes = 15): Promise<boolean> => {
+// Client-side rate limiting state
+const authAttempts = new Map<string, RateLimitState>();
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+
+// Enhanced server-side rate limiting with fallback
+export const checkServerRateLimit = async (
+  identifier: string, 
+  maxAttempts = 5, 
+  timeWindowMinutes = 15
+): Promise<boolean> => {
   try {
     const { data: isAllowed, error } = await supabase.rpc('check_rate_limit', {
       identifier,
@@ -12,23 +23,17 @@ export const checkServerRateLimit = async (identifier: string, maxAttempts = 5, 
 
     if (error) {
       console.warn('Server rate limit check failed:', error);
-      // Fall back to client-side rate limiting
-      return isRateLimited(identifier);
+      return isRateLimited(identifier); // Fallback to client-side
     }
 
     return isAllowed;
   } catch (error) {
     console.warn('Rate limit service unavailable:', error);
-    // Fall back to client-side rate limiting
-    return isRateLimited(identifier);
+    return isRateLimited(identifier); // Fallback to client-side
   }
 };
 
-// Enhanced client-side rate limiting (fallback)
-const authAttempts = new Map<string, { count: number; lastAttempt: number }>();
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
-
+// Client-side rate limiting (fallback)
 export const isRateLimited = (email: string): boolean => {
   const attempts = authAttempts.get(email);
   if (!attempts) return false;
@@ -42,7 +47,7 @@ export const isRateLimited = (email: string): boolean => {
   return attempts.count >= MAX_ATTEMPTS;
 };
 
-export const recordAttempt = (email: string, success: boolean) => {
+export const recordAttempt = (email: string, success: boolean): void => {
   const now = Date.now();
   const attempts = authAttempts.get(email) || { count: 0, lastAttempt: now };
   
@@ -55,7 +60,7 @@ export const recordAttempt = (email: string, success: boolean) => {
   }
 };
 
-// Enhanced input validation with XSS protection
+// Input validation with XSS protection
 export const sanitizeInput = (input: string): string => {
   return input
     .replace(/[<>'"]/g, '') // Remove potentially dangerous characters
@@ -94,7 +99,7 @@ export const validatePassword = (password: string): void => {
   }
 };
 
-// Admin session validation
+// Simple admin validation - no recursive calls
 export const validateAdminAccess = async (): Promise<boolean> => {
   try {
     const { data: isValid, error } = await supabase.rpc('validate_admin_session');
@@ -111,7 +116,7 @@ export const validateAdminAccess = async (): Promise<boolean> => {
   }
 };
 
-// Enhanced admin session validation with frequent checks
+// Enhanced admin validation with recent auth requirement
 export const validateAdminAccessEnhanced = async (requireRecentAuth = false): Promise<boolean> => {
   try {
     const { data: session } = await supabase.auth.getSession();
@@ -162,25 +167,5 @@ export const validateAdminAccessEnhanced = async (requireRecentAuth = false): Pr
       error: error instanceof Error ? error.message : 'Unknown error' 
     });
     return false;
-  }
-};
-
-// Improved security event logging with better error handling
-export const logSecurityEvent = async (eventType: string, eventData: any = {}) => {
-  try {
-    await supabase.rpc('log_security_event', {
-      event_type: eventType,
-      event_data: {
-        ...eventData,
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        url: window.location.href
-      }
-    });
-  } catch (error) {
-    // Only log in development to avoid console noise in production
-    if (import.meta.env.DEV) {
-      console.warn('Security event logging failed:', error);
-    }
   }
 };

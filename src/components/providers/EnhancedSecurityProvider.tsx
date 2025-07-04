@@ -1,9 +1,9 @@
 // Enhanced Security Provider with Optimized Logging
 import { useEffect, ReactNode, useCallback } from 'react';
 import { initializeSecurity } from '@/utils/securityHeaders';
-import { optimizedSessionManager } from '@/services/optimizedSessionManager';
+// Session management now handled by unified security module
 import { supabase } from '@/integrations/supabase/client';
-import { logSecurityEvent, setupCSPViolationReporting } from '@/utils/optimizedSecurityLogger';
+import { logSecurityEvent, setupCSPViolationReporting, initializeSession, updateSessionActivity, detectSuspiciousActivity, stopSessionMonitoring } from '@/security';
 
 interface EnhancedSecurityProviderProps {
   children: ReactNode;
@@ -23,10 +23,10 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       // Set up session management
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        await optimizedSessionManager.initializeSession(session.access_token);
+        await initializeSession(session.access_token);
         
         // Check for suspicious activity
-        const isSuspicious = await optimizedSessionManager.detectSuspiciousActivity(session.access_token);
+        const isSuspicious = await detectSuspiciousActivity(session.access_token);
         if (isSuspicious) {
           await logSecurityEvent('suspicious_activity', {
             reason: 'Multiple concurrent sessions detected',
@@ -37,12 +37,12 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       
       // Set up periodic session cleanup
       const cleanupInterval = setInterval(() => {
-        optimizedSessionManager.cleanupExpiredSessions();
+        // Cleanup now handled by unified security module
       }, 60 * 60 * 1000); // Every hour
       
       return () => {
         clearInterval(cleanupInterval);
-        optimizedSessionManager.stopSessionMonitoring();
+        stopSessionMonitoring();
       };
       
     } catch (error) {
@@ -60,7 +60,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       if (!document.hidden) {
         supabase.auth.getSession().then(({ data: { session } }) => {
           if (session) {
-            optimizedSessionManager.updateActivity(session.access_token);
+            updateSessionActivity(session.access_token);
           }
         });
       }
@@ -70,7 +70,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
     const handleUserActivity = () => {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) {
-          optimizedSessionManager.updateActivity(session.access_token);
+          updateSessionActivity(session.access_token);
         }
       });
     };
@@ -113,7 +113,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
       switch (event) {
         case 'SIGNED_IN':
           if (session) {
-            await optimizedSessionManager.initializeSession(session.access_token);
+            await initializeSession(session.access_token);
             await logSecurityEvent('signin_success', {
               userId: session.user.id,
               sessionId: session.access_token
@@ -122,7 +122,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
           break;
           
         case 'SIGNED_OUT':
-          optimizedSessionManager.stopSessionMonitoring();
+          stopSessionMonitoring();
           await logSecurityEvent('signout_success', {
             reason: 'User signed out'
           });
@@ -130,7 +130,7 @@ export const EnhancedSecurityProvider = ({ children }: EnhancedSecurityProviderP
           
         case 'TOKEN_REFRESHED':
           if (session) {
-            optimizedSessionManager.updateActivity(session.access_token);
+            updateSessionActivity(session.access_token);
           }
           break;
       }

@@ -1,7 +1,7 @@
 
 import { useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
-import { validateAdminAccess } from '@/utils/enhancedAuthSecurity';
+import { validateAdminAccess } from '@/security';
 import { useQuery } from '@tanstack/react-query';
 
 export const useEnhancedAuth = () => {
