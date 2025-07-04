@@ -33,6 +33,14 @@ const ROUTE_FEATURES = {
   '/billing': ['billing'],
 } as const;
 
+// Public routes that don't require authentication
+const PUBLIC_ROUTES = [
+  '/', 
+  '/login', 
+  '/signup', 
+  '/pricing'
+];
+
 // Core features - always loaded
 const CORE_FEATURES = [
   'dashboard',
@@ -64,6 +72,11 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     lastRefresh?: number;
   }>({});
   
+  // Check if current route is public (doesn't need authentication)
+  const isPublicRoute = useMemo(() => {
+    return PUBLIC_ROUTES.includes(route || '/');
+  }, [route]);
+
   // Optimize features based on current route
   const optimizedFeatures = useMemo(() => {
     if (preloadFeatures) return preloadFeatures;
@@ -128,7 +141,8 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   }
 
   // Show skeleton while auth is loading or initial feature check
-  if (authLoading || (shouldStartFeatureChecks && isLoading && Object.keys(accessMap).length === 0)) {
+  // BUT only for protected routes - public routes should render immediately
+  if (!isPublicRoute && (authLoading || (shouldStartFeatureChecks && isLoading && Object.keys(accessMap).length === 0))) {
     return (
       <div className="min-h-screen bg-background">
         <PageContentSkeleton sections={4} />
