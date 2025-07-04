@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { TeamNotification } from '../types/teamWorkflow';
+import { TeamNotification } from '@/features/teams/types';
 
 export interface NotificationPreferences {
   email: boolean;

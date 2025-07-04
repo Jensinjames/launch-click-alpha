@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TeamMetrics } from '@/shared/components/ui';
-import { useTeamAnalytics } from '@/shared/hooks';
+import { TeamMetrics } from '@/features/teams/components/TeamMetrics';
+import { useTeamAnalytics } from '@/features/teams/hooks/useTeamAnalytics';
 import { useUserTeams } from '@/hooks/useUserTeams';
 
 export const TeamAnalyticsSection: React.FC = () => {

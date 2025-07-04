@@ -1,11 +1,10 @@
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { TeamService } from '../services/teamService';
-import { TeamAnalytics, TeamNotification, TeamSettings } from '../types/teamWorkflow';
+import { TeamAnalytics, TeamNotification, TeamSettings } from '../types';
 
-// Cache key factories
-export const teamCacheKeys = {
-  all: ['teams'] as const,
+// Centralized cache key factory
+const teamCacheKeys = {
   analytics: (teamId: string, period: string) => ['teams', teamId, 'analytics', period] as const,
   notifications: (teamId: string, unreadOnly: boolean) => ['teams', teamId, 'notifications', unreadOnly] as const,
   settings: (teamId: string) => ['teams', teamId, 'settings'] as const,
@@ -29,31 +28,27 @@ export const useTeamAnalyticsCache = (teamId: string, period: '7d' | '30d' | '90
     refetchInterval: 10 * 60 * 1000, // 10 minutes
   });
 
-  const invalidateAnalytics = useCallback(() => {
-    queryClient.invalidateQueries({ 
-      queryKey: ['teams', teamId, 'analytics'] 
-    });
-  }, [queryClient, teamId]);
-
-  const prefetchOtherPeriods = useCallback(() => {
-    const otherPeriods = (['7d', '30d', '90d'] as const).filter(p => p !== period);
-    otherPeriods.forEach(p => {
-      queryClient.prefetchQuery({
-        queryKey: teamCacheKeys.analytics(teamId, p),
-        queryFn: async () => {
-          const { data, error } = await TeamService.getTeamAnalytics(teamId, p);
-          if (error) throw error;
-          return data;
-        },
-        staleTime: 5 * 60 * 1000,
-      });
+  // Prefetch related periods
+  const prefetchRelatedPeriods = useCallback(() => {
+    const periods = ['7d', '30d', '90d'] as const;
+    periods.forEach(p => {
+      if (p !== period) {
+        queryClient.prefetchQuery({
+          queryKey: teamCacheKeys.analytics(teamId, p),
+          queryFn: async () => {
+            const { data, error } = await TeamService.getTeamAnalytics(teamId, p);
+            if (error) throw error;
+            return data;
+          },
+          staleTime: 5 * 60 * 1000,
+        });
+      }
     });
   }, [queryClient, teamId, period]);
 
   return {
     ...query,
-    invalidateAnalytics,
-    prefetchOtherPeriods,
+    prefetchRelatedPeriods,
   };
 };
 
@@ -66,52 +61,42 @@ export const useTeamNotificationsCache = (teamId: string, unreadOnly = false) =>
     queryFn: async (): Promise<TeamNotification[]> => {
       const { data, error } = await TeamService.getTeamNotifications(teamId, unreadOnly);
       if (error) throw error;
-      return data || [];
+      return data;
     },
     enabled: !!teamId,
-    refetchInterval: 30 * 1000, // 30 seconds for real-time feel
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: string) => TeamService.markNotificationAsRead(notificationId),
     onMutate: async (notificationId) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: teamCacheKeys.notifications(teamId, false) });
-      await queryClient.cancelQueries({ queryKey: teamCacheKeys.notifications(teamId, true) });
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: teamCacheKeys.notifications(teamId, unreadOnly) });
 
-      // Snapshot previous values
-      const previousAll = queryClient.getQueryData<TeamNotification[]>(
-        teamCacheKeys.notifications(teamId, false)
-      );
-      const previousUnread = queryClient.getQueryData<TeamNotification[]>(
-        teamCacheKeys.notifications(teamId, true)
+      // Snapshot the previous value
+      const previousNotifications = queryClient.getQueryData<TeamNotification[]>(
+        teamCacheKeys.notifications(teamId, unreadOnly)
       );
 
       // Optimistically update to the new value
       queryClient.setQueryData<TeamNotification[]>(
-        teamCacheKeys.notifications(teamId, false),
-        (old) => old?.map(n => 
-          n.id === notificationId 
-            ? { ...n, read_at: new Date().toISOString() }
-            : n
+        teamCacheKeys.notifications(teamId, unreadOnly),
+        old => old?.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, read_at: new Date().toISOString() }
+            : notification
         ) || []
       );
 
-      queryClient.setQueryData<TeamNotification[]>(
-        teamCacheKeys.notifications(teamId, true),
-        (old) => old?.filter(n => n.id !== notificationId) || []
-      );
-
-      return { previousAll, previousUnread };
+      // Return a context object with the snapshotted value
+      return { previousNotifications };
     },
     onError: (err, notificationId, context) => {
-      // Rollback on error
-      if (context?.previousAll) {
-        queryClient.setQueryData(teamCacheKeys.notifications(teamId, false), context.previousAll);
-      }
-      if (context?.previousUnread) {
-        queryClient.setQueryData(teamCacheKeys.notifications(teamId, true), context.previousUnread);
-      }
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData(
+        teamCacheKeys.notifications(teamId, unreadOnly),
+        context?.previousNotifications
+      );
     },
     onSettled: () => {
       // Always refetch after error or success
@@ -120,22 +105,14 @@ export const useTeamNotificationsCache = (teamId: string, unreadOnly = false) =>
     },
   });
 
-  const unreadCount = useMemo(() => {
-    const allNotifications = queryClient.getQueryData<TeamNotification[]>(
-      teamCacheKeys.notifications(teamId, false)
-    );
-    return allNotifications?.filter(n => !n.read_at).length || 0;
-  }, [queryClient, teamId]);
-
   return {
     ...query,
-    unreadCount,
     markAsRead: markAsReadMutation.mutate,
-    isMarkingAsRead: markAsReadMutation.isPending
+    isMarkingAsRead: markAsReadMutation.isPending,
   };
 };
 
-// Hook for team settings with optimistic updates
+// Hook for team settings with auto-save capabilities
 export const useTeamSettingsCache = (teamId: string) => {
   const queryClient = useQueryClient();
   
@@ -155,14 +132,14 @@ export const useTeamSettingsCache = (teamId: string) => {
       TeamService.updateTeamSettings(teamId, settings),
     onMutate: async (newSettings) => {
       await queryClient.cancelQueries({ queryKey: teamCacheKeys.settings(teamId) });
-      
+
       const previousSettings = queryClient.getQueryData<TeamSettings>(
         teamCacheKeys.settings(teamId)
       );
 
       queryClient.setQueryData<TeamSettings>(
         teamCacheKeys.settings(teamId),
-        (old) => old ? {
+        old => old ? {
           ...old,
           settings: { ...old.settings, ...newSettings },
           updated_at: new Date().toISOString()
@@ -172,9 +149,10 @@ export const useTeamSettingsCache = (teamId: string) => {
       return { previousSettings };
     },
     onError: (err, newSettings, context) => {
-      if (context?.previousSettings) {
-        queryClient.setQueryData(teamCacheKeys.settings(teamId), context.previousSettings);
-      }
+      queryClient.setQueryData(
+        teamCacheKeys.settings(teamId),
+        context?.previousSettings
+      );
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: teamCacheKeys.settings(teamId) });
@@ -184,7 +162,7 @@ export const useTeamSettingsCache = (teamId: string) => {
   return {
     ...query,
     updateSettings: updateSettingsMutation.mutate,
-    isUpdatingSettings: updateSettingsMutation.isPending,
+    isUpdating: updateSettingsMutation.isPending,
   };
 };
 
@@ -196,13 +174,9 @@ export const useTeamCacheUtils = () => {
     queryClient.invalidateQueries({ queryKey: ['teams', teamId] });
   }, [queryClient]);
 
-  const clearTeamCache = useCallback((teamId: string) => {
-    queryClient.removeQueries({ queryKey: ['teams', teamId] });
-  }, [queryClient]);
-
-  const prefetchTeamData = useCallback(async (teamId: string) => {
-    // Prefetch commonly accessed data
-    const promises = [
+  const prefetchTeamDashboard = useCallback(async (teamId: string) => {
+    // Prefetch commonly accessed data for team dashboard
+    const prefetchPromises = [
       queryClient.prefetchQuery({
         queryKey: teamCacheKeys.analytics(teamId, '30d'),
         queryFn: async () => {
@@ -210,16 +184,14 @@ export const useTeamCacheUtils = () => {
           if (error) throw error;
           return data;
         },
-        staleTime: 5 * 60 * 1000,
       }),
       queryClient.prefetchQuery({
         queryKey: teamCacheKeys.notifications(teamId, true),
         queryFn: async () => {
           const { data, error } = await TeamService.getTeamNotifications(teamId, true);
           if (error) throw error;
-          return data || [];
+          return data;
         },
-        staleTime: 1 * 60 * 1000,
       }),
       queryClient.prefetchQuery({
         queryKey: teamCacheKeys.settings(teamId),
@@ -228,25 +200,27 @@ export const useTeamCacheUtils = () => {
           if (error) throw error;
           return data;
         },
-        staleTime: 10 * 60 * 1000,
-      })
+      }),
     ];
 
-    await Promise.allSettled(promises);
+    await Promise.all(prefetchPromises);
   }, [queryClient]);
 
-  const getCachedTeamData = useCallback((teamId: string) => {
-    return {
-      analytics: queryClient.getQueryData(teamCacheKeys.analytics(teamId, '30d')),
-      notifications: queryClient.getQueryData(teamCacheKeys.notifications(teamId, false)),
-      settings: queryClient.getQueryData(teamCacheKeys.settings(teamId)),
-    };
+  const getCachedTeamAnalytics = useCallback((teamId: string, period: string) => {
+    return queryClient.getQueryData<TeamAnalytics>(
+      teamCacheKeys.analytics(teamId, period)
+    );
+  }, [queryClient]);
+
+  const setCachedTeamAnalytics = useCallback((teamId: string, period: string, data: TeamAnalytics) => {
+    queryClient.setQueryData(teamCacheKeys.analytics(teamId, period), data);
   }, [queryClient]);
 
   return {
     invalidateAllTeamData,
-    clearTeamCache,
-    prefetchTeamData,
-    getCachedTeamData,
+    prefetchTeamDashboard,
+    getCachedTeamAnalytics,
+    setCachedTeamAnalytics,
+    cacheKeys: teamCacheKeys,
   };
 };

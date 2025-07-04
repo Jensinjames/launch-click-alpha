@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TeamService } from '../services/teamService';
-import { TeamNotification } from '../types/teamWorkflow';
+import { TeamNotification } from '../types';
 
 export const useTeamNotifications = (teamId: string, unreadOnly = false) => {
   const queryClient = useQueryClient();
@@ -10,27 +10,24 @@ export const useTeamNotifications = (teamId: string, unreadOnly = false) => {
     queryFn: async (): Promise<TeamNotification[]> => {
       const { data, error } = await TeamService.getTeamNotifications(teamId, unreadOnly);
       if (error) throw error;
-      return data || [];
+      return data;
     },
     enabled: !!teamId,
-    refetchInterval: 30 * 1000, // 30 seconds for real-time feel
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: string) => TeamService.markNotificationAsRead(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team-notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['team-notifications', teamId] });
     },
   });
 
-  const unreadCount = notifications.filter(n => !n.read_at).length;
-
   return {
     notifications,
-    unreadCount,
     isLoading,
     error,
     markAsRead: markAsReadMutation.mutate,
-    isMarkingAsRead: markAsReadMutation.isPending
+    isMarkingAsRead: markAsReadMutation.isPending,
   };
 };

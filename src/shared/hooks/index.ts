@@ -1,4 +1,2 @@
-export { useTeamAnalytics } from './useTeamAnalytics';
-export { useTeamNotifications } from './useTeamNotifications';
-export { useTeamAnalyticsCache, useTeamNotificationsCache, useTeamSettingsCache, useTeamCacheUtils } from './useTeamCache';
-export { useTeamWebSocket } from './useTeamWebSocket';
+// Team hooks moved to src/features/teams/hooks/
+// Import from @/features/teams if you need them
