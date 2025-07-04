@@ -35,7 +35,7 @@ export const BulkActions = ({ members, teamId, currentUserRole }: BulkActionsPro
   }
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+    <div className="space-y-4 p-4 border-semantic rounded-lg bg-surface-elevated">
       <BulkActionHeader
         selectedCount={selectedMembers.length}
         totalCount={selectableMembers.length}

@@ -661,4 +661,51 @@
     @apply hover:bg-surface-elevated;
     color: hsl(var(--text-primary));
   }
+
+  /* Additional Semantic Colors for Status Badges */
+  .status-badge-active {
+    @apply bg-success-light text-success border-success/20;
+  }
+
+  .status-badge-pending {
+    @apply bg-warning-light text-warning border-warning/20;
+  }
+
+  .status-badge-inactive {
+    @apply bg-muted text-muted-foreground border-border;
+  }
+
+  /* Role Badge Colors */
+  .role-badge-owner {
+    @apply bg-primary/10 text-primary border-primary/20;
+  }
+
+  .role-badge-admin {
+    @apply bg-info/10 text-info border-info/20;
+  }
+
+  .role-badge-editor {
+    @apply bg-success/10 text-success border-success/20;
+  }
+
+  .role-badge-viewer {
+    @apply bg-muted text-muted-foreground border-border;
+  }
+
+  /* Surface semantic classes for consistency */
+  .surface-hover {
+    @apply hover:bg-surface-elevated transition-colors;
+  }
+
+  .border-semantic {
+    @apply border-border;
+  }
+
+  .text-icon {
+    color: hsl(var(--text-tertiary));
+  }
+
+  .text-icon-hover {
+    color: hsl(var(--text-secondary));
+  }
 }

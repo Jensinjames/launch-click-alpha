@@ -8,11 +8,11 @@ import { useTeamMembersWithCredits } from "@/hooks/useTeamMembersWithCredits";
 import { useTeamSelection } from "@/hooks/team/useTeamSelection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CreateTeamDialog } from "@/components/teams/CreateTeamDialog";
-import { TeamsHeader } from "@/components/teams/TeamsHeader";
-import { TeamSelector } from "@/components/teams/TeamSelector";
-import { TeamStats } from "@/components/teams/TeamStats";
-import { TeamsTabs } from "@/components/teams/TeamsTabs";
+import { CreateTeamDialog } from "@/features/teams/components/CreateTeamDialog";
+import { TeamsHeader } from "@/features/teams/components/TeamsHeader";
+import { TeamSelector } from "@/features/teams/components/TeamSelector";
+import { TeamStats } from "@/features/teams/components/TeamStats";
+import { TeamsTabs } from "@/features/teams/components/TeamsTabs";
 import { TeamPermissions } from "@/utils/teamPermissions";
 
 const Teams = () => {

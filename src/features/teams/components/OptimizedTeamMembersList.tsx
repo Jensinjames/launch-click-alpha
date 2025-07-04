@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Crown } from "lucide-react";
 import { TeamMemberWithCredits } from "@/types/team";
-import { MemberManagementDialog } from "@/components/teams/MemberManagementDialog";
+import { MemberManagementDialog } from "./MemberManagementDialog";
 import { MemberListSkeleton } from "@/components/skeletons/MemberListSkeleton";
 
 interface OptimizedTeamMembersListProps {
@@ -32,14 +32,14 @@ const MemberRow = React.memo(({
 
   const getStatusBadgeColor = useCallback((status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active': return 'status-badge-active';
+      case 'pending': return 'status-badge-pending';
+      default: return 'status-badge-inactive';
     }
   }, []);
 
   return (
-    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+    <div className="flex items-center justify-between p-4 border-semantic rounded-lg surface-hover transition-colors">
       <div className="flex items-center space-x-4">
         <Avatar>
           <AvatarImage src={member.avatar_url} alt={member.name} />
@@ -50,12 +50,12 @@ const MemberRow = React.memo(({
         
         <div>
           <div className="flex items-center space-x-2">
-            <h3 className="font-medium text-gray-900">{member.name}</h3>
+            <h3 className="font-medium text-primary">{member.name}</h3>
             {member.role === "owner" && (
-              <Crown className="h-4 w-4 text-yellow-500" />
+              <Crown className="h-4 w-4 text-warning" />
             )}
           </div>
-          <p className="text-sm text-gray-600">{member.email}</p>
+          <p className="text-sm text-secondary">{member.email}</p>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -80,7 +80,7 @@ const MemberRow = React.memo(({
           <p className="text-sm font-medium">
             {member.credits.credits_used} / {member.credits.monthly_limit}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-tertiary">
             {member.credits.credits_remaining} remaining
           </p>
           <Progress 
@@ -120,7 +120,7 @@ export const OptimizedTeamMembersList = React.memo(({
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-gray-500">No team members found.</p>
+            <p className="text-tertiary">No team members found.</p>
           </div>
         </CardContent>
       </Card>

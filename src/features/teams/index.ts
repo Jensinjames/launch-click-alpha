@@ -1,8 +1,8 @@
 
 // Teams feature barrel exports
 export { default as TeamsPage } from '@/pages/Teams';
-export { TeamMembersList } from '@/components/teams/TeamMembersList';
-export { TeamAnalytics } from '@/components/teams/TeamAnalytics';
+export { OptimizedTeamMembersList as TeamMembersList } from './components/OptimizedTeamMembersList';
+export { TeamAnalytics } from './components/TeamAnalytics';
 export { useTeamMembersWithCredits } from '@/hooks/useTeamMembersWithCredits';
 export { useTeamMutations } from '@/hooks/useTeamMutations';
 

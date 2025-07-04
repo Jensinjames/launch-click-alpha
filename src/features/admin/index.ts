@@ -5,9 +5,9 @@ export { default as AdminPage } from '@/pages/Admin';
 export { useAdminMutations, type UserRole } from './hooks/useAdminMutations';
 
 // Admin components
-export { AdminSecurityWrapper } from '@/components/admin/AdminSecurityWrapper';
-export { EmergencyAdminWrapper } from '@/components/admin/EmergencyAdminWrapper';
-export { OptimizedCreditsManagement } from '@/components/admin/OptimizedCreditsManagement';
-export { AuditLogs } from '@/components/admin/AuditLogs';
-export { TeamsManagement } from '@/components/admin/TeamsManagement';
-export { CreditsManagement } from '@/components/admin/CreditsManagement';
+export { AdminSecurityWrapper } from './components/AdminSecurityWrapper';
+// EmergencyAdminWrapper merged into AdminSecurityWrapper
+export { OptimizedCreditsManagement } from './components/OptimizedCreditsManagement';
+export { AuditLogs } from './components/AuditLogs';
+export { TeamsManagement } from './components/TeamsManagement';
+export { CreditsManagement } from './components/CreditsManagement';

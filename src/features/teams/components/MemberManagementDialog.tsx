@@ -106,7 +106,7 @@ export const MemberManagementDialog = ({
             <div className="space-y-2">
               <Label htmlFor="credits">Monthly Credit Limit</Label>
               <div className="flex items-center space-x-2">
-                <CreditCard className="h-4 w-4 text-gray-500" />
+                <CreditCard className="h-4 w-4 text-icon" />
                 <Input
                   id="credits"
                   type="number"

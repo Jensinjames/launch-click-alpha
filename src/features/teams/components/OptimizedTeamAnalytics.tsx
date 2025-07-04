@@ -31,9 +31,9 @@ const MetricCard = React.memo(({
       <div className="flex items-center space-x-3">
         <Icon className={`h-8 w-8 ${color}`} />
         <div>
-          <p className="text-sm text-gray-600">{title}</p>
+          <p className="text-sm text-secondary">{title}</p>
           <p className="text-2xl font-bold">{value}</p>
-          {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-tertiary">{subtitle}</p>}
         </div>
       </div>
     </CardContent>
@@ -105,26 +105,26 @@ export const OptimizedTeamAnalytics = React.memo(({
           icon={TrendingUp}
           title="Avg Utilization"
           value={`${analytics.avgUtilization.toFixed(1)}%`}
-          color="text-blue-600"
+          color="text-info"
         />
         <MetricCard
           icon={Users}
           title="Active Members"
           value={analytics.statistics.active_members}
-          color="text-green-600"
+          color="text-success"
         />
         <MetricCard
           icon={CreditCard}
           title="Credits Pool"
           value={analytics.statistics.total_credits_available}
-          color="text-purple-600"
+          color="text-primary"
         />
         <MetricCard
           icon={Calendar}
           title="This Month"
           value={analytics.statistics.total_credits_used}
           subtitle="credits used"
-          color="text-orange-600"
+          color="text-warning"
         />
       </div>
 
@@ -188,12 +188,12 @@ export const OptimizedTeamAnalytics = React.memo(({
             {analytics.topUsers.map((member, index) => (
               <div key={member.id} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
                     #{index + 1}
                   </div>
                   <div>
                     <p className="font-medium">{member.name}</p>
-                    <p className="text-sm text-gray-600">{member.role}</p>
+                    <p className="text-sm text-secondary">{member.role}</p>
                   </div>
                 </div>
                 <div className="text-right">

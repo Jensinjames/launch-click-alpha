@@ -1,21 +1,21 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TeamsManagement } from "@/components/admin/TeamsManagement";
-import { CreditsManagement } from "@/components/admin/CreditsManagement";
-import { AuditLogs } from "@/components/admin/AuditLogs";
-import { EmergencyAdminWrapper } from "@/components/admin/EmergencyAdminWrapper";
+import { TeamsManagement } from "@/features/admin/components/TeamsManagement";
+import { CreditsManagement } from "@/features/admin/components/CreditsManagement";
+import { AuditLogs } from "@/features/admin/components/AuditLogs";
+import { AdminSecurityWrapper } from "@/features/admin/components/AdminSecurityWrapper";
 import { Shield, Users, CreditCard, Activity } from "lucide-react";
 
 const Admin = () => {
   return (
-    <EmergencyAdminWrapper>
+    <AdminSecurityWrapper emergencyMode={true}>
       <div className="container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center space-x-3">
-          <Shield className="h-8 w-8 text-purple-600" />
+          <Shield className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <p className="text-gray-600">Manage system resources and monitor activities</p>
+            <p className="text-secondary">Manage system resources and monitor activities</p>
           </div>
         </div>
 
@@ -48,7 +48,7 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </EmergencyAdminWrapper>
+    </AdminSecurityWrapper>
   );
 };
 

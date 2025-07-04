@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Users } from "lucide-react";
 import { CreateTeamDialog } from "./CreateTeamDialog";
-import { InviteMembersDialog } from "@/features/teams/components/InviteMembersDialog";
+import { InviteMembersDialog } from "./InviteMembersDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useTeamSelection } from "@/hooks/team/useTeamSelection";
 

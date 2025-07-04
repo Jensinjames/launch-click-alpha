@@ -1,6 +1,7 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { validateAdminAccessEnhanced, logSecurityEvent } from '@/security';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ interface AdminSecurityWrapperProps {
   requireFreshSession?: boolean;
   maxSessionAge?: number;
   sensitiveOperation?: string;
+  emergencyMode?: boolean; // Simple mode using useAdminAccess hook
 }
 
 export const AdminSecurityWrapper = ({ 
@@ -22,12 +24,89 @@ export const AdminSecurityWrapper = ({
   requireRecentAuth = false,
   requireFreshSession = false,
   maxSessionAge = 30,
-  sensitiveOperation 
+  sensitiveOperation,
+  emergencyMode = false
 }: AdminSecurityWrapperProps) => {
   const { user } = useAuth();
+  const { data: adminData, isLoading: emergencyLoading, error: emergencyError } = useAdminAccess();
   const [isValidating, setIsValidating] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Emergency mode - use simple useAdminAccess hook
+  if (emergencyMode) {
+    if (emergencyLoading) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <Card className="max-w-md w-full">
+            <CardContent className="pt-8 pb-8 text-center">
+              <RefreshCw className="mx-auto h-8 w-8 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Checking admin access...</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    if (emergencyError) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <Card className="max-w-md w-full border-destructive/20 bg-destructive/5">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+              </div>
+              <CardTitle className="text-xl font-bold text-destructive">
+                Access Check Failed
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-destructive/80">
+                Unable to verify admin access. Please try again.
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => window.location.reload()}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    if (!adminData?.isAdmin) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <Card className="max-w-md w-full border-destructive/20 bg-destructive/5">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+                <Shield className="h-6 w-6 text-destructive" />
+              </div>
+              <CardTitle className="text-xl font-bold text-destructive">
+                Admin Access Required
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-destructive/80">
+                You need administrator privileges to access this area.
+              </p>
+              <Link to="/dashboard">
+                <Button variant="outline" className="w-full">
+                  Back to Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    return <>{children}</>;
+  }
 
   useEffect(() => {
     let mounted = true;

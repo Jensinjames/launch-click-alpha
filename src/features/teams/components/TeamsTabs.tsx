@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, BarChart3, Settings2 } from "lucide-react";
 import { TeamAdminData } from "@/hooks/useTeamMembersWithCredits";
-import { TeamMembersList } from "./TeamMembersList";
+import { OptimizedTeamMembersList } from "./OptimizedTeamMembersList";
 import { TeamAnalytics } from "./TeamAnalytics";
 import { BulkActions } from "./BulkActions";
-import { InviteMembersDialog } from "@/features/teams/components/InviteMembersDialog";
+import { InviteMembersDialog } from "./InviteMembersDialog";
 
 interface TeamsTabsProps {
   teamData: TeamAdminData;
@@ -40,7 +40,7 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
           <h3 className="text-lg font-semibold">Team Members</h3>
           <InviteMembersDialog teamId={selectedTeamId} currentUserRole={currentUserRole} />
         </div>
-        <TeamMembersList 
+        <OptimizedTeamMembersList 
           members={members}
           teamId={selectedTeamId}
           currentUserRole={currentUserRole}
