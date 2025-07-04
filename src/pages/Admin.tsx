@@ -1,11 +1,14 @@
 
+import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TeamsManagement } from "@/features/admin/components/TeamsManagement";
-import { CreditsManagement } from "@/features/admin/components/CreditsManagement";
-import { AuditLogs } from "@/features/admin/components/AuditLogs";
+import { Shield, Users, CreditCard, Activity } from "@/lib/icons";
 import { AdminSecurityWrapper } from "@/features/admin/components/AdminSecurityWrapper";
-import { Shield, Users, CreditCard, Activity } from "lucide-react";
+import { 
+  LazyTeamsManagement, 
+  LazyCreditsManagement, 
+  LazyAuditLogs,
+  AdminLoadingFallback 
+} from "@/components/admin/AdminComponents";
 
 const Admin = () => {
   return (
@@ -36,15 +39,21 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="teams">
-            <TeamsManagement />
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <LazyTeamsManagement />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="credits">
-            <CreditsManagement />
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <LazyCreditsManagement />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="audit">
-            <AuditLogs />
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <LazyAuditLogs />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>

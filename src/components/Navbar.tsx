@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Menu, X } from "lucide-react";
+import { Menu, X } from "@/lib/icons";
 import rocketLogo from "@/assets/rocket_svg.svg";
 
 const Navbar = () => {

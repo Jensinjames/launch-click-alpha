@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { Moon, Sun, Monitor } from "lucide-react"
+import { Moon, Sun, Monitor } from "@/lib/icons"
 
 import { Button } from "@/components/ui/button"
 import {

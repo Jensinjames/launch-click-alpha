@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Zap, Users, Clock } from "lucide-react";
+import { FileText, Zap, Users, Clock } from "@/lib/icons";
 
 interface DashboardStatsProps {
   credits: {

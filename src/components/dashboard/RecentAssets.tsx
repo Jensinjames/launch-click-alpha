@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Star, Clock, Plus, ArrowRight } from "lucide-react";
+import { FileText, Star, Clock, Plus, ArrowRight } from "@/lib/icons";
 
 interface RecentAssetsProps {
   assets: any[];

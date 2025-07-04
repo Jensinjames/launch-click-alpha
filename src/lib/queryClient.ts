@@ -5,8 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes - optimized for better caching
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 15 * 60 * 1000, // 15 minutes for better caching
+      gcTime: 30 * 60 * 1000, // 30 minutes
       retry: (failureCount, error: any) => {
         // Handle session expired errors
         if (error?.message?.includes('Invalid Refresh Token') || 
@@ -30,6 +30,9 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: 'always',
       refetchOnMount: false, // Prevent unnecessary refetches
       networkMode: 'online',
+      // Add background refetching for better UX
+      refetchInterval: 5 * 60 * 1000, // 5 minutes background refresh
+      refetchIntervalInBackground: false,
     },
     mutations: {
       retry: (failureCount, error: any) => {
