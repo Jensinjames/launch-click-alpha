@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Query team members with their profiles and credits
+    // Query team members with their profiles and credits - using explicit foreign key relationship
     const { data: teamMembers, error: membersError } = await supabaseClient
       .from('team_members')
       .select(`
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
         status,
         created_at,
         joined_at,
-        profiles!inner (
+        profiles!fk_team_members_user (
           id,
           email,
           full_name,

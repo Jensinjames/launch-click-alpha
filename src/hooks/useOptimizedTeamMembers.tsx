@@ -24,7 +24,7 @@ const testConnectivity = async (): Promise<boolean> => {
 const getFallbackTeamData = async (teamId: string): Promise<TeamAdminData> => {
   console.log('Using fallback method to fetch team data...');
   
-  // Get team members with their profiles and credits
+  // Get team members with their profiles and credits - using explicit foreign key relationship
   const { data: teamMembers, error: membersError } = await supabase
     .from('team_members')
     .select(`
@@ -33,7 +33,7 @@ const getFallbackTeamData = async (teamId: string): Promise<TeamAdminData> => {
       status,
       joined_at,
       user_id,
-      profiles!inner (
+      profiles!fk_team_members_user (
         id,
         full_name,
         email,
