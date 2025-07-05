@@ -28,16 +28,49 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
         if (error) {
           console.error('Edge function error details:', error);
           
-          // Provide more specific error messages based on the error type
-          if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
-            throw new Error('You do not have permission to view this team\'s data');
+          // Extract more specific error information from the response
+          let errorMessage = 'Unknown error occurred';
+          
+          // Check if error has a message property
+          if (error.message) {
+            errorMessage = error.message;
           }
           
-          if (error.message?.includes('not found')) {
-            throw new Error('Team not found or you do not have access to it');
+          // Check if error has context or details
+          if (error.context) {
+            console.error('Error context:', error.context);
           }
           
-          throw new Error(`Failed to fetch team data: ${error.message || 'Unknown error'}`);
+          // Handle different HTTP status codes if available
+          if (error.status) {
+            switch (error.status) {
+              case 401:
+                throw new Error('Authentication required. Please log in again.');
+              case 403:
+                throw new Error('You do not have permission to view this team\'s data. You must be a team owner or admin.');
+              case 404:
+                throw new Error('Team not found or you do not have access to it.');
+              case 500:
+                throw new Error('Server error occurred. Please try again later.');
+              default:
+                throw new Error(`Server returned error (${error.status}): ${errorMessage}`);
+            }
+          }
+          
+          // Provide more specific error messages based on the error message content
+          if (errorMessage.toLowerCase().includes('permission') || errorMessage.toLowerCase().includes('unauthorized')) {
+            throw new Error('You do not have permission to view this team\'s data. You must be a team owner or admin.');
+          }
+          
+          if (errorMessage.toLowerCase().includes('not found')) {
+            throw new Error('Team not found or you do not have access to it.');
+          }
+          
+          if (errorMessage.toLowerCase().includes('forbidden')) {
+            throw new Error('Access denied. You must be a team owner or admin to view this data.');
+          }
+          
+          throw new Error(`Failed to fetch team data: ${errorMessage}`);
         }
 
         if (!data) {
@@ -48,9 +81,29 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
       } catch (functionError: any) {
         console.error('Function invocation error:', functionError);
         
-        // Handle different types of function errors
+        // If it's already a custom error message, re-throw it
+        if (functionError.message && !functionError.message.includes('FunctionsError')) {
+          throw functionError;
+        }
+        
+        // Handle different types of Supabase function errors
         if (functionError.message?.includes('FunctionsHttpError')) {
-          throw new Error('Server error occurred while fetching team data. Please try again later.');
+          // Try to extract status code from the error
+          const statusMatch = functionError.message.match(/status (\d+)/);
+          const status = statusMatch ? parseInt(statusMatch[1]) : null;
+          
+          switch (status) {
+            case 401:
+              throw new Error('Authentication required. Please log in again.');
+            case 403:
+              throw new Error('You do not have permission to view this team\'s data. You must be a team owner or admin.');
+            case 404:
+              throw new Error('Team not found or you do not have access to it.');
+            case 500:
+              throw new Error('Server error occurred. Please try again later.');
+            default:
+              throw new Error(`Server error occurred (${status || 'unknown'}). Please try again later.`);
+          }
         }
         
         if (functionError.message?.includes('FunctionsRelayError')) {
@@ -61,12 +114,8 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
           throw new Error('Unable to connect to the server. Please try again later.');
         }
         
-        // Re-throw the original error if it's already a custom error message
-        if (functionError.message && !functionError.message.includes('Error')) {
-          throw functionError;
-        }
-        
-        throw new Error('An unexpected error occurred while fetching team data');
+        // Generic fallback error
+        throw new Error('An unexpected error occurred while fetching team data. Please try again.');
       }
     },
     enabled: !!teamId,
@@ -77,7 +126,9 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
       // Don't retry on permission or authentication errors
       if (error?.message?.includes('permission') || 
           error?.message?.includes('unauthorized') || 
-          error?.message?.includes('not found')) {
+          error?.message?.includes('not found') ||
+          error?.message?.includes('Access denied') ||
+          error?.message?.includes('Authentication required')) {
         return false;
       }
       
