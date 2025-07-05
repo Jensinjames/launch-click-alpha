@@ -307,10 +307,10 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
 
   } catch (error) {
     console.error('Error in generate-content function:', error);
+    console.error('Error in generate-content function:', error.stack);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An unexpected error occurred',
-        details: error.stack
+        error: 'An unexpected error occurred. Please try again later.'
       }),
       { 
         status: 500,
