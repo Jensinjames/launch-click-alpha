@@ -132,6 +132,33 @@ export type Database = {
           },
         ]
       }
+      content_pipeline_requirements: {
+        Row: {
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string | null
+          id: string
+          pipeline_config: Json
+          required_images: Json
+          updated_at: string | null
+        }
+        Insert: {
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          id?: string
+          pipeline_config?: Json
+          required_images?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          id?: string
+          pipeline_config?: Json
+          required_images?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       content_templates: {
         Row: {
           asset_references: Json | null
@@ -323,6 +350,75 @@ export type Database = {
           },
         ]
       }
+      image_assets: {
+        Row: {
+          content_id: string | null
+          created_at: string | null
+          file_size: number | null
+          generation_params: Json | null
+          height: number | null
+          id: string
+          image_type: string
+          image_url: string
+          pipeline_type: Database["public"]["Enums"]["content_type"] | null
+          prompt: string | null
+          reference_images: Json | null
+          storage_path: string | null
+          updated_at: string | null
+          user_id: string
+          width: number | null
+        }
+        Insert: {
+          content_id?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          generation_params?: Json | null
+          height?: number | null
+          id?: string
+          image_type: string
+          image_url: string
+          pipeline_type?: Database["public"]["Enums"]["content_type"] | null
+          prompt?: string | null
+          reference_images?: Json | null
+          storage_path?: string | null
+          updated_at?: string | null
+          user_id: string
+          width?: number | null
+        }
+        Update: {
+          content_id?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          generation_params?: Json | null
+          height?: number | null
+          id?: string
+          image_type?: string
+          image_url?: string
+          pipeline_type?: Database["public"]["Enums"]["content_type"] | null
+          prompt?: string | null
+          reference_images?: Json | null
+          storage_path?: string | null
+          updated_at?: string | null
+          user_id?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_assets_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "generated_content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "image_assets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_tokens: {
         Row: {
           created_at: string
@@ -423,6 +519,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      reference_images: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_size: number | null
+          filename: string
+          id: string
+          mime_type: string | null
+          original_filename: string | null
+          storage_path: string
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_size?: number | null
+          filename: string
+          id?: string
+          mime_type?: string | null
+          original_filename?: string | null
+          storage_path: string
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_size?: number | null
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          original_filename?: string | null
+          storage_path?: string
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reference_images_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stripe_customers: {
         Row: {
