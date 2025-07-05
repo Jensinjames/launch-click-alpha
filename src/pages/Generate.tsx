@@ -12,6 +12,7 @@ import Layout from "@/components/layout/Layout";
 import { TemplateSelector } from "@/components/templates/TemplateSelector";
 import { TemplateBuilder } from "@/components/templates/TemplateBuilder";
 import { ImageGenerationPanel } from "@/components/image-generation/ImageGenerationPanel";
+import { MarketingImageGenerator } from "@/components/image-generation/MarketingImageGenerator";
 import { useContentGeneration } from "@/hooks/useUserContent";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { useQueryClient } from "@tanstack/react-query";
@@ -345,11 +346,13 @@ const Generate = () => {
               </Card>
 
               {/* Image Generation Section */}
-              <div className="mt-6">
+              <div className="mt-6 space-y-6">
                 <ImageGenerationPanel 
                   contentType={contentTypeMapping[selectedType]}
                   contentPrompt={prompt}
                 />
+                
+                <MarketingImageGenerator />
               </div>
 
               {/* Generated Content Display */}
