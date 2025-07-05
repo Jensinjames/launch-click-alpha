@@ -51,6 +51,7 @@ serve(async (req) => {
     const gradioUrl = "https://jensin-ai-marketing-content-creator.hf.space/api/predict";
     
     console.log('Calling Gradio API:', gradioUrl);
+    console.log('Request payload:', { data: [prompt, num_steps, style], fn_index: 0 });
     
     const gradioResponse = await fetch(gradioUrl, {
       method: 'POST',
@@ -58,7 +59,8 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
-        data: [prompt, num_steps, style]
+        data: [prompt, num_steps, style],
+        fn_index: 0
       })
     });
 
