@@ -6,44 +6,53 @@ import Layout from "@/components/layout/Layout";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import AssetGeneratorGrid from "@/components/dashboard/AssetGeneratorGrid";
 import RecentAssets from "@/components/dashboard/RecentAssets";
+
 const Dashboard = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const [credits, setCredits] = useState({
     used: 0,
     limit: 50
   });
   const [recentAssets, setRecentAssets] = useState([]);
+
   useEffect(() => {
     if (user) {
       fetchUserData();
     }
   }, [user]);
+
   const fetchUserData = async () => {
     try {
-      // Single batched RPC call instead of multiple queries
-      const { data, error } = await supabase.rpc('get_dashboard_data');
-      
-      if (error) {
-        console.error("Error fetching dashboard data:", error);
-        return;
+      const { data: creditsData } = await supabase
+        .from("user_credits")
+        .select("*")
+        .eq('user_id', user.id)
+        .single();
+
+      if (creditsData) {
+        setCredits({
+          used: creditsData.credits_used,
+          limit: creditsData.monthly_limit
+        });
       }
-      
-      if (data && typeof data === 'object') {
-        const result = data as any;
-        if (result.credits) {
-          setCredits(result.credits);
-        }
-        if (result.recentAssets) {
-          setRecentAssets(result.recentAssets);
-        }
+
+      const { data: assetsData } = await supabase
+        .from("generated_content")
+        .select("*")
+        .eq('user_id', user.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (assetsData) {
+        setRecentAssets(assetsData);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
-  return <AuthGuard requireAuth={true}>
+
+  return (
+    <AuthGuard requireAuth={true}>
       <Layout>
         <div className="space-y-8">
           <div className="mb-12">
@@ -62,6 +71,8 @@ const Dashboard = () => {
           <RecentAssets assets={recentAssets} />
         </div>
       </Layout>
-    </AuthGuard>;
+    </AuthGuard>
+  );
 };
+
 export default Dashboard;
