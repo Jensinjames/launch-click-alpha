@@ -47,31 +47,65 @@ serve(async (req) => {
       throw new Error('Invalid authentication');
     }
 
-    // Call Gradio API with correct endpoint and format
-    const gradioUrl = "https://jensin-ai-marketing-content-creator.hf.space/api/predict";
+    // Get HF_TOKEN for authentication
+    const hfToken = Deno.env.get('HF_TOKEN');
+    if (!hfToken) {
+      throw new Error('HF_TOKEN is not configured');
+    }
+
+    // Step 1: Call Gradio API to initiate generation and get event ID
+    const gradioUrl = "https://jensin-ai-marketing-content-creator.hf.space/gradio_api/call/single_image_generation";
     
     console.log('Calling Gradio API:', gradioUrl);
-    console.log('Request payload:', { data: [prompt, num_steps, style], fn_index: 0 });
+    console.log('Request payload:', { data: [prompt, num_steps, style] });
     
-    const gradioResponse = await fetch(gradioUrl, {
+    const initResponse = await fetch(gradioUrl, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${hfToken}`
       },
       body: JSON.stringify({ 
-        data: [prompt, num_steps, style],
-        fn_index: 0
+        data: [prompt, num_steps, style]
       })
     });
 
-    if (!gradioResponse.ok) {
-      const error = await gradioResponse.text();
-      console.error('Gradio API error:', error);
-      throw new Error(`Failed to generate image: ${error}`);
+    if (!initResponse.ok) {
+      const error = await initResponse.text();
+      console.error('Gradio API init error:', error);
+      throw new Error(`Failed to initiate image generation: ${error}`);
     }
 
-    const gradioResult = await gradioResponse.json();
-    console.log('Gradio API response:', gradioResult);
+    const initResult = await initResponse.text();
+    console.log('Gradio API init response:', initResult);
+    
+    // Extract event ID from response
+    const eventId = initResult.split('"')[3]; // Based on the cURL pattern provided
+    if (!eventId) {
+      throw new Error('Failed to get event ID from Gradio API');
+    }
+    
+    console.log('Got event ID:', eventId);
+
+    // Step 2: Poll for the result using the event ID
+    const resultUrl = `https://jensin-ai-marketing-content-creator.hf.space/gradio_api/call/single_image_generation/${eventId}`;
+    console.log('Polling for result:', resultUrl);
+    
+    const resultResponse = await fetch(resultUrl, {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${hfToken}`
+      }
+    });
+
+    if (!resultResponse.ok) {
+      const error = await resultResponse.text();
+      console.error('Gradio API result error:', error);
+      throw new Error(`Failed to get generation result: ${error}`);
+    }
+
+    const gradioResult = await resultResponse.json();
+    console.log('Gradio API final response:', gradioResult);
     
     // Extract image and status from Gradio response
     if (!gradioResult.data || !Array.isArray(gradioResult.data)) {
