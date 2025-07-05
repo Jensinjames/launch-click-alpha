@@ -17,11 +17,6 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@/admin": path.resolve(__dirname, "./src/features/admin"),
-      "@/teams": path.resolve(__dirname, "./src/features/teams"),
-      "@/auth": path.resolve(__dirname, "./src/features/auth"),
-      "@/analytics": path.resolve(__dirname, "./src/features/analytics"),
-      "@/settings": path.resolve(__dirname, "./src/features/settings"),
     },
   },
 }));
