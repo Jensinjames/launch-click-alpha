@@ -3,6 +3,93 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TeamAdminData, TeamMemberWithCredits } from '@/types/team';
 
+// Helper function to test network connectivity
+const testConnectivity = async (): Promise<boolean> => {
+  try {
+    // Test basic connectivity to Supabase
+    const response = await fetch(`${supabase.supabaseUrl}/rest/v1/`, {
+      method: 'HEAD',
+      headers: {
+        'apikey': supabase.supabaseKey,
+      },
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Connectivity test failed:', error);
+    return false;
+  }
+};
+
+// Fallback function to get team data using direct database queries
+const getFallbackTeamData = async (teamId: string): Promise<TeamAdminData> => {
+  console.log('Using fallback method to fetch team data...');
+  
+  // Get team members with their profiles and credits
+  const { data: teamMembers, error: membersError } = await supabase
+    .from('team_members')
+    .select(`
+      id,
+      role,
+      status,
+      joined_at,
+      user_id,
+      profiles!inner (
+        id,
+        full_name,
+        email,
+        avatar_url
+      ),
+      user_credits!inner (
+        monthly_limit,
+        credits_used,
+        reset_at
+      )
+    `)
+    .eq('team_id', teamId)
+    .eq('status', 'active');
+
+  if (membersError) {
+    throw new Error(`Failed to fetch team members: ${membersError.message}`);
+  }
+
+  if (!teamMembers || teamMembers.length === 0) {
+    throw new Error('No team members found or you do not have access to this team');
+  }
+
+  // Transform the data to match expected format
+  const members: TeamMemberWithCredits[] = teamMembers.map(member => ({
+    id: member.user_id,
+    name: member.profiles.full_name || member.profiles.email,
+    email: member.profiles.email,
+    role: member.role,
+    status: member.status,
+    avatar_url: member.profiles.avatar_url,
+    joined_at: member.joined_at,
+    credits: {
+      monthly_limit: member.user_credits.monthly_limit,
+      credits_used: member.user_credits.credits_used,
+      reset_at: member.user_credits.reset_at,
+    },
+  }));
+
+  // Get team info
+  const { data: teamInfo, error: teamError } = await supabase
+    .from('teams')
+    .select('id, name, owner_id')
+    .eq('id', teamId)
+    .single();
+
+  if (teamError) {
+    throw new Error(`Failed to fetch team info: ${teamError.message}`);
+  }
+
+  return {
+    team: teamInfo,
+    members,
+    total_members: members.length,
+  };
+};
+
 export const useOptimizedTeamMembers = (teamId: string | null) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['optimized-team-members', teamId],
@@ -17,7 +104,16 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
         throw new Error('User must be authenticated');
       }
 
+      // First, test basic connectivity
+      const isConnected = await testConnectivity();
+      if (!isConnected) {
+        console.warn('Network connectivity issues detected, using fallback method');
+        return getFallbackTeamData(teamId);
+      }
+
       try {
+        console.log('Attempting to call Edge Function...');
+        
         const { data, error } = await supabase.functions.invoke('get-team-credits-admins', {
           body: { team_id: teamId },
           headers: {
@@ -28,15 +124,21 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
         if (error) {
           console.error('Edge function error details:', error);
           
+          // Check if this is a network/connectivity error
+          if (error.message?.includes('Failed to fetch') || 
+              error.message?.includes('NetworkError') ||
+              error.message?.includes('fetch')) {
+            console.warn('Network error detected, falling back to direct database queries');
+            return getFallbackTeamData(teamId);
+          }
+          
           // Extract more specific error information from the response
           let errorMessage = 'Unknown error occurred';
           
-          // Check if error has a message property
           if (error.message) {
             errorMessage = error.message;
           }
           
-          // Check if error has context or details
           if (error.context) {
             console.error('Error context:', error.context);
           }
@@ -77,9 +179,20 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
           throw new Error('No data returned from server');
         }
 
+        console.log('Edge function call successful');
         return data as TeamAdminData;
+        
       } catch (functionError: any) {
         console.error('Function invocation error:', functionError);
+        
+        // Check if this is a network connectivity error and use fallback
+        if (functionError.message?.includes('Failed to fetch') ||
+            functionError.message?.includes('NetworkError') ||
+            functionError.message?.includes('fetch') ||
+            functionError.name === 'TypeError') {
+          console.warn('Network error during Edge Function call, using fallback method');
+          return getFallbackTeamData(teamId);
+        }
         
         // If it's already a custom error message, re-throw it
         if (functionError.message && !functionError.message.includes('FunctionsError')) {
@@ -107,15 +220,23 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
         }
         
         if (functionError.message?.includes('FunctionsRelayError')) {
-          throw new Error('Network error occurred. Please check your connection and try again.');
+          console.warn('Network relay error, using fallback method');
+          return getFallbackTeamData(teamId);
         }
         
         if (functionError.message?.includes('FunctionsFetchError')) {
-          throw new Error('Unable to connect to the server. Please try again later.');
+          console.warn('Function fetch error, using fallback method');
+          return getFallbackTeamData(teamId);
         }
         
-        // Generic fallback error
-        throw new Error('An unexpected error occurred while fetching team data. Please try again.');
+        // Generic fallback error - try the fallback method one more time
+        console.warn('Unexpected error, attempting fallback method');
+        try {
+          return getFallbackTeamData(teamId);
+        } catch (fallbackError) {
+          console.error('Fallback method also failed:', fallbackError);
+          throw new Error('Unable to fetch team data. Please check your connection and try again.');
+        }
       }
     },
     enabled: !!teamId,
