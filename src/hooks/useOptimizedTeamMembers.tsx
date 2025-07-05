@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,28 +17,74 @@ export const useOptimizedTeamMembers = (teamId: string | null) => {
         throw new Error('User must be authenticated');
       }
 
-      const { data, error } = await supabase.functions.invoke('get-team-credits-admins', {
-        body: { team_id: teamId },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      try {
+        const { data, error } = await supabase.functions.invoke('get-team-credits-admins', {
+          body: { team_id: teamId },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (error) {
-        console.error('Error fetching team admin data:', error);
-        throw new Error(error.message || 'Failed to fetch team data');
+        if (error) {
+          console.error('Edge function error details:', error);
+          
+          // Provide more specific error messages based on the error type
+          if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+            throw new Error('You do not have permission to view this team\'s data');
+          }
+          
+          if (error.message?.includes('not found')) {
+            throw new Error('Team not found or you do not have access to it');
+          }
+          
+          throw new Error(`Failed to fetch team data: ${error.message || 'Unknown error'}`);
+        }
+
+        if (!data) {
+          throw new Error('No data returned from server');
+        }
+
+        return data as TeamAdminData;
+      } catch (functionError: any) {
+        console.error('Function invocation error:', functionError);
+        
+        // Handle different types of function errors
+        if (functionError.message?.includes('FunctionsHttpError')) {
+          throw new Error('Server error occurred while fetching team data. Please try again later.');
+        }
+        
+        if (functionError.message?.includes('FunctionsRelayError')) {
+          throw new Error('Network error occurred. Please check your connection and try again.');
+        }
+        
+        if (functionError.message?.includes('FunctionsFetchError')) {
+          throw new Error('Unable to connect to the server. Please try again later.');
+        }
+        
+        // Re-throw the original error if it's already a custom error message
+        if (functionError.message && !functionError.message.includes('Error')) {
+          throw functionError;
+        }
+        
+        throw new Error('An unexpected error occurred while fetching team data');
       }
-
-      if (!data) {
-        throw new Error('No data returned from server');
-      }
-
-      return data as TeamAdminData;
     },
     enabled: !!teamId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry on permission or authentication errors
+      if (error?.message?.includes('permission') || 
+          error?.message?.includes('unauthorized') || 
+          error?.message?.includes('not found')) {
+        return false;
+      }
+      
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Memoized computed values to prevent unnecessary recalculations
