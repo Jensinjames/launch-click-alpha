@@ -14,10 +14,16 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Initialize Supabase clients
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    
+    // Client for user authentication (uses anon key)
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+    
+    // Client for database operations (uses service role key)
+    const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
@@ -25,12 +31,13 @@ serve(async (req) => {
       throw new Error('No authorization header');
     }
 
-    // Get user from the JWT token
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
+    // Get user from the JWT token using anon client
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(
       authHeader.replace('Bearer ', '')
     );
 
     if (userError || !user) {
+      console.error('Auth error:', userError);
       throw new Error('Invalid or expired token');
     }
 
@@ -47,8 +54,8 @@ serve(async (req) => {
 
     console.log(`Generating content for user ${user.id}:`, { type, title, tone, audience, output_format });
 
-    // Check user credits
-    const { data: creditsData, error: creditsError } = await supabase
+    // Check user credits using service client
+    const { data: creditsData, error: creditsError } = await supabaseService
       .from('user_credits')
       .select('credits_used, monthly_limit')
       .eq('user_id', user.id)
@@ -59,8 +66,8 @@ serve(async (req) => {
       throw new Error('Failed to fetch user credits');
     }
 
-    // Calculate credits needed based on content type and output format
-    let creditsCost = {
+    // Calculate credits needed based on content type (text generation only)
+    const creditsCost = {
       'email_sequence': 15,
       'social_post': 5,
       'landing_page': 10,
@@ -69,11 +76,6 @@ serve(async (req) => {
       'funnel': 20,
       'strategy_brief': 12
     }[type] || 10;
-
-    // Adjust for output format
-    if (output_format === 'image') {
-      creditsCost = creditsCost * 3; // Images cost more
-    }
 
     if (creditsData.credits_used + creditsCost > creditsData.monthly_limit) {
       return new Response(
@@ -94,50 +96,8 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Handle different output formats
+    // Generate text content only (images handled separately by generate-image function)
     let generatedContent;
-    let assets = [];
-
-    if (output_format === 'image' || (template_data && template_data.output_type === 'image')) {
-      // Generate image content
-      const imagePrompt = template_data ? 
-        buildPromptFromTemplate(template_data, { prompt, tone, audience, ...settings }) : 
-        prompt;
-      
-      const imageResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-image`, {
-        method: 'POST',
-        headers: {
-          'Authorization': req.headers.get('Authorization') || '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: imagePrompt,
-          style: settings.style || 'natural',
-          size: settings.size || '1024x1024',
-          quality: settings.quality || 'standard'
-        }),
-      });
-
-      if (!imageResponse.ok) {
-        const errorText = await imageResponse.text();
-        console.error('Image generation error:', errorText);
-        throw new Error('Failed to generate image');
-      }
-
-      const imageData = await imageResponse.json();
-      generatedContent = {
-        type: 'image',
-        url: imageData.image_url,
-        filename: imageData.filename,
-        prompt: imageData.prompt,
-        revised_prompt: imageData.revised_prompt
-      };
-      assets.push({
-        url: imageData.image_url,
-        type: 'image',
-        name: imageData.filename
-      });
-    } else {
       // Generate text content
       const systemPrompts = {
         'email_sequence': 'You are an expert email marketing copywriter. Create engaging, conversion-focused email content that builds relationships and drives action.',
@@ -204,17 +164,16 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
       const aiResponse = await response.json();
       const generatedText = aiResponse.choices[0].message.content;
       
-      generatedContent = {
-        type: 'text',
-        text: generatedText,
-        metadata: {
-          model: settings.model || 'gpt-4o-mini',
-          tokens_used: aiResponse.usage?.total_tokens || 0,
-          generation_time: new Date().toISOString(),
-          wordCount: generatedText.split(' ').length
-        }
-      };
-    }
+    generatedContent = {
+      type: 'text',
+      text: generatedText,
+      metadata: {
+        model: settings.model || 'gpt-4o-mini',
+        tokens_used: aiResponse.usage?.total_tokens || 0,
+        generation_time: new Date().toISOString(),
+        wordCount: generatedText.split(' ').length
+      }
+    };
 
     // Save content to database
     console.log(`Attempting to save content for user ${user.id}, type: ${type}`);
@@ -226,9 +185,7 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
       content: generatedContent,
       prompt: template_data ? JSON.stringify(template_data) : prompt,
       metadata: {
-        output_format: output_format,
         template_used: !!template_data,
-        assets: assets,
         settings: settings,
         tone: tone || 'professional',
         audience: audience || 'general',
@@ -238,7 +195,7 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
     
     console.log('Insert data structure:', JSON.stringify(insertData, null, 2));
     
-    const { data: contentResult, error: contentError } = await supabase
+    const { data: contentResult, error: contentError } = await supabaseService
       .from('generated_content')
       .insert(insertData)
       .select()
@@ -258,8 +215,8 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
     
     console.log(`Content saved successfully with ID: ${contentResult.id}`);
 
-    // Deduct credits
-    const { error: creditsUpdateError } = await supabase
+    // Deduct credits using service client
+    const { error: creditsUpdateError } = await supabaseService
       .from('user_credits')
       .update({ 
         credits_used: creditsData.credits_used + creditsCost,
@@ -272,8 +229,8 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
       console.error('CRITICAL: Content saved but credits not deducted for user:', user.id);
     }
 
-    // Log user activity
-    await supabase
+    // Log user activity using service client
+    await supabaseService
       .from('user_activity_log')
       .insert({
         user_id: user.id,
@@ -282,7 +239,6 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
         resource_id: contentResult.id,
         metadata: {
           content_type: type,
-          output_format: output_format,
           credits_used: creditsCost,
           prompt_length: prompt?.length || 0,
           template_used: !!template_data
@@ -295,10 +251,8 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
       JSON.stringify({
         success: true,
         content: contentResult,
-        assets: assets,
         creditsUsed: creditsCost,
-        creditsRemaining: creditsData.monthly_limit - (creditsData.credits_used + creditsCost),
-        output_format: output_format
+        creditsRemaining: creditsData.monthly_limit - (creditsData.credits_used + creditsCost)
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

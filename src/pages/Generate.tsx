@@ -40,6 +40,7 @@ const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ContentTemplate | null>(null);
   const [generatedContent, setGeneratedContent] = useState<any>(null);
+  const [generatedImages, setGeneratedImages] = useState<any[]>([]);
   
   const { generateContent } = useContentGeneration();
   const { plan, hasCreditsRemaining } = useUserPlan();
@@ -108,6 +109,7 @@ const Generate = () => {
 
     setIsGenerating(true);
     setGeneratedContent(null);
+    // Keep existing images - they're generated separately
 
     try {
       const result = await generateContent({
@@ -351,41 +353,81 @@ const Generate = () => {
               </div>
 
               {/* Generated Content Display */}
-              {generatedContent && (
+              {(generatedContent || generatedImages.length > 0) && (
                 <Card className="mt-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Sparkles className="h-5 w-5 text-purple-600" />
-                      Generated Content
+                      Generated Content & Assets
                     </CardTitle>
                     <CardDescription>
-                      Your AI-generated content is ready! You can copy it or make edits.
+                      Your AI-generated content and images are ready! You can copy, download, or make edits.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="p-4 bg-muted rounded-lg">
-                      <h3 className="font-medium mb-2 text-foreground">{generatedContent.title}</h3>
-                      <div className="whitespace-pre-wrap text-muted-foreground">
-                        {generatedContent.content?.text || 'No content generated'}
+                  <CardContent className="space-y-6">
+                    {/* Text Content */}
+                    {generatedContent && (
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-foreground">Text Content</h4>
+                        <div className="p-4 bg-muted rounded-lg">
+                          <h3 className="font-medium mb-2 text-foreground">{generatedContent.title}</h3>
+                          <div className="whitespace-pre-wrap text-muted-foreground">
+                            {generatedContent.content?.text || 'No content generated'}
+                          </div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigator.clipboard.writeText(generatedContent.content?.text || '')}
+                        >
+                          Copy Text to Clipboard
+                        </Button>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => navigator.clipboard.writeText(generatedContent.content?.text || '')}
-                      >
-                        Copy to Clipboard
-                      </Button>
+                    )}
+
+                    {/* Generated Images */}
+                    {generatedImages.length > 0 && (
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-foreground">Generated Images</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {generatedImages.map((image, index) => (
+                            <div key={index} className="border rounded-lg overflow-hidden">
+                              <img
+                                src={image.imageUrl}
+                                alt={image.name}
+                                className="w-full h-48 object-cover"
+                              />
+                              <div className="p-3">
+                                <h5 className="font-medium text-sm">{image.name}</h5>
+                                <p className="text-xs text-muted-foreground mt-1 truncate">
+                                  {image.prompt}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="mt-2"
+                                  onClick={() => window.open(image.imageUrl, '_blank')}
+                                >
+                                  Download Image
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2 pt-4 border-t">
                       <Button 
                         variant="outline"
                         onClick={() => {
                           setGeneratedContent(null);
+                          setGeneratedImages([]);
                           setPrompt('');
                           setTitle('');
                           setSelectedTemplate(null);
                         }}
                       >
-                        Generate New
+                        Generate New Content
                       </Button>
                     </div>
                   </CardContent>
