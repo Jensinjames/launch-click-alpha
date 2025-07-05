@@ -148,11 +148,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in execute-composite-template:', error);
+    console.error('Error in execute-composite-template:', error.stack || error);
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An unexpected error occurred',
-        details: error.stack 
+        details: 'Please contact support if the issue persists.' 
       }),
       { 
         status: 500,
