@@ -11,6 +11,7 @@ import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
 import { TemplateSelector } from "@/components/templates/TemplateSelector";
 import { TemplateBuilder } from "@/components/templates/TemplateBuilder";
+import { ImageGenerationPanel } from "@/components/image-generation/ImageGenerationPanel";
 import { useContentGeneration } from "@/hooks/useUserContent";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { useQueryClient } from "@tanstack/react-query";
@@ -340,6 +341,14 @@ const Generate = () => {
                   </form>
                 </CardContent>
               </Card>
+
+              {/* Image Generation Section */}
+              <div className="mt-6">
+                <ImageGenerationPanel 
+                  contentType={contentTypeMapping[selectedType]}
+                  contentPrompt={prompt}
+                />
+              </div>
 
               {/* Generated Content Display */}
               {generatedContent && (
