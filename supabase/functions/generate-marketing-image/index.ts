@@ -47,70 +47,74 @@ serve(async (req) => {
       throw new Error('Invalid authentication');
     }
 
-    // Call HuggingFace MCP API
-    const hfUrl = "https://jensin-ai-marketing-content-creator.hf.space/gradio_api/mcp/http/AI_Marketing_Content_Creator_single_image_generation";
+    // Call Gradio API with correct endpoint and format
+    const gradioUrl = "https://jensin-ai-marketing-content-creator.hf.space/api/predict";
     
-    console.log('Calling HuggingFace MCP API:', hfUrl);
+    console.log('Calling Gradio API:', gradioUrl);
     
-    const hfResponse = await fetch(hfUrl, {
+    const gradioResponse = await fetch(gradioUrl, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/event-stream'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
-        prompt: prompt, 
-        num_steps: num_steps,
-        style: style 
+        data: [prompt, num_steps, style]
       })
     });
 
-    if (!hfResponse.ok) {
-      const error = await hfResponse.text();
-      console.error('HuggingFace API error:', error);
+    if (!gradioResponse.ok) {
+      const error = await gradioResponse.text();
+      console.error('Gradio API error:', error);
       throw new Error(`Failed to generate image: ${error}`);
     }
 
-    const resultText = await hfResponse.text();
-    console.log('HuggingFace API response:', resultText);
+    const gradioResult = await gradioResponse.json();
+    console.log('Gradio API response:', gradioResult);
     
-    // Parse JSON-RPC response
-    let parsedResponse;
-    try {
-      parsedResponse = JSON.parse(resultText);
-    } catch (parseError) {
-      console.error('Failed to parse JSON response:', parseError);
-      throw new Error(`Invalid JSON response: ${resultText}`);
+    // Extract image and status from Gradio response
+    if (!gradioResult.data || !Array.isArray(gradioResult.data)) {
+      throw new Error('Invalid response format from Gradio API');
     }
     
-    // Handle JSON-RPC error responses
-    if (parsedResponse.error) {
-      console.error('JSON-RPC error:', parsedResponse.error);
-      throw new Error(`API error: ${parsedResponse.error.message || 'Unknown error'}`);
+    const imageData = gradioResult.data[0]; // Generated image
+    const status = gradioResult.data[1]; // Status message
+    
+    console.log('Status:', status);
+    console.log('Image data type:', typeof imageData);
+    
+    let imageBuffer;
+    let contentType = 'image/png';
+    
+    // Handle different image data formats
+    if (typeof imageData === 'string') {
+      if (imageData.startsWith('data:image/')) {
+        // Base64 encoded image
+        const base64Data = imageData.split(',')[1];
+        imageBuffer = new Uint8Array(atob(base64Data).split('').map(c => c.charCodeAt(0)));
+        contentType = imageData.match(/data:([^;]+)/)?.[1] || 'image/png';
+      } else if (imageData.startsWith('http')) {
+        // URL to image
+        const imageRes = await fetch(imageData);
+        if (!imageRes.ok) {
+          throw new Error(`Failed to fetch image from URL: ${imageRes.statusText}`);
+        }
+        imageBuffer = new Uint8Array(await imageRes.arrayBuffer());
+        contentType = imageRes.headers.get('Content-Type') || 'image/png';
+      } else {
+        // Assume it's a file path - try to fetch from Gradio
+        const fileUrl = `https://jensin-ai-marketing-content-creator.hf.space/file=${imageData}`;
+        console.log('Fetching image from Gradio file system:', fileUrl);
+        
+        const fileRes = await fetch(fileUrl);
+        if (!fileRes.ok) {
+          throw new Error(`Failed to fetch generated image: ${fileRes.statusText}`);
+        }
+        imageBuffer = new Uint8Array(await fileRes.arrayBuffer());
+        contentType = fileRes.headers.get('Content-Type') || 'image/png';
+      }
+    } else {
+      throw new Error('Unexpected image data format');
     }
-    
-    // Extract image path from JSON-RPC result
-    const imagePath = parsedResponse.result || parsedResponse;
-    
-    // Clean up the image path (remove extra quotes and whitespace)
-    const cleanImagePath = typeof imagePath === 'string' 
-      ? imagePath.replace(/^["']|["']$/g, '').trim()
-      : imagePath;
-    
-    console.log('Extracted image path:', cleanImagePath);
-    
-    // Fetch the actual image file from Gradio
-    const fileUrl = `https://jensin-ai-marketing-content-creator.hf.space/gradio_api/file=${cleanImagePath}`;
-    console.log('Fetching image from:', fileUrl);
-    
-    const fileRes = await fetch(fileUrl);
-    
-    if (!fileRes.ok) {
-      throw new Error(`Failed to fetch generated image: ${fileRes.statusText}`);
-    }
-
-    const imageBuffer = await fileRes.arrayBuffer();
-    const contentType = fileRes.headers.get('Content-Type') || 'image/png';
     
     // Generate unique filename for marketing images
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -121,7 +125,7 @@ serve(async (req) => {
     
     const { data: uploadData, error: uploadError } = await supabaseService.storage
       .from('generated-images')
-      .upload(filename, new Blob([new Uint8Array(imageBuffer)], { type: contentType }), {
+      .upload(filename, new Blob([imageBuffer], { type: contentType }), {
         contentType: contentType,
         cacheControl: '3600'
       });
