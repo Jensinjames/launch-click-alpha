@@ -54,10 +54,16 @@ serve(async (req) => {
     const imageData = await imageResponse.json();
     const base64Image = imageData.data[0].b64_json;
     
-    // Initialize Supabase client
+    // Initialize Supabase clients
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Client for user authentication (uses anon key)
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+    
+    // Client for storage operations (uses service role key)
+    const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get user from JWT
     const authHeader = req.headers.get('Authorization');
@@ -65,7 +71,7 @@ serve(async (req) => {
       throw new Error('Authorization header missing');
     }
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(
       authHeader.replace('Bearer ', '')
     );
 
@@ -84,7 +90,7 @@ serve(async (req) => {
     // Upload to Supabase Storage
     console.log('Uploading image to storage:', filename);
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabaseService.storage
       .from('generated-images')
       .upload(filename, imageBlob, {
         contentType: 'image/png',
@@ -97,7 +103,7 @@ serve(async (req) => {
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseService.storage
       .from('generated-images')
       .getPublicUrl(filename);
 
