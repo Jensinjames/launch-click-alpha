@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,15 +26,23 @@ const Teams = () => {
     hasTeams
   } = useTeamSelection();
 
+  // Get current user's role in the selected team
+  const currentUserRole = React.useMemo(() => {
+    if (!selectedTeamId || !userTeams) return 'viewer';
+    const selectedTeam = userTeams.find(team => team.id === selectedTeamId);
+    return selectedTeam?.role || 'viewer';
+  }, [selectedTeamId, userTeams]);
+
+  // Only fetch team data if user is owner or admin
+  const canAccessAdminData = currentUserRole === 'owner' || currentUserRole === 'admin';
+  const teamIdForQuery = canAccessAdminData ? selectedTeamId : null;
+
   const {
     data: teamData,
     isLoading,
     error,
     refetch
-  } = useTeamMembersWithCredits(selectedTeamId);
-
-  // Get current user's role in the team
-  const currentUserRole = teamData?.members.find(m => m.user_id === user?.id)?.role || 'viewer';
+  } = useTeamMembersWithCredits(teamIdForQuery);
 
   return (
     <AuthGuard requireAuth={true}>
@@ -82,6 +89,28 @@ const Teams = () => {
                     <Button variant="outline" onClick={() => refetch()}>
                       Try Again
                     </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : !teamData && !canAccessAdminData ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <TeamsHeader />
+                    <TeamSelector 
+                      userTeams={userTeams} 
+                      selectedTeamId={selectedTeamId} 
+                      onTeamChange={handleTeamChange} 
+                    />
+                    <div className="mt-8">
+                      <h3 className="text-lg font-semibold mb-2">Limited Access</h3>
+                      <p className="text-muted-foreground mb-4">
+                        You are a member of this team, but detailed team management features are restricted to owners and administrators.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Contact your team owner or administrator for access to team management features.
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
