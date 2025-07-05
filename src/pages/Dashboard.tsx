@@ -39,6 +39,7 @@ const Dashboard = () => {
       const { data: assetsData } = await supabase
         .from("generated_content")
         .select("*")
+        .eq('user_id', user.id)
         .order("created_at", { ascending: false })
         .limit(5);
 
