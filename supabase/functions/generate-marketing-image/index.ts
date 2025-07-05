@@ -54,7 +54,10 @@ serve(async (req) => {
     
     const hfResponse = await fetch(hfUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream'
+      },
       body: JSON.stringify({ 
         prompt: prompt, 
         num_steps: num_steps,
@@ -68,14 +71,36 @@ serve(async (req) => {
       throw new Error(`Failed to generate image: ${error}`);
     }
 
-    const resultJson = await hfResponse.text();
-    console.log('HuggingFace API response:', resultJson);
+    const resultText = await hfResponse.text();
+    console.log('HuggingFace API response:', resultText);
     
-    // The response should be the image file path
-    const imagePath = resultJson.replace(/"/g, ''); // Remove quotes if present
+    // Parse JSON-RPC response
+    let parsedResponse;
+    try {
+      parsedResponse = JSON.parse(resultText);
+    } catch (parseError) {
+      console.error('Failed to parse JSON response:', parseError);
+      throw new Error(`Invalid JSON response: ${resultText}`);
+    }
+    
+    // Handle JSON-RPC error responses
+    if (parsedResponse.error) {
+      console.error('JSON-RPC error:', parsedResponse.error);
+      throw new Error(`API error: ${parsedResponse.error.message || 'Unknown error'}`);
+    }
+    
+    // Extract image path from JSON-RPC result
+    const imagePath = parsedResponse.result || parsedResponse;
+    
+    // Clean up the image path (remove extra quotes and whitespace)
+    const cleanImagePath = typeof imagePath === 'string' 
+      ? imagePath.replace(/^["']|["']$/g, '').trim()
+      : imagePath;
+    
+    console.log('Extracted image path:', cleanImagePath);
     
     // Fetch the actual image file from Gradio
-    const fileUrl = `https://jensin-ai-marketing-content-creator.hf.space/gradio_api/file=${imagePath}`;
+    const fileUrl = `https://jensin-ai-marketing-content-creator.hf.space/gradio_api/file=${cleanImagePath}`;
     console.log('Fetching image from:', fileUrl);
     
     const fileRes = await fetch(fileUrl);
