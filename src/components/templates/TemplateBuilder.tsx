@@ -113,7 +113,7 @@ export const TemplateBuilder = ({ contentType, children }: TemplateBuildeerProps
             Create Custom Template
           </DialogTitle>
           <DialogDescription>
-            Build a reusable template for {contentType.replace('_', ' ')} generation
+            Build a reusable template for {contentType?.replace('_', ' ') || 'content'} generation
           </DialogDescription>
         </DialogHeader>
 

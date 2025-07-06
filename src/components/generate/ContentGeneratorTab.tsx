@@ -25,7 +25,13 @@ const contentTypeMapping: Record<string, Database['public']['Enums']['content_ty
   landing: 'landing_page',
   blog: 'blog_post',
   ad: 'ad_copy',
-  funnel: 'funnel'
+  funnel: 'funnel',
+  // Also support direct database enum values
+  email_sequence: 'email_sequence',
+  social_post: 'social_post',
+  landing_page: 'landing_page',
+  blog_post: 'blog_post',
+  ad_copy: 'ad_copy'
 };
 
 const contentTypes = [{
