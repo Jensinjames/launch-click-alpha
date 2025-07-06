@@ -50,6 +50,7 @@ export type Database = {
       }
       content_analytics: {
         Row: {
+          category_context: Json | null
           content_id: string
           id: string
           metadata: Json | null
@@ -58,6 +59,7 @@ export type Database = {
           recorded_at: string
         }
         Insert: {
+          category_context?: Json | null
           content_id: string
           id?: string
           metadata?: Json | null
@@ -66,6 +68,7 @@ export type Database = {
           recorded_at?: string
         }
         Update: {
+          category_context?: Json | null
           content_id?: string
           id?: string
           metadata?: Json | null
@@ -305,8 +308,11 @@ export type Database = {
       }
       generated_content: {
         Row: {
+          category_path: string | null
           content: Json
+          content_tags: string[] | null
           created_at: string
+          folder_structure: Json | null
           id: string
           is_favorite: boolean | null
           metadata: Json | null
@@ -317,8 +323,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category_path?: string | null
           content: Json
+          content_tags?: string[] | null
           created_at?: string
+          folder_structure?: Json | null
           id?: string
           is_favorite?: boolean | null
           metadata?: Json | null
@@ -329,8 +338,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category_path?: string | null
           content?: Json
+          content_tags?: string[] | null
           created_at?: string
+          folder_structure?: Json | null
           id?: string
           is_favorite?: boolean | null
           metadata?: Json | null
@@ -1370,9 +1382,17 @@ export type Database = {
         Args: { password: string }
         Returns: boolean
       }
+      generate_category_path: {
+        Args: { content_type: Database["public"]["Enums"]["content_type"] }
+        Returns: string
+      }
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_category_info: {
+        Args: { content_type: Database["public"]["Enums"]["content_type"] }
+        Returns: Json
       }
       get_dashboard_data: {
         Args: { user_uuid?: string }

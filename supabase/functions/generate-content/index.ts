@@ -175,21 +175,44 @@ Make it actionable, engaging, and tailored to the specified audience and tone.`;
       }
     };
 
+    // Generate category path based on content type
+    const generateCategoryPath = (contentType: string): string => {
+      const categoryMap: Record<string, string> = {
+        'email_sequence': 'email-campaigns',
+        'social_post': 'social-media', 
+        'landing_page': 'landing-pages',
+        'blog_post': 'blog-posts',
+        'ad_copy': 'ad-copy',
+        'funnel': 'sales-funnels',
+        'strategy_brief': 'strategy-briefs'
+      };
+      return categoryMap[contentType] || 'general';
+    };
+
     // Save content to database
     console.log(`Attempting to save content for user ${user.id}, type: ${type}`);
     
+    const categoryPath = generateCategoryPath(type);
     const insertData = {
       user_id: user.id,
       type,
       title: title || `${type.replace('_', ' ')} - ${new Date().toLocaleDateString()}`,
       content: generatedContent,
       prompt: template_data ? JSON.stringify(template_data) : prompt,
+      category_path: categoryPath,
+      folder_structure: {
+        category: categoryPath,
+        created_at: new Date().toISOString(),
+        content_type: type,
+        storage_path: `user-uploads/${user.id}/${categoryPath}`
+      },
       metadata: {
         template_used: !!template_data,
         settings: settings,
         tone: tone || 'professional',
         audience: audience || 'general',
-        creditsCost
+        creditsCost,
+        category: categoryPath
       }
     };
     

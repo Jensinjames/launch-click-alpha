@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,31 +12,53 @@ import Layout from "@/components/layout/Layout";
 import { useUserContent } from "@/hooks/useUserContent";
 import { useContentMutations } from "@/hooks/useContentMutations";
 import { toast } from "sonner";
-// URL-to-content-type mapping
-const CONTENT_TYPE_ROUTES = {
-  'emails': 'email_sequence',
-  'social': 'social_post',
-  'landing': 'landing_page',
-  'blogs': 'blog_post',
-  'ads': 'ad_copy',
-  'funnels': 'funnel',
-  'strategy': 'strategy_brief'
-} as const;
+import { 
+  getCategoryInfo, 
+  getContentTypeFromUrl, 
+  getUrlFromContentType,
+  CONTENT_TYPE_ROUTES 
+} from "@/utils/contentCategories";
+import CategoryHeader from "@/components/content/CategoryHeader";
+
+type ContentType = keyof typeof CONTENT_TYPE_ROUTES;
 
 const Content = () => {
   const { type: urlType } = useParams<{ type?: string }>();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  // Set filter type based on URL parameter
+  // Initialize state from URL parameters and search params
   useEffect(() => {
-    if (urlType && urlType in CONTENT_TYPE_ROUTES) {
-      setFilterType(CONTENT_TYPE_ROUTES[urlType as keyof typeof CONTENT_TYPE_ROUTES]);
-    } else if (!urlType) {
-      setFilterType("all");
+    // Set filter type based on URL parameter
+    const contentType = getContentTypeFromUrl(urlType);
+    setFilterType(contentType);
+    
+    // Set search and sort from URL search params
+    const search = searchParams.get('search') || '';
+    const sort = searchParams.get('sort') || 'newest';
+    
+    setSearchQuery(search);
+    setSortBy(sort);
+  }, [urlType, searchParams]);
+
+  // Update URL when filters change
+  const updateUrl = (newSearch: string, newSort: string, newFilter: string) => {
+    const params = new URLSearchParams();
+    
+    if (newSearch) params.set('search', newSearch);
+    if (newSort !== 'newest') params.set('sort', newSort);
+    
+    // Update URL path if filter type changes
+    if (newFilter !== filterType) {
+      const urlPath = newFilter === 'all' ? '/content' : `/content/${getUrlFromContentType(newFilter as any)}`;
+      navigate(`${urlPath}${params.toString() ? '?' + params.toString() : ''}`, { replace: true });
+    } else {
+      setSearchParams(params);
     }
-  }, [urlType]);
+  };
 
   const { data: contentItems = [], isLoading, error } = useUserContent({
     type: filterType,
@@ -45,6 +67,10 @@ const Content = () => {
   });
 
   const { toggleFavorite, deleteContent } = useContentMutations();
+  
+  // Get category information for dynamic header
+  const currentContentType = filterType === 'all' ? 'all' : filterType as any;
+  const categoryInfo = getCategoryInfo(currentContentType);
 
   const handleToggleFavorite = async (id: string, currentFavorite: boolean) => {
     try {
@@ -74,6 +100,22 @@ const Content = () => {
     } catch (error) {
       toast.error('Failed to copy content');
     }
+  };
+
+  // Handle filter changes with URL updates
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    updateUrl(value, sortBy, filterType);
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    updateUrl(searchQuery, value, filterType);
+  };
+
+  const handleFilterChange = (value: string) => {
+    setFilterType(value);
+    updateUrl(searchQuery, sortBy, value);
   };
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -129,15 +171,11 @@ const Content = () => {
   return <AuthGuard requireAuth={true}>
       <Layout>
         <div className="max-w-6xl mx-auto">
-          {/* Page Header */}
-          <header className="mb-8">
-            <h1 className="text-4xl font-bold mb-3 text-foreground">
-              Content Library
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Manage and organize all your generated content
-            </p>
-          </header>
+          {/* Dynamic Category Header */}
+          <CategoryHeader 
+            categoryInfo={categoryInfo}
+            contentType={currentContentType}
+          />
 
           {/* Filters and Search */}
           <section aria-labelledby="filters-heading" className="mb-8">
@@ -153,7 +191,13 @@ const Content = () => {
                     </Label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
-                      <Input id="content-search" placeholder="Search content..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
+                      <Input 
+                        id="content-search" 
+                        placeholder="Search content..." 
+                        value={searchQuery} 
+                        onChange={e => handleSearchChange(e.target.value)} 
+                        className="pl-10" 
+                      />
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -161,7 +205,7 @@ const Content = () => {
                       <Label htmlFor="content-type-filter" className="sr-only">
                         Filter by content type
                       </Label>
-                      <Select value={filterType} onValueChange={setFilterType}>
+                      <Select value={filterType} onValueChange={handleFilterChange}>
                         <SelectTrigger id="content-type-filter" className="w-40">
                           <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
                           <SelectValue />
@@ -182,7 +226,7 @@ const Content = () => {
                       <Label htmlFor="content-sort" className="sr-only">
                         Sort content
                       </Label>
-                      <Select value={sortBy} onValueChange={setSortBy}>
+                      <Select value={sortBy} onValueChange={handleSortChange}>
                         <SelectTrigger id="content-sort" className="w-32">
                           <SelectValue />
                         </SelectTrigger>
@@ -242,8 +286,8 @@ const Content = () => {
                   <p className="text-muted-foreground mb-6">
                     {searchQuery || filterType !== 'all' ? 'Try adjusting your search or filters.' : 'Get started by generating your first piece of content.'}
                   </p>
-                  <Button onClick={() => window.location.href = '/generate'}>
-                    Generate Content
+                  <Button onClick={() => navigate('/generate')}>
+                    {categoryInfo.cta}
                   </Button>
                 </CardContent>
               </Card>
