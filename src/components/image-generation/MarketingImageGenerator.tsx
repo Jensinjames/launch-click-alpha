@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Loader2, Sparkles, Download, Save, Clock } from 'lucide-react';
 import { useMarketingImageGeneration } from '@/hooks/useMarketingImageGeneration';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { useGenerateContext } from '@/contexts/GenerateContext';
 import { toast } from 'sonner';
 
 interface MarketingImageResult {
@@ -31,17 +32,35 @@ export const MarketingImageGenerator = () => {
 
   const { generateMarketingImage, isGenerating, jobStatus, currentJobId } = useMarketingImageGeneration();
   const { hasCreditsRemaining } = useUserPlan();
+  const { generatedImages, setGeneratedImages, saveImageToStorage, setActiveTab } = useGenerateContext();
 
   // Handle job status updates
   useEffect(() => {
     if (jobStatus?.status === 'completed' && jobStatus.image_url) {
-      setGeneratedImage({
+      const newImage = {
         image_url: jobStatus.image_url,
         filename: `marketing_${currentJobId}.png`,
         prompt: jobStatus.prompt
-      });
+      };
+      
+      setGeneratedImage(newImage);
       setProgress(100);
       setEstimatedTime(0);
+
+      // Auto-add to session images
+      const sessionImage = {
+        imageUrl: jobStatus.image_url,
+        name: `Marketing Image ${new Date().toLocaleDateString()}`,
+        prompt: jobStatus.prompt,
+        type: 'marketing',
+        style: style
+      };
+      
+      setGeneratedImages([...generatedImages, sessionImage]);
+      
+      // Save to persistent storage
+      saveImageToStorage(sessionImage);
+      
     } else if (jobStatus?.status === 'failed') {
       setProgress(0);
       setEstimatedTime(0);
@@ -52,7 +71,7 @@ export const MarketingImageGenerator = () => {
         setEstimatedTime(Math.max(0, 45 - (progress / 2)));
       }
     }
-  }, [jobStatus, currentJobId, progress]);
+  }, [jobStatus, currentJobId, progress, generatedImages, setGeneratedImages, saveImageToStorage, style]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -92,6 +111,8 @@ export const MarketingImageGenerator = () => {
 
   const handleSaveToContent = async () => {
     if (generatedImage) {
+      // Switch to results tab to show the saved content
+      setActiveTab("results");
       toast.success('Marketing image saved to your content library!');
     }
   };

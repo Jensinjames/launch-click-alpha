@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
 type ContentTemplate = Database['public']['Tables']['content_templates']['Row'];
@@ -29,6 +30,9 @@ interface GenerateContextType {
   // Tab navigation
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  
+  // Storage integration
+  saveImageToStorage: (imageData: any) => Promise<void>;
 }
 
 const GenerateContext = createContext<GenerateContextType | undefined>(undefined);
@@ -62,6 +66,40 @@ export const GenerateProvider = ({ children }: GenerateProviderProps) => {
   // Tab navigation
   const [activeTab, setActiveTab] = useState("content");
 
+  // Storage integration function
+  const saveImageToStorage = useCallback(async (imageData: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('image_assets')
+        .insert({
+          user_id: user.id,
+          image_url: imageData.imageUrl,
+          prompt: imageData.prompt,
+          image_type: 'generated',
+          generation_params: {
+            type: imageData.type,
+            style: imageData.style,
+            model: imageData.model || 'unknown'
+          }
+        });
+
+      if (error) {
+        console.error('Failed to save image to storage:', error);
+        throw error;
+      }
+      
+      console.log('Image saved to storage:', data);
+    } catch (error) {
+      console.error('Error saving image:', error);
+      // Don't throw to avoid blocking UI - just log for now
+    }
+  }, []);
+
   const value: GenerateContextType = {
     selectedType,
     setSelectedType,
@@ -83,6 +121,7 @@ export const GenerateProvider = ({ children }: GenerateProviderProps) => {
     setGeneratedImages,
     activeTab,
     setActiveTab,
+    saveImageToStorage,
   };
 
   return (
