@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
@@ -8,43 +6,11 @@ import ContentCategoryGrid from "@/components/dashboard/ContentCategoryGrid";
 import RecentContentPerformance from "@/components/dashboard/RecentContentPerformance";
 import TeamActivityOverview from "@/components/dashboard/TeamActivityOverview";
 import RecentAssets from "@/components/dashboard/RecentAssets";
+import { useDashboardData } from "@/hooks/dashboard/useDashboardData";
+
 const Dashboard = () => {
-  const {
-    user
-  } = useAuth();
-  const [credits, setCredits] = useState({
-    used: 0,
-    limit: 50
-  });
-  const [recentAssets, setRecentAssets] = useState([]);
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
-    }
-  }, [user]);
-  const fetchUserData = async () => {
-    try {
-      // Single batched RPC call instead of multiple queries
-      const { data, error } = await supabase.rpc('get_dashboard_data');
-      
-      if (error) {
-        console.error("Error fetching dashboard data:", error);
-        return;
-      }
-      
-      if (data && typeof data === 'object') {
-        const result = data as any;
-        if (result.credits) {
-          setCredits(result.credits);
-        }
-        if (result.recentAssets) {
-          setRecentAssets(result.recentAssets);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
+  const { user } = useAuth();
+  const { data, isLoading, error } = useDashboardData();
   return <AuthGuard requireAuth={true}>
       <Layout>
         <div className="w-full px-4 lg:px-6">
@@ -59,7 +25,7 @@ const Dashboard = () => {
           </header>
 
           {/* Enhanced Stats */}
-          <EnhancedDashboardStats credits={credits} assetsCount={recentAssets.length} />
+          <EnhancedDashboardStats credits={data.credits} assetsCount={data.recentAssets.length} />
 
           {/* Main Dashboard Grid - Optimized Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-6">
@@ -77,7 +43,7 @@ const Dashboard = () => {
 
           {/* Recent Assets Section */}
           <section id="recent-assets-section" aria-labelledby="recent-assets-title">
-            <RecentAssets assets={recentAssets} />
+            <RecentAssets assets={data.recentAssets} />
           </section>
         </div>
       </Layout>

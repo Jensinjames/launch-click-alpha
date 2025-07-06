@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,54 +10,28 @@ import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
 import { useUserContent } from "@/hooks/useUserContent";
 import { useContentMutations } from "@/hooks/useContentMutations";
-import { toast } from "sonner";
-import { 
-  getCategoryInfo, 
-  getContentTypeFromUrl, 
-  getUrlFromContentType,
-  CONTENT_TYPE_ROUTES 
-} from "@/utils/contentCategories";
+import { getCategoryInfo, CONTENT_TYPE_ROUTES } from "@/utils/contentCategories";
 import CategoryHeader from "@/components/content/CategoryHeader";
+import { useContentFilters } from "@/hooks/content/useContentFilters";
+import { useContentNavigation } from "@/hooks/content/useContentNavigation";
+import { ContentOperationsService } from "@/services/content/ContentOperationsService";
 
 type ContentType = keyof typeof CONTENT_TYPE_ROUTES;
 
 const Content = () => {
   const { type: urlType } = useParams<{ type?: string }>();
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
-
-  // Initialize state from URL parameters and search params
-  useEffect(() => {
-    // Set filter type based on URL parameter
-    const contentType = getContentTypeFromUrl(urlType);
-    setFilterType(contentType);
-    
-    // Set search and sort from URL search params
-    const search = searchParams.get('search') || '';
-    const sort = searchParams.get('sort') || 'newest';
-    
-    setSearchQuery(search);
-    setSortBy(sort);
-  }, [urlType, searchParams]);
-
-  // Update URL when filters change
-  const updateUrl = (newSearch: string, newSort: string, newFilter: string) => {
-    const params = new URLSearchParams();
-    
-    if (newSearch) params.set('search', newSearch);
-    if (newSort !== 'newest') params.set('sort', newSort);
-    
-    // Update URL path if filter type changes
-    if (newFilter !== filterType) {
-      const urlPath = newFilter === 'all' ? '/content' : `/content/${getUrlFromContentType(newFilter as any)}`;
-      navigate(`${urlPath}${params.toString() ? '?' + params.toString() : ''}`, { replace: true });
-    } else {
-      setSearchParams(params);
-    }
-  };
+  
+  // Use new hooks for filtering and navigation
+  const {
+    searchQuery,
+    filterType,
+    sortBy,
+    handleSearchChange,
+    handleSortChange,
+    handleFilterChange,
+  } = useContentFilters(urlType);
+  
+  const { navigateToContentType, navigateToGenerate } = useContentNavigation();
 
   const { data: contentItems = [], isLoading, error } = useUserContent({
     type: filterType,
@@ -72,101 +45,17 @@ const Content = () => {
   const currentContentType = filterType === 'all' ? 'all' : filterType as any;
   const categoryInfo = getCategoryInfo(currentContentType);
 
-  const handleToggleFavorite = async (id: string, currentFavorite: boolean) => {
-    try {
-      await toggleFavorite.mutateAsync({ id, is_favorite: !currentFavorite });
-      toast.success(currentFavorite ? 'Removed from favorites' : 'Added to favorites');
-    } catch (error) {
-      toast.error('Failed to update favorite status');
-    }
+  // Use service methods for content operations
+  const handleToggleFavorite = (id: string, currentFavorite: boolean) => {
+    ContentOperationsService.handleToggleFavorite(id, currentFavorite, toggleFavorite);
   };
 
-  const handleDeleteContent = async (id: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
-    
-    try {
-      await deleteContent.mutateAsync(id);
-      toast.success('Content deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete content');
-    }
+  const handleDeleteContent = (id: string, title: string) => {
+    ContentOperationsService.handleDeleteContent(id, title, deleteContent);
   };
 
-  const handleCopyContent = async (content: any) => {
-    try {
-      const textToCopy = content?.text || JSON.stringify(content, null, 2);
-      await navigator.clipboard.writeText(textToCopy);
-      toast.success('Content copied to clipboard');
-    } catch (error) {
-      toast.error('Failed to copy content');
-    }
-  };
-
-  // Handle filter changes with URL updates
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    updateUrl(value, sortBy, filterType);
-  };
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value);
-    updateUrl(searchQuery, value, filterType);
-  };
-
-  const handleFilterChange = (value: string) => {
-    setFilterType(value);
-    updateUrl(searchQuery, sortBy, value);
-  };
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'published':
-        return 'bg-green-100 text-green-800';
-      case 'draft':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'archived':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'email_sequence':
-        return 'Email Campaign';
-      case 'social_post':
-        return 'Social Media';
-      case 'landing_page':
-        return 'Landing Page';
-      case 'blog_post':
-        return 'Blog Post';
-      case 'ad_copy':
-        return 'Ad Copy';
-      case 'funnel':
-        return 'Sales Funnel';
-      case 'strategy_brief':
-        return 'Strategy Brief';
-      default:
-        return type.replace('_', ' ');
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'email_sequence':
-        return Mail;
-      case 'social_post':
-        return Share2;
-      case 'landing_page':
-      case 'blog_post':
-      case 'strategy_brief':
-        return FileText;
-      case 'ad_copy':
-        return MoreHorizontal;
-      case 'funnel':
-        return FileText;
-      default:
-        return FileText;
-    }
+  const handleCopyContent = (content: any) => {
+    ContentOperationsService.handleCopyContent(content);
   };
   return <AuthGuard requireAuth={true}>
       <Layout>
@@ -286,7 +175,7 @@ const Content = () => {
                   <p className="text-muted-foreground mb-6">
                     {searchQuery || filterType !== 'all' ? 'Try adjusting your search or filters.' : 'Get started by generating your first piece of content.'}
                   </p>
-                  <Button onClick={() => navigate('/generate')}>
+                  <Button onClick={() => navigateToGenerate()}>
                     {categoryInfo.cta}
                   </Button>
                 </CardContent>
@@ -294,7 +183,10 @@ const Content = () => {
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {contentItems.map(item => {
-                  const Icon = getTypeIcon(item.type);
+                  const iconName = ContentOperationsService.getTypeIcon(item.type);
+                  const IconComponent = iconName === 'Mail' ? Mail : 
+                                       iconName === 'Share2' ? Share2 : 
+                                       iconName === 'MoreHorizontal' ? MoreHorizontal : FileText;
                   const contentText = (item.content as any)?.text || JSON.stringify(item.content, null, 2) || 'No content available';
                   
                   return (
@@ -303,7 +195,7 @@ const Content = () => {
                         <div className="flex items-start justify-between">
                           <div className="flex items-center space-x-3 min-w-0 flex-1">
                             <div className="p-2 bg-purple-100 rounded-lg">
-                              <Icon className="h-5 w-5 text-purple-600" />
+                              <IconComponent className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <h3 className="font-semibold truncate text-foreground text-sm">
@@ -311,7 +203,7 @@ const Content = () => {
                               </h3>
                               <div className="flex items-center space-x-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
-                                  {getTypeLabel(item.type)}
+                                  {ContentOperationsService.getTypeLabel(item.type)}
                                 </Badge>
                                 {item.is_favorite && (
                                   <Badge variant="secondary" className="text-xs">
