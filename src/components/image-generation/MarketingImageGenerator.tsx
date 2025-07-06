@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,11 @@ interface MarketingImageResult {
   prompt: string;
 }
 
+interface JobResult {
+  job_id: string;
+  status: string;
+}
+
 export const MarketingImageGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [style, setStyle] = useState('none');
@@ -24,41 +29,47 @@ export const MarketingImageGenerator = () => {
   const [progress, setProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState(0);
 
-  const { generateMarketingImage, isGenerating } = useMarketingImageGeneration();
+  const { generateMarketingImage, isGenerating, jobStatus, currentJobId } = useMarketingImageGeneration();
   const { hasCreditsRemaining } = useUserPlan();
+
+  // Handle job status updates
+  useEffect(() => {
+    if (jobStatus?.status === 'completed' && jobStatus.image_url) {
+      setGeneratedImage({
+        image_url: jobStatus.image_url,
+        filename: `marketing_${currentJobId}.png`,
+        prompt: jobStatus.prompt
+      });
+      setProgress(100);
+      setEstimatedTime(0);
+    } else if (jobStatus?.status === 'failed') {
+      setProgress(0);
+      setEstimatedTime(0);
+    } else if (jobStatus?.status === 'processing') {
+      // Simulate progress for processing jobs
+      if (progress < 95) {
+        setProgress(prev => Math.min(prev + 1, 95));
+        setEstimatedTime(Math.max(0, 45 - (progress / 2)));
+      }
+    }
+  }, [jobStatus, currentJobId, progress]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
 
     try {
-      // Start progress tracking
-      setProgress(0);
-      setEstimatedTime(45); // 45 second estimate
-      
-      // Simulate progress during the 30+ second generation
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          const newProgress = Math.min(prev + 2, 95); // Stop at 95% until completion
-          setEstimatedTime(Math.max(0, 45 - (newProgress / 2)));
-          return newProgress;
-        });
-      }, 1000);
+      // Reset states
+      setGeneratedImage(null);
+      setProgress(5);
+      setEstimatedTime(45);
 
-      const result = await generateMarketingImage({
+      await generateMarketingImage({
         prompt,
         style,
         num_steps: numSteps
       });
 
-      clearInterval(progressInterval);
-      setProgress(100);
-      setEstimatedTime(0);
-
-      setGeneratedImage({
-        image_url: result.image_url,
-        filename: result.filename || `marketing_${Date.now()}.png`,
-        prompt: prompt
-      });
+      // Progress will be updated by the effect above based on job status
     } catch (error) {
       console.error('Failed to generate marketing image:', error);
       setProgress(0);

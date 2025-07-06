@@ -457,6 +457,51 @@ export type Database = {
           },
         ]
       }
+      marketing_image_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          generation_params: Json | null
+          id: string
+          image_url: string | null
+          prompt: string
+          status: string
+          steps: number | null
+          style: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          generation_params?: Json | null
+          id?: string
+          image_url?: string | null
+          prompt: string
+          status?: string
+          steps?: number | null
+          style?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          generation_params?: Json | null
+          id?: string
+          image_url?: string | null
+          prompt?: string
+          status?: string
+          steps?: number | null
+          style?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       plan_features: {
         Row: {
           created_at: string

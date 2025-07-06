@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,19 +10,24 @@ const corsHeaders = {
 
 const MODAL_API_URL = "https://jensinjames--flux-api-server-fastapi-server.modal.run";
 
-async function generateMarketingImage(prompt: string, steps: number = 50, style: string = "none"): Promise<string> {
-  console.log(`Generating marketing image with prompt: ${prompt}`);
+async function startMarketingImageJob(jobId: string, prompt: string, steps: number = 50, style: string = "none"): Promise<void> {
+  console.log(`Starting marketing image job ${jobId} with prompt: ${prompt}`);
   
-  // Call Modal.com FastAPI backend directly
-  console.log(`Calling Modal.com API: ${MODAL_API_URL}/generate`);
+  // Get the webhook URL for this deployment
+  const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/marketing-image-webhook`;
+  
   const payload = {
     prompt: prompt,
     num_inference_steps: steps,
-    style: style
+    style: style,
+    job_id: jobId,
+    webhook_url: webhookUrl
   };
+  
+  console.log(`Calling Modal.com API: ${MODAL_API_URL}/generate-webhook`);
   console.log(`Request payload: ${JSON.stringify(payload, null, 2)}`);
   
-  const response = await fetch(`${MODAL_API_URL}/generate`, {
+  const response = await fetch(`${MODAL_API_URL}/generate-webhook`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -32,25 +38,11 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
   if (!response.ok) {
     const errorText = await response.text();
     console.error(`Modal API error: ${response.status} - ${errorText}`);
-    
-    if (response.status === 429) {
-      throw new Error("Rate limit exceeded - please try again later");
-    } else if (response.status === 500) {
-      throw new Error("Backend server error - the AI model may be busy");
-    } else {
-      throw new Error(`Modal API returned ${response.status}: ${errorText}`);
-    }
+    throw new Error(`Modal API returned ${response.status}: ${errorText}`);
   }
   
   const result = await response.json();
-  console.log(`Modal API response received`);
-  
-  if (!result.image) {
-    throw new Error("No image returned from Modal API");
-  }
-  
-  console.log("Successfully generated image via Modal.com");
-  return result.image;
+  console.log(`Modal API job started: ${JSON.stringify(result)}`);
 }
 
 serve(async (req) => {
@@ -63,7 +55,36 @@ serve(async (req) => {
   }
 
   try {
-    console.log('[MarketingImageFunction] Processing POST request');
+    // Get the authorization header to identify the user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error('[MarketingImageFunction] User authentication error:', userError);
+      return new Response(
+        JSON.stringify({ error: "Authentication failed" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log('[MarketingImageFunction] Processing POST request for user:', user.id);
     const requestBody = await req.text();
     console.log('[MarketingImageFunction] Raw request body:', requestBody);
     
@@ -75,28 +96,71 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Create a new job in the database
+    const { data: job, error: jobError } = await supabase
+      .from('marketing_image_jobs')
+      .insert({
+        user_id: user.id,
+        prompt: prompt,
+        style: style,
+        steps: steps,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (jobError || !job) {
+      console.error('[MarketingImageFunction] Job creation error:', jobError);
+      return new Response(
+        JSON.stringify({ error: "Failed to create generation job" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`[MarketingImageFunction] Created job ${job.id}`);
+
+    // Start the generation job asynchronously (don't await)
+    try {
+      // Update job status to processing
+      await supabase
+        .from('marketing_image_jobs')
+        .update({ status: 'processing' })
+        .eq('id', job.id);
+
+      // Start the background job
+      startMarketingImageJob(job.id, prompt, steps, style).catch(async (error) => {
+        console.error(`[MarketingImageFunction] Job ${job.id} failed:`, error);
+        // Update job status to failed
+        await supabase
+          .from('marketing_image_jobs')
+          .update({ 
+            status: 'failed', 
+            error_message: error.message,
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', job.id);
+      });
+    } catch (startError) {
+      console.error('[MarketingImageFunction] Error starting job:', startError);
+      // Update job status to failed
+      await supabase
+        .from('marketing_image_jobs')
+        .update({ 
+          status: 'failed', 
+          error_message: startError.message,
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', job.id);
+    }
     
-    const imageBase64 = await generateMarketingImage(prompt, steps, style);
-    
-    // Generate filename based on prompt and timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const safePrompt = prompt.slice(0, 50).replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `marketing_${safePrompt}_${timestamp}.png`;
-    
-    // Ensure base64 is properly formatted as data URL
-    const imageDataUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
-    
+    // Return job information immediately
     return new Response(
       JSON.stringify({ 
         success: true, 
-        image_url: imageDataUrl,
-        filename: filename,
-        prompt: prompt,
-        generation_params: {
-          steps: steps,
-          style: style,
-          generator: 'modal_fastapi'
-        }
+        job_id: job.id,
+        status: 'processing',
+        message: 'Image generation started. Use the job ID to check status.'
       }),
       { 
         status: 200, 
