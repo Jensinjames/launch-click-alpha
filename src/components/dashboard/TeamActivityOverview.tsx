@@ -135,30 +135,37 @@ const TeamActivityOverview = React.memo(({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Team Members Overview */}
-      <Card className="surface-elevated">
-        <CardHeader className="pb-4">
+      <Card id="team-overview-card" className="surface-elevated">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
+                <Users className="h-4 w-4 text-primary" />
                 Team Overview
               </CardTitle>
               <CardDescription>
                 {displayTeamMembers.filter(m => m.status === 'online').length} of {displayTeamMembers.length} members online
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button variant="outline" size="sm" aria-label="Invite team member">
+              <Plus className="h-4 w-4 mr-1" />
               Invite
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 gap-2">
             {displayTeamMembers.slice(0, 4).map((member) => (
-              <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer">
+              <div 
+                key={member.id} 
+                id={`team-member-${member.id}`}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${member.name} profile - ${member.status}`}
+              >
                 <div className="relative">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={member.avatar} alt={member.name} />
@@ -166,7 +173,10 @@ const TeamActivityOverview = React.memo(({
                       {member.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${getStatusColor(member.status)}`} />
+                  <div 
+                    className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${getStatusColor(member.status)}`}
+                    aria-label={`${member.status} status`}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-foreground truncate">{member.name}</div>
@@ -179,30 +189,37 @@ const TeamActivityOverview = React.memo(({
       </Card>
 
       {/* Pending Tasks */}
-      <Card className="surface-elevated">
-        <CardHeader className="pb-4">
+      <Card id="pending-tasks-card" className="surface-elevated">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-warning" />
+                <AlertCircle className="h-4 w-4 text-warning" />
                 Pending Tasks
               </CardTitle>
               <CardDescription>
                 {displayPendingTasks.length} items require attention
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" className="text-primary">
+            <Button variant="ghost" size="sm" className="text-primary" aria-label="View all pending tasks">
               View All
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2">
           {displayPendingTasks.map((task) => (
-            <div key={task.id} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer">
+            <div 
+              key={task.id} 
+              id={`pending-task-${task.id}`}
+              className="flex items-center gap-3 p-2 border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label={`Task: ${task.title} - ${task.priority} priority, due ${new Date(task.dueDate).toLocaleDateString()}`}
+            >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-foreground">{task.title}</span>
+                  <span className="text-sm font-medium text-foreground line-clamp-1">{task.title}</span>
                   <Badge variant="secondary" className={getPriorityColor(task.priority)}>
                     {task.priority}
                   </Badge>
@@ -225,19 +242,26 @@ const TeamActivityOverview = React.memo(({
       </Card>
 
       {/* Recent Activity */}
-      <Card className="surface-elevated">
-        <CardHeader className="pb-4">
+      <Card id="recent-activity-card" className="surface-elevated">
+        <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-info" />
+            <Clock className="h-4 w-4 text-info" />
             Recent Activity
           </CardTitle>
           <CardDescription>Latest team updates and changes</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2">
           {displayRecentActivity.map((activity) => {
             const ActivityIcon = getActivityIcon(activity.type);
             return (
-              <div key={activity.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
+              <div 
+                key={activity.id} 
+                id={`recent-activity-${activity.id}`}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                role="button"
+                tabIndex={0}
+                aria-label={`${activity.user.name} ${activity.action} ${activity.target} ${activity.timestamp}`}
+              >
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={activity.user.avatar} alt={activity.user.name} />
@@ -245,13 +269,13 @@ const TeamActivityOverview = React.memo(({
                       {activity.user.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
-                  <ActivityIcon className="h-3 w-3 text-muted-foreground" />
+                  <ActivityIcon className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="text-sm text-foreground">
                     <span className="font-medium">{activity.user.name}</span>
                     <span className="text-muted-foreground"> {activity.action} </span>
-                    <span className="font-medium">{activity.target}</span>
+                    <span className="font-medium truncate">{activity.target}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">{activity.timestamp}</div>
                 </div>

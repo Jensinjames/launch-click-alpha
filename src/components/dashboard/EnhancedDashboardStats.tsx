@@ -63,20 +63,22 @@ const EnhancedDashboardStats = React.memo(({
   ], [credits.used, credits.limit, assetsCount]);
 
   return (
-    <section aria-labelledby="dashboard-stats-title" className="mb-12">
+    <section aria-labelledby="dashboard-stats-title" className="mb-6">
       <h2 id="dashboard-stats-title" className="sr-only">Dashboard Statistics</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsData.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
             <Card 
-              key={index} 
+              key={index}
+              id={`dashboard-stat-${index}`}
               className={`surface-elevated hover:shadow-md transition-all duration-200 border-2 ${stat.borderColor} focus-visible cursor-pointer group`}
               role="img"
               aria-label={`${stat.title}: ${stat.value} (${stat.change})`}
+              aria-describedby={`stat-description-${index}`}
               tabIndex={0}
             >
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium text-foreground">
                     {stat.title}
@@ -87,23 +89,30 @@ const EnhancedDashboardStats = React.memo(({
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-foreground mb-1">
+                      <div className="text-2xl font-bold text-foreground mb-1">
                         {stat.value}
                       </div>
-                      <div className={`text-sm font-medium ${
-                        stat.trend === 'up' ? 'text-success' : 
-                        stat.trend === 'down' ? 'text-error' : 'text-muted-foreground'
-                      }`}>
+                      <div 
+                        id={`stat-description-${index}`}
+                        className={`text-sm font-medium ${
+                          stat.trend === 'up' ? 'text-success' : 
+                          stat.trend === 'down' ? 'text-error' : 'text-muted-foreground'
+                        }`}
+                      >
                         {stat.change}
                       </div>
                     </div>
                   </div>
                   {stat.progress !== null && (
                     <div className="space-y-1">
-                      <Progress value={stat.progress} className="h-2" />
+                      <Progress 
+                        value={stat.progress} 
+                        className="h-2" 
+                        aria-label={`${stat.title} progress: ${stat.progress.toFixed(1)}%`}
+                      />
                       <div className="text-xs text-muted-foreground">
                         {stat.progress.toFixed(1)}% of limit
                       </div>

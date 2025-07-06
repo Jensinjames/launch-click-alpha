@@ -100,20 +100,21 @@ const ContentCategoryGrid = React.memo(() => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <section aria-labelledby="content-categories-title" className="space-y-4">
+      <header className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Content Categories</h2>
+          <h2 id="content-categories-title" className="text-2xl font-bold text-foreground">Content Categories</h2>
           <p className="text-muted-foreground">Quick access to your content by type</p>
         </div>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category) => {
           const IconComponent = category.icon;
           return (
             <Card 
               key={category.id}
+              id={`content-category-${category.id}`}
               className={`surface-elevated hover:shadow-lg transition-all duration-300 cursor-pointer group border-2 ${category.borderColor} focus-visible`}
               onClick={() => handleCategoryClick(category)}
               onKeyDown={(e) => {
@@ -125,13 +126,14 @@ const ContentCategoryGrid = React.memo(() => {
               tabIndex={0}
               role="button"
               aria-label={`View ${category.name}: ${category.description}`}
+              aria-describedby={`category-description-${category.id}`}
             >
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`p-2.5 rounded-lg bg-gradient-to-r ${category.color} text-white group-hover:scale-110 transition-transform duration-200`}>
-                        <IconComponent className="h-5 w-5" />
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white group-hover:scale-110 transition-transform duration-200`}>
+                        <IconComponent className="h-4 w-4" />
                       </div>
                       {category.recentCount > 0 && (
                         <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
@@ -143,7 +145,10 @@ const ContentCategoryGrid = React.memo(() => {
                     <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                       {category.name}
                     </CardTitle>
-                    <CardDescription className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    <CardDescription 
+                      id={`category-description-${category.id}`}
+                      className="text-sm text-muted-foreground mt-1 line-clamp-2"
+                    >
                       {category.description}
                     </CardDescription>
                   </div>
@@ -172,7 +177,7 @@ const ContentCategoryGrid = React.memo(() => {
           );
         })}
       </div>
-    </div>
+    </section>
   );
 });
 
