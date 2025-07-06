@@ -24,13 +24,14 @@ const FeatureAccessContext = createContext<FeatureAccessContextType | undefined>
 
 // Route-based feature mapping for lazy loading
 const ROUTE_FEATURES = {
-  '/dashboard': ['page_access_dashboard', 'content_generation', 'analytics'],
+  '/dashboard': ['content_generation', 'analytics'],
   '/generate': ['content_generation', 'templates', 'image_generation'],
-  '/analytics': ['page_access_analytics', 'teams'],
-  '/teams': ['page_access_teams'],
-  '/integrations': ['page_access_integrations'],
+  '/analytics': ['teams'],
+  '/teams': [],
+  '/integrations': [],
+  '/settings': [],
   '/admin': ['page_access_admin'],
-  '/billing': ['page_access_billing'],
+  '/billing': [],
 } as const;
 
 // Public routes that don't require authentication
@@ -41,25 +42,26 @@ const PUBLIC_ROUTES = [
   '/pricing'
 ];
 
-// Essential features - loaded immediately (critical navigation only)
+// Essential features - loaded immediately (all navigation features for instant sidebar rendering)
 const ESSENTIAL_FEATURES = [
   'page_access_dashboard',
   'page_access_generate',
   'page_access_content',
-  'content_generation'
+  'page_access_teams',
+  'page_access_analytics',
+  'page_access_integrations',
+  'page_access_settings',
+  'page_access_billing'
 ];
 
 // Secondary features - loaded on demand or route-specific
 const SECONDARY_FEATURES = [
-  'page_access_teams',
-  'page_access_analytics', 
-  'page_access_integrations',
-  'page_access_settings',
   'page_access_admin',
-  'page_access_billing',
+  'content_generation',
   'templates',
   'image_generation',
-  'integrations'
+  'teams',
+  'analytics'
 ];
 
 interface FeatureAccessProviderProps {

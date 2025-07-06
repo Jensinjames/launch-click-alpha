@@ -57,7 +57,7 @@ const Sidebar = () => {
       name: 'Integrations',
       href: '/integrations',
       icon: Puzzle,
-      featureName: 'integrations'
+      featureName: 'page_access_integrations'
     },
     {
       name: 'Settings',
