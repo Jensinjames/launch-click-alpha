@@ -10,24 +10,19 @@ const corsHeaders = {
 
 const MODAL_API_URL = "https://jensinjames--flux-api-server-fastapi-server.modal.run";
 
-async function startMarketingImageJob(jobId: string, prompt: string, steps: number = 50, style: string = "none"): Promise<void> {
-  console.log(`Starting marketing image job ${jobId} with prompt: ${prompt}`);
-  
-  // Get the webhook URL for this deployment
-  const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/marketing-image-webhook`;
+async function generateMarketingImageSync(jobId: string, prompt: string, steps: number = 50, style: string = "none"): Promise<string> {
+  console.log(`Generating marketing image for job ${jobId} with prompt: ${prompt}`);
   
   const payload = {
     prompt: prompt,
     num_inference_steps: steps,
-    style: style,
-    job_id: jobId,
-    webhook_url: webhookUrl
+    style: style
   };
   
-  console.log(`Calling Modal.com API: ${MODAL_API_URL}/generate-webhook`);
+  console.log(`Calling Modal.com API: ${MODAL_API_URL}/generate`);
   console.log(`Request payload: ${JSON.stringify(payload, null, 2)}`);
   
-  const response = await fetch(`${MODAL_API_URL}/generate-webhook`, {
+  const response = await fetch(`${MODAL_API_URL}/generate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -42,7 +37,10 @@ async function startMarketingImageJob(jobId: string, prompt: string, steps: numb
   }
   
   const result = await response.json();
-  console.log(`Modal API job started: ${JSON.stringify(result)}`);
+  console.log(`Modal API generation completed`);
+  
+  // Return the image URL or base64 data
+  return result.image_url || result.image || result.data;
 }
 
 serve(async (req) => {
@@ -128,8 +126,37 @@ serve(async (req) => {
         .update({ status: 'processing' })
         .eq('id', job.id);
 
-      // Start the background job
-      startMarketingImageJob(job.id, prompt, steps, style).catch(async (error) => {
+      // Generate the image synchronously
+      generateMarketingImageSync(job.id, prompt, steps, style).then(async (imageUrl) => {
+        console.log(`[MarketingImageFunction] Job ${job.id} completed successfully`);
+        
+        // Update job status to completed
+        await supabase
+          .from('marketing_image_jobs')
+          .update({ 
+            status: 'completed', 
+            image_url: imageUrl,
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', job.id);
+
+        // Also save to image_assets table for user's library
+        await supabase
+          .from('image_assets')
+          .insert({
+            user_id: user.id,
+            image_url: imageUrl,
+            image_type: 'marketing',
+            prompt: prompt,
+            storage_path: `marketing_${job.id}.png`,
+            generation_params: {
+              style: style,
+              steps: steps,
+              generator: 'modal_sync'
+            }
+          });
+          
+      }).catch(async (error) => {
         console.error(`[MarketingImageFunction] Job ${job.id} failed:`, error);
         // Update job status to failed
         await supabase

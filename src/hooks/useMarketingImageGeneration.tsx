@@ -106,7 +106,19 @@ const useMarketingImageJobStatus = (jobId: string | null) => {
       };
     },
     enabled: !!jobId,
-    refetchInterval: 2000, // Poll every 2 seconds
+    refetchInterval: (query) => {
+      // If we don't have data yet, continue polling
+      if (!query.state.data) return 2000;
+      
+      // Stop polling if job is completed or failed  
+      const status = query.state.data.status;
+      if (status === 'completed' || status === 'failed') {
+        return false;
+      }
+      
+      // Poll every 2 seconds for pending/processing jobs
+      return 2000;
+    },
     refetchIntervalInBackground: false,
   });
 };
@@ -118,13 +130,6 @@ export const useMarketingImageGeneration = () => {
   
   const startJobMutation = useStartMarketingImageJob();
   const { data: jobStatus, error: statusError } = useMarketingImageJobStatus(currentJobId);
-
-  // Stop polling when job is complete
-  useEffect(() => {
-    if (jobStatus?.status === 'completed' || jobStatus?.status === 'failed') {
-      // Optional: Could add logic here to stop polling, but the query will handle it
-    }
-  }, [jobStatus?.status]);
 
   // Handle job completion
   useEffect(() => {
