@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -170,6 +170,9 @@ export const CreateTeamDialog = ({ open, onOpenChange, onSuccess }: CreateTeamDi
             <Users className="h-5 w-5 mr-2" />
             Create New Team
           </DialogTitle>
+          <DialogDescription>
+            Create a new team and assign it to an existing user with a Growth or Elite plan.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -177,14 +180,19 @@ export const CreateTeamDialog = ({ open, onOpenChange, onSuccess }: CreateTeamDi
             <Label htmlFor="team-name">Team Name *</Label>
             <Input
               id="team-name"
+              name="team-name"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
               placeholder="Enter team name"
               disabled={loading}
               maxLength={50}
+              aria-describedby={errors.name ? "team-name-error" : undefined}
+              aria-invalid={!!errors.name}
             />
             {errors.name && (
-              <p className="text-sm text-destructive">{errors.name}</p>
+              <p id="team-name-error" className="text-sm text-destructive" role="alert">
+                {errors.name}
+              </p>
             )}
           </div>
 
@@ -192,14 +200,19 @@ export const CreateTeamDialog = ({ open, onOpenChange, onSuccess }: CreateTeamDi
             <Label htmlFor="owner-email">Team Owner Email *</Label>
             <Input
               id="owner-email"
+              name="owner-email"
               type="email"
               value={formData.ownerEmail}
               onChange={(e) => handleInputChange("ownerEmail", e.target.value)}
               placeholder="owner@example.com"
               disabled={loading}
+              aria-describedby={errors.ownerEmail ? "owner-email-error" : undefined}
+              aria-invalid={!!errors.ownerEmail}
             />
             {errors.ownerEmail && (
-              <p className="text-sm text-destructive">{errors.ownerEmail}</p>
+              <p id="owner-email-error" className="text-sm text-destructive" role="alert">
+                {errors.ownerEmail}
+              </p>
             )}
             <p className="text-xs text-muted-foreground">
               User must exist and have a Growth or Elite plan

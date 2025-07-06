@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -192,6 +192,9 @@ export const EditTeamDialog = ({ open, onOpenChange, team, onSuccess }: EditTeam
             <Edit3 className="h-5 w-5 mr-2" />
             Edit Team: {team.name}
           </DialogTitle>
+          <DialogDescription>
+            Update team settings, rename the team, or transfer ownership to another user.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -201,14 +204,19 @@ export const EditTeamDialog = ({ open, onOpenChange, team, onSuccess }: EditTeam
               <Label htmlFor="team-name">Team Name</Label>
               <Input
                 id="team-name"
+                name="team-name"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Enter team name"
                 disabled={loading}
                 maxLength={50}
+                aria-describedby={errors.name ? "team-name-error" : undefined}
+                aria-invalid={!!errors.name}
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name}</p>
+                <p id="team-name-error" className="text-sm text-destructive" role="alert">
+                  {errors.name}
+                </p>
               )}
             </div>
 
@@ -253,14 +261,19 @@ export const EditTeamDialog = ({ open, onOpenChange, team, onSuccess }: EditTeam
                     <Label htmlFor="transfer-email">New Owner Email</Label>
                     <Input
                       id="transfer-email"
+                      name="transfer-email"
                       type="email"
                       value={formData.transferEmail}
                       onChange={(e) => handleInputChange("transferEmail", e.target.value)}
                       placeholder="new-owner@example.com"
                       disabled={loading}
+                      aria-describedby={errors.transferEmail ? "transfer-email-error" : undefined}
+                      aria-invalid={!!errors.transferEmail}
                     />
                     {errors.transferEmail && (
-                      <p className="text-sm text-destructive">{errors.transferEmail}</p>
+                      <p id="transfer-email-error" className="text-sm text-destructive" role="alert">
+                        {errors.transferEmail}
+                      </p>
                     )}
                     <p className="text-xs text-muted-foreground">
                       User must exist and have a Growth or Elite plan
