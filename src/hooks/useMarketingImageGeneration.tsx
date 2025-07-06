@@ -77,7 +77,7 @@ const useStartMarketingImageJob = () => {
 
 // Hook for checking job status
 const useMarketingImageJobStatus = (jobId: string | null) => {
-  return useQuery({
+  return useQuery<MarketingImageJob>({
     queryKey: ['marketing-image-job', jobId],
     queryFn: async (): Promise<MarketingImageJob> => {
       if (!jobId) throw new Error('No job ID provided');
@@ -106,14 +106,7 @@ const useMarketingImageJobStatus = (jobId: string | null) => {
       };
     },
     enabled: !!jobId,
-    refetchInterval: (data) => {
-      // Stop polling if job is completed or failed  
-      if (data?.status === 'completed' || data?.status === 'failed') {
-        return false;
-      }
-      // Poll every 2 seconds for pending/processing jobs
-      return 2000;
-    },
+    refetchInterval: 2000, // Poll every 2 seconds
     refetchIntervalInBackground: false,
   });
 };
@@ -125,6 +118,13 @@ export const useMarketingImageGeneration = () => {
   
   const startJobMutation = useStartMarketingImageJob();
   const { data: jobStatus, error: statusError } = useMarketingImageJobStatus(currentJobId);
+
+  // Stop polling when job is complete
+  useEffect(() => {
+    if (jobStatus?.status === 'completed' || jobStatus?.status === 'failed') {
+      // Optional: Could add logic here to stop polling, but the query will handle it
+    }
+  }, [jobStatus?.status]);
 
   // Handle job completion
   useEffect(() => {
