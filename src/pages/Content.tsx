@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,10 +12,31 @@ import Layout from "@/components/layout/Layout";
 import { useUserContent } from "@/hooks/useUserContent";
 import { useContentMutations } from "@/hooks/useContentMutations";
 import { toast } from "sonner";
+// URL-to-content-type mapping
+const CONTENT_TYPE_ROUTES = {
+  'emails': 'email_sequence',
+  'social': 'social_post',
+  'landing': 'landing_page',
+  'blogs': 'blog_post',
+  'ads': 'ad_copy',
+  'funnels': 'funnel',
+  'strategy': 'strategy_brief'
+} as const;
+
 const Content = () => {
+  const { type: urlType } = useParams<{ type?: string }>();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+
+  // Set filter type based on URL parameter
+  useEffect(() => {
+    if (urlType && urlType in CONTENT_TYPE_ROUTES) {
+      setFilterType(CONTENT_TYPE_ROUTES[urlType as keyof typeof CONTENT_TYPE_ROUTES]);
+    } else if (!urlType) {
+      setFilterType("all");
+    }
+  }, [urlType]);
 
   const { data: contentItems = [], isLoading, error } = useUserContent({
     type: filterType,

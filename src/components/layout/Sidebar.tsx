@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, BarChart3, CreditCard, Zap, Settings, Menu, X, FileText, Users, Puzzle } from "@/lib/icons";
+import { LayoutDashboard, BarChart3, CreditCard, Zap, Settings, Menu, X, FileText, Users, Puzzle, Mail, Share2 } from "@/lib/icons";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SidebarItem } from "./SidebarItem";
+import { NestedSidebarItem } from "./NestedSidebarItem";
 import EmergencyLogoutButton from "@/components/auth/EmergencyLogoutButton";
 import { cn } from "@/lib/utils";
 import rocketLogo from "@/assets/rocket_svg.svg";
@@ -30,7 +31,15 @@ const Sidebar = () => {
       name: 'Content',
       href: '/content',
       icon: FileText,
-      featureName: 'page_access_content'
+      featureName: 'page_access_content',
+      children: [
+        { name: 'All Content', href: '/content', icon: FileText, featureName: 'page_access_content' },
+        { name: 'Email Campaigns', href: '/content/emails', icon: Mail, featureName: 'page_access_content' },
+        { name: 'Social Media', href: '/content/social', icon: Share2, featureName: 'page_access_content' },
+        { name: 'Landing Pages', href: '/content/landing', icon: FileText, featureName: 'page_access_content' },
+        { name: 'Blogs', href: '/content/blogs', icon: FileText, featureName: 'page_access_content' },
+        { name: 'Ad Copy', href: '/content/ads', icon: FileText, featureName: 'page_access_content' }
+      ]
     },
     {
       name: 'Teams',
@@ -118,15 +127,27 @@ const Sidebar = () => {
           {/* Navigation */}
           <nav role="navigation" aria-label="Main menu" className="flex-1 space-y-2 py-[21px] my-0 px-0">
             {navigation.map((item) => (
-              <SidebarItem
-                key={item.name}
-                name={item.name}
-                href={item.href}
-                icon={item.icon}
-                featureName={item.featureName}
-                isActive={isActive(item.href)}
-                onNavigate={() => setIsOpen(false)}
-              />
+              item.children ? (
+                <NestedSidebarItem
+                  key={item.name}
+                  name={item.name}
+                  href={item.href}
+                  icon={item.icon}
+                  featureName={item.featureName}
+                  children={item.children}
+                  onNavigate={() => setIsOpen(false)}
+                />
+              ) : (
+                <SidebarItem
+                  key={item.name}
+                  name={item.name}
+                  href={item.href}
+                  icon={item.icon}
+                  featureName={item.featureName}
+                  isActive={isActive(item.href)}
+                  onNavigate={() => setIsOpen(false)}
+                />
+              )
             ))}
           </nav>
 
