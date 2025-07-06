@@ -73,8 +73,8 @@ export const useFeatureAccessBulk = (featureNames: string[]) => {
       }
     },
     enabled: !loading && !!user?.id && featureNames.length > 0,
-    staleTime: 3 * 60 * 1000, // 3 minutes - shorter for more responsive updates
-    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+    staleTime: 8 * 60 * 1000, // 8 minutes - longer for feature access (stable data)
+    gcTime: 15 * 60 * 1000, // 15 minutes garbage collection
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: 3,

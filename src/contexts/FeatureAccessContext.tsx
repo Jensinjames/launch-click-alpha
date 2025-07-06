@@ -41,18 +41,22 @@ const PUBLIC_ROUTES = [
   '/pricing'
 ];
 
-// Core features - always loaded (ALL navigation features preloaded)
-const CORE_FEATURES = [
+// Essential features - loaded immediately (critical navigation only)
+const ESSENTIAL_FEATURES = [
   'page_access_dashboard',
   'page_access_generate',
   'page_access_content',
+  'content_generation'
+];
+
+// Secondary features - loaded on demand or route-specific
+const SECONDARY_FEATURES = [
   'page_access_teams',
-  'page_access_analytics',
+  'page_access_analytics', 
   'page_access_integrations',
   'page_access_settings',
   'page_access_admin',
   'page_access_billing',
-  'content_generation',
   'templates',
   'image_generation',
   'integrations'
@@ -92,10 +96,15 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
 
   const optimizedFeatures = useMemo(() => {
     if (preloadFeatures) return preloadFeatures;
-    if (route && ROUTE_FEATURES[route as keyof typeof ROUTE_FEATURES]) {
-      return [...CORE_FEATURES, ...ROUTE_FEATURES[route as keyof typeof ROUTE_FEATURES]];
-    }
-    return CORE_FEATURES;
+    
+    // Load essential features + route-specific features only
+    const routeSpecific = route && ROUTE_FEATURES[route as keyof typeof ROUTE_FEATURES] 
+      ? ROUTE_FEATURES[route as keyof typeof ROUTE_FEATURES] 
+      : [];
+    
+    // Combine essential + unique route features (avoid duplicates)
+    const combined = [...ESSENTIAL_FEATURES, ...routeSpecific];
+    return Array.from(new Set(combined));
   }, [preloadFeatures, route]);
 
   const shouldStartFeatureChecks = !authLoading && user;
