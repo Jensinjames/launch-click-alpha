@@ -135,10 +135,10 @@ const TeamActivityOverview = React.memo(({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Team Members Overview */}
       <Card id="team-overview-card" className="surface-elevated">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
@@ -155,7 +155,7 @@ const TeamActivityOverview = React.memo(({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 p-4">
           <div className="grid grid-cols-1 gap-2">
             {displayTeamMembers.slice(0, 4).map((member) => (
               <div 
@@ -190,7 +190,7 @@ const TeamActivityOverview = React.memo(({
 
       {/* Pending Tasks */}
       <Card id="pending-tasks-card" className="surface-elevated">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
@@ -207,7 +207,7 @@ const TeamActivityOverview = React.memo(({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-2 p-4">
           {displayPendingTasks.map((task) => (
             <div 
               key={task.id} 
@@ -243,14 +243,14 @@ const TeamActivityOverview = React.memo(({
 
       {/* Recent Activity */}
       <Card id="recent-activity-card" className="surface-elevated">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-info" />
             Recent Activity
           </CardTitle>
           <CardDescription>Latest team updates and changes</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-2 p-4">
           {displayRecentActivity.map((activity) => {
             const ActivityIcon = getActivityIcon(activity.type);
             return (
