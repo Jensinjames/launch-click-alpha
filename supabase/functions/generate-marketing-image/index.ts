@@ -3,6 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
 const GRADIO_API_URL = "https://jensin-ai-marketing-content-creator.hf.space/gradio_api/call/single_image_generation";
@@ -168,13 +170,20 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
 }
 
 serve(async (req) => {
+  console.log(`[MarketingImageFunction] ${req.method} request received`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('[MarketingImageFunction] Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { prompt, steps = 50, style = "none" } = await req.json();
+    console.log('[MarketingImageFunction] Processing POST request');
+    const requestBody = await req.text();
+    console.log('[MarketingImageFunction] Raw request body:', requestBody);
+    
+    const { prompt, steps = 50, style = "none" } = JSON.parse(requestBody);
     
     if (!prompt) {
       return new Response(

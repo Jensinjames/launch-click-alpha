@@ -20,14 +20,16 @@ export const addSecurityHeaders = () => {
     isDevelopment 
       ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' https://supabase.co https://*.supabase.co http://localhost:* ws://localhost:* wss://localhost:*`
       : `script-src 'self' 'nonce-${nonce}' https://supabase.co https://*.supabase.co`,
-    `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    isDevelopment
+      ? `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`
+      : `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
     isDevelopment 
       ? "img-src 'self' data: https: blob: http://localhost:*"
       : "img-src 'self' data: https: blob:",
     isDevelopment
-      ? "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co http://localhost:* ws://localhost:* wss://localhost:*"
-      : "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co",
+      ? "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co https://gbdmxgkkjekiaqpsyeib.supabase.co http://localhost:* ws://localhost:* wss://localhost:*"
+      : "connect-src 'self' https://supabase.co https://*.supabase.co wss://*.supabase.co https://gbdmxgkkjekiaqpsyeib.supabase.co",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",

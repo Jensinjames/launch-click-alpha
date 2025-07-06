@@ -27,9 +27,21 @@ export const useMarketingImageGeneration = () => {
 
   const generateMarketingImageMutation = useMutation({
     mutationFn: async (params: GenerateMarketingImageParams): Promise<GeneratedMarketingImage> => {
+      console.log('[MarketingImageGeneration] Starting generation with params:', params);
+      
       if (!user) {
+        console.error('[MarketingImageGeneration] User not authenticated');
         throw new Error('User not authenticated');
       }
+
+      // Verify authentication session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.error('[MarketingImageGeneration] No valid session:', sessionError);
+        throw new Error('Authentication session expired. Please log in again.');
+      }
+
+      console.log('[MarketingImageGeneration] Authentication verified, checking feature access');
 
       // Check feature access and deduct credits (5 credits per marketing image)
       try {
@@ -39,28 +51,55 @@ export const useMarketingImageGeneration = () => {
           5, // 5 credits per marketing image
           false // not a dry run, actually deduct credits
         );
+        console.log('[MarketingImageGeneration] Feature access verified, credits deducted');
       } catch (error: any) {
+        console.error('[MarketingImageGeneration] Feature access error:', error);
         if (error.type === 'QUOTA_EXCEEDED' || error.type === 'PLAN_LIMIT') {
           throw new Error('Insufficient credits or plan access for marketing image generation');
         }
         throw error;
       }
 
-      // Generate marketing image using edge function
-      const { data, error } = await supabase.functions.invoke('generate-marketing-image', {
-        body: {
-          prompt: params.prompt,
-          style: params.style || 'none',
-          steps: params.num_steps || 50
-        }
+      console.log('[MarketingImageGeneration] Calling edge function with payload:', {
+        prompt: params.prompt,
+        style: params.style || 'none',
+        steps: params.num_steps || 50
       });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to generate marketing image');
-      }
+      // Generate marketing image using edge function
+      let data: any;
+      try {
+        const response = await supabase.functions.invoke('generate-marketing-image', {
+          body: {
+            prompt: params.prompt,
+            style: params.style || 'none',
+            steps: params.num_steps || 50
+          }
+        });
 
-      if (!data.success) {
-        throw new Error(data.error || 'Marketing image generation failed');
+        console.log('[MarketingImageGeneration] Edge function response:', response);
+
+        if (response.error) {
+          console.error('[MarketingImageGeneration] Edge function error:', response.error);
+          throw new Error(`Edge function error: ${response.error.message || JSON.stringify(response.error)}`);
+        }
+
+        if (!response.data) {
+          console.error('[MarketingImageGeneration] No data returned from edge function');
+          throw new Error('No data returned from image generation service');
+        }
+
+        data = response.data;
+
+        if (!data.success) {
+          console.error('[MarketingImageGeneration] Generation failed:', data.error);
+          throw new Error(data.error || 'Marketing image generation failed');
+        }
+
+        console.log('[MarketingImageGeneration] Image generated successfully');
+      } catch (invokeError: any) {
+        console.error('[MarketingImageGeneration] supabase.functions.invoke failed:', invokeError);
+        throw new Error(`Failed to send a request to the Edge Function: ${invokeError.message}`);
       }
 
       // Store image metadata in database
