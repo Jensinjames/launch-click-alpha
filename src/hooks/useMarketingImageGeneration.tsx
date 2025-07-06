@@ -99,7 +99,18 @@ export const useMarketingImageGeneration = () => {
         console.log('[MarketingImageGeneration] Image generated successfully');
       } catch (invokeError: any) {
         console.error('[MarketingImageGeneration] supabase.functions.invoke failed:', invokeError);
-        throw new Error(`Failed to send a request to the Edge Function: ${invokeError.message}`);
+        
+        // Handle specific timeout errors
+        if (invokeError.message?.includes('timed out') || invokeError.message?.includes('timeout')) {
+          throw new Error('Image generation timed out. AI models can be slow - please try again.');
+        }
+        
+        // Handle other Edge Function errors
+        if (invokeError.message?.includes('Edge function error')) {
+          throw new Error(`Image generation failed: ${invokeError.message.replace('Edge function error:', '').trim()}`);
+        }
+        
+        throw new Error(`Failed to connect to image generation service: ${invokeError.message}`);
       }
 
       // Store image metadata in database
@@ -139,7 +150,15 @@ export const useMarketingImageGeneration = () => {
     },
     onError: (error: any) => {
       console.error('Marketing image generation error:', error);
-      toast.error(error.message || 'Failed to generate marketing image');
+      
+      // Show user-friendly error messages
+      if (error.message?.includes('timed out') || error.message?.includes('timeout')) {
+        toast.error('Image generation timed out. Please try again - AI models can take time to process.');
+      } else if (error.message?.includes('credits') || error.message?.includes('quota')) {
+        toast.error('Insufficient credits for image generation. Please upgrade your plan.');
+      } else {
+        toast.error(error.message || 'Failed to generate marketing image');
+      }
     }
   });
 

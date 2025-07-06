@@ -103,11 +103,19 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
   const pollUrl = `${GRADIO_API_URL}/${eventId}`;
   console.log(`Polling for result: ${pollUrl}`);
   
-  // Extended attempts for 30+ second generation time  
-  const maxAttempts = 30;
-  let pollInterval = 2000; // Start with 2 seconds for longer tasks
+  // Reduced attempts to prevent Edge Function timeout - target ~30-45 seconds max
+  const maxAttempts = 15;
+  let pollInterval = 1000; // Start with 1 second for faster response
+  const startTime = Date.now();
   
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Check if we're approaching timeout (45 seconds max)
+    const elapsed = Date.now() - startTime;
+    if (elapsed > 45000) {
+      console.log(`Stopping polling after ${elapsed}ms to prevent timeout`);
+      throw new Error(`Image generation timed out after ${Math.round(elapsed/1000)} seconds. Please try again.`);
+    }
+    
     try {
       const pollResponse = await fetch(pollUrl, {
         headers: {
@@ -123,7 +131,7 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
         }
         
         // Progressive backoff - increase interval for retries
-        pollInterval = Math.min(pollInterval * 1.3, 5000);
+        pollInterval = Math.min(pollInterval * 1.2, 3000);
         await new Promise(resolve => setTimeout(resolve, pollInterval));
         continue;
       }
@@ -150,7 +158,8 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
       console.log(`Poll attempt ${attempt + 1}: Result not ready yet`);
       
       // Progressive backoff - increase interval
-      pollInterval = Math.min(pollInterval * 1.2, 4000);
+      pollInterval = Math.min(pollInterval * 1.1, 3000);
+      console.log(`Next poll in ${pollInterval}ms (attempt ${attempt + 1}/${maxAttempts})`);
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     } catch (error) {
       console.error(`Error during poll attempt ${attempt + 1}:`, error);
@@ -161,12 +170,13 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
       }
       
       // Progressive backoff for other errors
-      pollInterval = Math.min(pollInterval * 1.5, 5000);
+      pollInterval = Math.min(pollInterval * 1.3, 3000);
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
   }
   
-  throw new Error(`Image generation timed out after ${maxAttempts} attempts`);
+  const totalTime = Math.round((Date.now() - startTime) / 1000);
+  throw new Error(`Image generation timed out after ${totalTime} seconds (${maxAttempts} attempts). The AI model may be busy - please try again in a moment.`);
 }
 
 serve(async (req) => {
