@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
-import DashboardStats from "@/components/dashboard/DashboardStats";
-import AssetGeneratorGrid from "@/components/dashboard/AssetGeneratorGrid";
+import EnhancedDashboardStats from "@/components/dashboard/EnhancedDashboardStats";
+import ContentCategoryGrid from "@/components/dashboard/ContentCategoryGrid";
+import RecentContentPerformance from "@/components/dashboard/RecentContentPerformance";
+import TeamActivityOverview from "@/components/dashboard/TeamActivityOverview";
 import RecentAssets from "@/components/dashboard/RecentAssets";
 const Dashboard = () => {
   const {
@@ -45,20 +47,35 @@ const Dashboard = () => {
   };
   return <AuthGuard requireAuth={true}>
       <Layout>
-        <div className="space-y-8">
-          <div className="mb-12">
-            <h1 className="text-4xl font-bold mb-3 text-violet-700">
+        <div className="max-w-7xl mx-auto">
+          {/* Welcome Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-brand-secondary bg-clip-text text-transparent">
               Welcome back, {user?.user_metadata?.full_name || "User"}! 👋
             </h1>
-            <p className="text-lg text-zinc-50">
+            <p className="text-lg text-muted-foreground">
               Ready to create some amazing marketing content today?
             </p>
           </div>
 
-          <DashboardStats credits={credits} assetsCount={recentAssets.length} />
+          {/* Enhanced Stats */}
+          <EnhancedDashboardStats credits={credits} assetsCount={recentAssets.length} />
 
-          <AssetGeneratorGrid />
+          {/* Main Dashboard Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-8">
+            {/* Main Content Area */}
+            <div className="xl:col-span-3 space-y-8">
+              <ContentCategoryGrid />
+              <RecentContentPerformance />
+            </div>
 
+            {/* Right Sidebar */}
+            <div className="xl:col-span-1">
+              <TeamActivityOverview />
+            </div>
+          </div>
+
+          {/* Recent Assets Section */}
           <RecentAssets assets={recentAssets} />
         </div>
       </Layout>

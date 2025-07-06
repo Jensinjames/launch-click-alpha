@@ -63,6 +63,14 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/content/:type"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <Content />
+            </Suspense>
+          }
+        />
+        <Route
           path="/analytics"
           element={
             <Suspense fallback={<div>Loading...</div>}>
