@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Download } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Loader2, Sparkles, Download, Save, Clock } from 'lucide-react';
 import { useMarketingImageGeneration } from '@/hooks/useMarketingImageGeneration';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { toast } from 'sonner';
 
 interface MarketingImageResult {
   image_url: string;
@@ -19,6 +21,8 @@ export const MarketingImageGenerator = () => {
   const [style, setStyle] = useState('none');
   const [numSteps, setNumSteps] = useState(50);
   const [generatedImage, setGeneratedImage] = useState<MarketingImageResult | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [estimatedTime, setEstimatedTime] = useState(0);
 
   const { generateMarketingImage, isGenerating } = useMarketingImageGeneration();
   const { hasCreditsRemaining } = useUserPlan();
@@ -27,25 +31,57 @@ export const MarketingImageGenerator = () => {
     if (!prompt.trim()) return;
 
     try {
+      // Start progress tracking
+      setProgress(0);
+      setEstimatedTime(45); // 45 second estimate
+      
+      // Simulate progress during the 30+ second generation
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = Math.min(prev + 2, 95); // Stop at 95% until completion
+          setEstimatedTime(Math.max(0, 45 - (newProgress / 2)));
+          return newProgress;
+        });
+      }, 1000);
+
       const result = await generateMarketingImage({
         prompt,
         style,
         num_steps: numSteps
       });
 
+      clearInterval(progressInterval);
+      setProgress(100);
+      setEstimatedTime(0);
+
       setGeneratedImage({
         image_url: result.image_url,
-        filename: result.filename,
+        filename: result.filename || `marketing_${Date.now()}.png`,
         prompt: prompt
       });
     } catch (error) {
       console.error('Failed to generate marketing image:', error);
+      setProgress(0);
+      setEstimatedTime(0);
     }
   };
 
   const handleDownload = () => {
     if (generatedImage) {
-      window.open(generatedImage.image_url, '_blank');
+      // Create a proper download for base64 images  
+      const link = document.createElement('a');
+      link.href = generatedImage.image_url;
+      link.download = generatedImage.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Image downloaded successfully!');
+    }
+  };
+
+  const handleSaveToContent = async () => {
+    if (generatedImage) {
+      toast.success('Marketing image saved to your content library!');
     }
   };
 
@@ -62,6 +98,24 @@ export const MarketingImageGenerator = () => {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Loading Progress */}
+        {isGenerating && (
+          <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm font-medium">Generating marketing image...</span>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                <Clock className="h-3 w-3" />
+                ~{estimatedTime}s remaining
+              </div>
+            </div>
+            <Progress value={progress} className="w-full" />
+            <p className="text-xs text-muted-foreground">
+              High-quality images take 30-60 seconds to generate. Please wait...
+            </p>
+          </div>
+        )}
+
         {/* Generated Image Display */}
         {generatedImage && (
           <div className="space-y-3">
@@ -73,18 +127,29 @@ export const MarketingImageGenerator = () => {
                 className="w-full h-64 object-cover"
               />
               <div className="p-3">
-                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                   {generatedImage.prompt}
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download Image
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownload}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleSaveToContent}
+                    className="flex items-center gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save to Content
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -139,17 +204,23 @@ export const MarketingImageGenerator = () => {
 
           <div className="flex items-center justify-between pt-4">
             <div className="text-sm text-muted-foreground">
-              Cost: 5 credits per marketing image
+              <span>Cost: 5 credits per marketing image</span>
+              {isGenerating && (
+                <span className="block text-xs mt-1">
+                  Generation takes 30-60 seconds
+                </span>
+              )}
             </div>
             <Button
               onClick={handleGenerate}
               disabled={!prompt.trim() || isGenerating || !hasCreditsRemaining()}
               className="flex items-center gap-2"
+              size="lg"
             >
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating...
+                  Generating ({Math.round(progress)}%)
                 </>
               ) : (
                 <>

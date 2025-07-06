@@ -17,6 +17,7 @@ interface GeneratedMarketingImage {
   filename: string;
   prompt: string;
   revised_prompt?: string;
+  generation_params?: any;
   error?: string;
 }
 
@@ -50,7 +51,7 @@ export const useMarketingImageGeneration = () => {
         body: {
           prompt: params.prompt,
           style: params.style || 'none',
-          num_steps: params.num_steps || 50
+          steps: params.num_steps || 50
         }
       });
 
@@ -71,11 +72,11 @@ export const useMarketingImageGeneration = () => {
           image_url: data.image_url,
           image_type: 'marketing',
           prompt: params.prompt,
-          storage_path: data.filename,
-          generation_params: {
+          storage_path: data.filename || `marketing_${Date.now()}.png`,
+          generation_params: data.generation_params || {
             style: params.style,
             num_steps: params.num_steps,
-            generator: 'huggingface_mcp'
+            generator: 'huggingface_gradio'
           }
         });
 
@@ -84,7 +85,13 @@ export const useMarketingImageGeneration = () => {
         // Don't fail the whole operation for this
       }
 
-      return data;
+      return {
+        success: data.success,
+        image_url: data.image_url,
+        filename: data.filename || `marketing_${Date.now()}.png`,
+        prompt: data.prompt,
+        generation_params: data.generation_params
+      };
     },
     onSuccess: (data) => {
       toast.success('Marketing image generated successfully! 5 credits used.');

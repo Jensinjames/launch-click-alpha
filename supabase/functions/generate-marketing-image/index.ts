@@ -101,9 +101,9 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
   const pollUrl = `${GRADIO_API_URL}/${eventId}`;
   console.log(`Polling for result: ${pollUrl}`);
   
-  // Reduced attempts and progressive backoff
-  const maxAttempts = 15;
-  let pollInterval = 1000; // Start with 1 second
+  // Extended attempts for 30+ second generation time  
+  const maxAttempts = 30;
+  let pollInterval = 2000; // Start with 2 seconds for longer tasks
   
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
@@ -121,7 +121,7 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
         }
         
         // Progressive backoff - increase interval for retries
-        pollInterval = Math.min(pollInterval * 1.5, 4000);
+        pollInterval = Math.min(pollInterval * 1.3, 5000);
         await new Promise(resolve => setTimeout(resolve, pollInterval));
         continue;
       }
@@ -148,7 +148,7 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
       console.log(`Poll attempt ${attempt + 1}: Result not ready yet`);
       
       // Progressive backoff - increase interval
-      pollInterval = Math.min(pollInterval * 1.2, 3000);
+      pollInterval = Math.min(pollInterval * 1.2, 4000);
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     } catch (error) {
       console.error(`Error during poll attempt ${attempt + 1}:`, error);
@@ -159,7 +159,7 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
       }
       
       // Progressive backoff for other errors
-      pollInterval = Math.min(pollInterval * 1.5, 4000);
+      pollInterval = Math.min(pollInterval * 1.5, 5000);
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
   }
@@ -185,11 +185,25 @@ serve(async (req) => {
     
     const imageBase64 = await generateMarketingImage(prompt, steps, style);
     
+    // Generate filename based on prompt and timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const safePrompt = prompt.slice(0, 50).replace(/[^a-zA-Z0-9]/g, '_');
+    const filename = `marketing_${safePrompt}_${timestamp}.png`;
+    
+    // Ensure base64 is properly formatted as data URL
+    const imageDataUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
-        image_url: imageBase64,
-        prompt: prompt
+        image_url: imageDataUrl,
+        filename: filename,
+        prompt: prompt,
+        generation_params: {
+          steps: steps,
+          style: style,
+          generator: 'huggingface_gradio'
+        }
       }),
       { 
         status: 200, 
