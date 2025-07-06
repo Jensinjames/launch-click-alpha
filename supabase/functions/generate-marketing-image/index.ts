@@ -6,6 +6,7 @@ const corsHeaders = {
 };
 
 const GRADIO_API_URL = "https://jensin-ai-marketing-content-creator.hf.space/gradio_api/call/single_image_generation";
+const HF_TOKEN = Deno.env.get('HF_TOKEN');
 
 // Helper function to parse SSE responses
 async function parseSSEResponse(response: Response): Promise<any> {
@@ -52,6 +53,11 @@ async function parseSSEResponse(response: Response): Promise<any> {
 async function generateMarketingImage(prompt: string, steps: number = 50, style: string = "none"): Promise<string> {
   console.log(`Generating marketing image with prompt: ${prompt}`);
   
+  // Check if HF_TOKEN is available
+  if (!HF_TOKEN) {
+    throw new Error("HF_TOKEN is required but not configured");
+  }
+  
   // Initial API call to start the generation
   console.log(`Calling Gradio API: ${GRADIO_API_URL}`);
   const payload = {
@@ -62,13 +68,23 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
   const response = await fetch(GRADIO_API_URL, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${HF_TOKEN}`
     },
     body: JSON.stringify(payload)
   });
   
   if (!response.ok) {
-    throw new Error(`Gradio API returned ${response.status}: ${await response.text()}`);
+    const errorText = await response.text();
+    console.error(`Gradio API error: ${response.status} - ${errorText}`);
+    
+    if (response.status === 401) {
+      throw new Error("Authentication failed - check HF_TOKEN");
+    } else if (response.status === 429) {
+      throw new Error("Rate limit exceeded - please try again later");
+    } else {
+      throw new Error(`Gradio API returned ${response.status}: ${errorText}`);
+    }
   }
   
   const initData = await response.json();
@@ -81,20 +97,31 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
   const eventId = initData.event_id;
   console.log(`Got event ID: ${eventId}`);
   
-  // Poll for results
+  // Poll for results with optimized timing
   const pollUrl = `${GRADIO_API_URL}/${eventId}`;
   console.log(`Polling for result: ${pollUrl}`);
   
-  // Maximum number of polling attempts
-  const maxAttempts = 30;
-  const pollInterval = 2000; // 2 seconds
+  // Reduced attempts and progressive backoff
+  const maxAttempts = 15;
+  let pollInterval = 1000; // Start with 1 second
   
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const pollResponse = await fetch(pollUrl);
+      const pollResponse = await fetch(pollUrl, {
+        headers: {
+          "Authorization": `Bearer ${HF_TOKEN}`
+        }
+      });
       
       if (!pollResponse.ok) {
         console.log(`Poll attempt ${attempt + 1} failed: ${pollResponse.status}`);
+        
+        if (pollResponse.status === 401) {
+          throw new Error("Authentication failed during polling");
+        }
+        
+        // Progressive backoff - increase interval for retries
+        pollInterval = Math.min(pollInterval * 1.5, 4000);
         await new Promise(resolve => setTimeout(resolve, pollInterval));
         continue;
       }
@@ -105,27 +132,39 @@ async function generateMarketingImage(prompt: string, steps: number = 50, style:
         // Handle SSE response
         const result = await parseSSEResponse(pollResponse);
         if (result && result.data && result.data[0]) {
-          // Return the base64 image data
+          console.log("Successfully generated image via SSE");
           return result.data[0];
         }
       } else {
         // Try regular JSON parsing
         const result = await pollResponse.json();
         if (result && result.data && result.data[0]) {
+          console.log("Successfully generated image via JSON");
           return result.data[0];
         }
       }
       
       // If we get here, the result wasn't ready yet
       console.log(`Poll attempt ${attempt + 1}: Result not ready yet`);
+      
+      // Progressive backoff - increase interval
+      pollInterval = Math.min(pollInterval * 1.2, 3000);
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     } catch (error) {
       console.error(`Error during poll attempt ${attempt + 1}:`, error);
+      
+      // Don't retry on authentication errors
+      if (error.message.includes("Authentication failed")) {
+        throw error;
+      }
+      
+      // Progressive backoff for other errors
+      pollInterval = Math.min(pollInterval * 1.5, 4000);
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
   }
   
-  throw new Error("Maximum polling attempts reached without getting a result");
+  throw new Error(`Image generation timed out after ${maxAttempts} attempts`);
 }
 
 serve(async (req) => {
