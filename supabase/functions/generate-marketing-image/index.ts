@@ -7,176 +7,50 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-const GRADIO_API_URL = "https://jensin-ai-marketing-content-creator.hf.space/gradio_api/call/single_image_generation";
-const HF_TOKEN = Deno.env.get('HF_TOKEN');
-
-// Helper function to parse SSE responses
-async function parseSSEResponse(response: Response): Promise<any> {
-  const reader = response.body?.getReader();
-  if (!reader) {
-    throw new Error("Response body is null");
-  }
-
-  let result = null;
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    
-    // Convert the Uint8Array to a string and add it to our buffer
-    buffer += new TextDecoder().decode(value);
-    
-    // Look for complete JSON objects in the SSE stream
-    // Gradio typically sends data in format: data: {"data":["base64image"]}\n\n
-    const dataMatches = buffer.match(/data: ({.*?})\n\n/g);
-    if (dataMatches && dataMatches.length > 0) {
-      for (const match of dataMatches) {
-        try {
-          // Extract the JSON part from "data: {json}\n\n"
-          const jsonStr = match.replace(/^data: /, "").trim();
-          const data = JSON.parse(jsonStr);
-          if (data.data && data.data.length > 0) {
-            result = data;
-            break;
-          }
-        } catch (e) {
-          console.log("Error parsing SSE data chunk:", e);
-        }
-      }
-      
-      if (result) break;
-    }
-  }
-
-  return result;
-}
+const MODAL_API_URL = "https://jensinjames--flux-api-server-fastapi-server.modal.run";
 
 async function generateMarketingImage(prompt: string, steps: number = 50, style: string = "none"): Promise<string> {
   console.log(`Generating marketing image with prompt: ${prompt}`);
   
-  // Check if HF_TOKEN is available
-  if (!HF_TOKEN) {
-    throw new Error("HF_TOKEN is required but not configured");
-  }
-  
-  // Initial API call to start the generation
-  console.log(`Calling Gradio API: ${GRADIO_API_URL}`);
+  // Call Modal.com FastAPI backend directly
+  console.log(`Calling Modal.com API: ${MODAL_API_URL}/generate`);
   const payload = {
-    data: [prompt, steps, style]
+    prompt: prompt,
+    num_inference_steps: steps,
+    style: style
   };
   console.log(`Request payload: ${JSON.stringify(payload, null, 2)}`);
   
-  const response = await fetch(GRADIO_API_URL, {
+  const response = await fetch(`${MODAL_API_URL}/generate`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${HF_TOKEN}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify(payload)
   });
   
   if (!response.ok) {
     const errorText = await response.text();
-    console.error(`Gradio API error: ${response.status} - ${errorText}`);
+    console.error(`Modal API error: ${response.status} - ${errorText}`);
     
-    if (response.status === 401) {
-      throw new Error("Authentication failed - check HF_TOKEN");
-    } else if (response.status === 429) {
+    if (response.status === 429) {
       throw new Error("Rate limit exceeded - please try again later");
+    } else if (response.status === 500) {
+      throw new Error("Backend server error - the AI model may be busy");
     } else {
-      throw new Error(`Gradio API returned ${response.status}: ${errorText}`);
+      throw new Error(`Modal API returned ${response.status}: ${errorText}`);
     }
   }
   
-  const initData = await response.json();
-  console.log(`Gradio API init response: ${JSON.stringify(initData)}`);
+  const result = await response.json();
+  console.log(`Modal API response received`);
   
-  if (!initData.event_id) {
-    throw new Error("No event ID returned from Gradio API");
+  if (!result.image) {
+    throw new Error("No image returned from Modal API");
   }
   
-  const eventId = initData.event_id;
-  console.log(`Got event ID: ${eventId}`);
-  
-  // Poll for results with optimized timing
-  const pollUrl = `${GRADIO_API_URL}/${eventId}`;
-  console.log(`Polling for result: ${pollUrl}`);
-  
-  // Reduced attempts to prevent Edge Function timeout - target ~30-45 seconds max
-  const maxAttempts = 15;
-  let pollInterval = 1000; // Start with 1 second for faster response
-  const startTime = Date.now();
-  
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    // Check if we're approaching timeout (45 seconds max)
-    const elapsed = Date.now() - startTime;
-    if (elapsed > 45000) {
-      console.log(`Stopping polling after ${elapsed}ms to prevent timeout`);
-      throw new Error(`Image generation timed out after ${Math.round(elapsed/1000)} seconds. Please try again.`);
-    }
-    
-    try {
-      const pollResponse = await fetch(pollUrl, {
-        headers: {
-          "Authorization": `Bearer ${HF_TOKEN}`
-        }
-      });
-      
-      if (!pollResponse.ok) {
-        console.log(`Poll attempt ${attempt + 1} failed: ${pollResponse.status}`);
-        
-        if (pollResponse.status === 401) {
-          throw new Error("Authentication failed during polling");
-        }
-        
-        // Progressive backoff - increase interval for retries
-        pollInterval = Math.min(pollInterval * 1.2, 3000);
-        await new Promise(resolve => setTimeout(resolve, pollInterval));
-        continue;
-      }
-      
-      // Check if the response is SSE format
-      const contentType = pollResponse.headers.get("content-type");
-      if (contentType && contentType.includes("text/event-stream")) {
-        // Handle SSE response
-        const result = await parseSSEResponse(pollResponse);
-        if (result && result.data && result.data[0]) {
-          console.log("Successfully generated image via SSE");
-          return result.data[0];
-        }
-      } else {
-        // Try regular JSON parsing
-        const result = await pollResponse.json();
-        if (result && result.data && result.data[0]) {
-          console.log("Successfully generated image via JSON");
-          return result.data[0];
-        }
-      }
-      
-      // If we get here, the result wasn't ready yet
-      console.log(`Poll attempt ${attempt + 1}: Result not ready yet`);
-      
-      // Progressive backoff - increase interval
-      pollInterval = Math.min(pollInterval * 1.1, 3000);
-      console.log(`Next poll in ${pollInterval}ms (attempt ${attempt + 1}/${maxAttempts})`);
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-    } catch (error) {
-      console.error(`Error during poll attempt ${attempt + 1}:`, error);
-      
-      // Don't retry on authentication errors
-      if (error.message.includes("Authentication failed")) {
-        throw error;
-      }
-      
-      // Progressive backoff for other errors
-      pollInterval = Math.min(pollInterval * 1.3, 3000);
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-    }
-  }
-  
-  const totalTime = Math.round((Date.now() - startTime) / 1000);
-  throw new Error(`Image generation timed out after ${totalTime} seconds (${maxAttempts} attempts). The AI model may be busy - please try again in a moment.`);
+  console.log("Successfully generated image via Modal.com");
+  return result.image;
 }
 
 serve(async (req) => {
@@ -221,7 +95,7 @@ serve(async (req) => {
         generation_params: {
           steps: steps,
           style: style,
-          generator: 'huggingface_gradio'
+          generator: 'modal_fastapi'
         }
       }),
       { 
