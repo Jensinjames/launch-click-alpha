@@ -198,6 +198,42 @@ export const useAdminMutations = () => {
     }
   });
 
+  // Update User Plan Mutation
+  const updateUserPlan = useMutation({
+    mutationFn: async (data: { userId: string; newPlan: 'starter' | 'pro' | 'growth' | 'elite' }) => {
+      const { error } = await supabase
+        .from('user_plans')
+        .update({ 
+          plan_type: data.newPlan,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', data.userId);
+
+      if (error) throw error;
+
+      // Log the admin action
+      await supabase.rpc('audit_sensitive_operation', {
+        p_action: 'admin_update_user_plan',
+        p_table_name: 'user_plans',
+        p_record_id: data.userId,
+        p_new_values: { 
+          plan_type: data.newPlan,
+          updated_at: new Date().toISOString()
+        }
+      });
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['upgrade-candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toast.success('User plan updated successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update user plan');
+    }
+  });
+
   return {
     updateUserCredits,
     resetUserCredits,
@@ -205,6 +241,7 @@ export const useAdminMutations = () => {
     banUser,
     unbanUser,
     updateUserRole,
+    updateUserPlan,
     
     // Consolidated state
     isLoading: updateUserCredits.isPending || 
@@ -212,7 +249,8 @@ export const useAdminMutations = () => {
                deleteTeam.isPending || 
                banUser.isPending || 
                unbanUser.isPending || 
-               updateUserRole.isPending,
+               updateUserRole.isPending ||
+               updateUserPlan.isPending,
     
     // Reset all mutations
     reset: () => {
@@ -222,6 +260,7 @@ export const useAdminMutations = () => {
       banUser.reset();
       unbanUser.reset();
       updateUserRole.reset();
+      updateUserPlan.reset();
     }
   };
 };
