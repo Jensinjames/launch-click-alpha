@@ -98,6 +98,87 @@ export type Database = {
           },
         ]
       }
+      content_assemblies: {
+        Row: {
+          assembly_type: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assembly_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assembly_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      content_dependencies: {
+        Row: {
+          assembly_id: string
+          content_id: string
+          created_at: string
+          dependency_order: number
+          dependency_type: string
+          id: string
+          settings: Json | null
+        }
+        Insert: {
+          assembly_id: string
+          content_id: string
+          created_at?: string
+          dependency_order?: number
+          dependency_type?: string
+          id?: string
+          settings?: Json | null
+        }
+        Update: {
+          assembly_id?: string
+          content_id?: string
+          created_at?: string
+          dependency_order?: number
+          dependency_type?: string
+          id?: string
+          settings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_dependencies_assembly_id_fkey"
+            columns: ["assembly_id"]
+            isOneToOne: false
+            referencedRelation: "content_assemblies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_dependencies_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "generated_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_performance_summary: {
         Row: {
           content_id: string
@@ -1394,6 +1475,10 @@ export type Database = {
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_assembly_with_content: {
+        Args: { assembly_uuid: string }
+        Returns: Json
       }
       get_category_info: {
         Args: { content_type: Database["public"]["Enums"]["content_type"] }

@@ -8,6 +8,7 @@ interface PageHeaderProps {
   dateFilter?: string;
   onExport?: () => void;
   onDateFilterChange?: (filter: string) => void;
+  action?: React.ReactNode;
   children?: React.ReactNode;
 }
 const PageHeader = ({
@@ -18,6 +19,7 @@ const PageHeader = ({
   dateFilter = "Last 30 days",
   onExport,
   onDateFilterChange,
+  action,
   children
 }: PageHeaderProps) => {
   return <div className="border-b border-border pb-6 mb-8">
@@ -44,6 +46,7 @@ const PageHeader = ({
               Export
             </Button>}
           
+          {action}
           {children}
         </div>
       </div>

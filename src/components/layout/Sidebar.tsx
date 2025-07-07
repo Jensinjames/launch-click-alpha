@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, BarChart3, CreditCard, Zap, Settings, Menu, X, FileText, Users, Puzzle, Mail, Share2 } from "@/lib/icons";
+import { LayoutDashboard, BarChart3, CreditCard, Zap, Settings, Menu, X, FileText, Users, Puzzle, Mail, Share2, Layers } from "@/lib/icons";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SidebarItem } from "./SidebarItem";
 import { NestedSidebarItem } from "./NestedSidebarItem";
@@ -41,6 +41,12 @@ const Sidebar = () => {
         { name: 'Blogs', href: '/content/blogs', icon: FileText, featureName: 'page_access_content' },
         { name: 'Ad Copy', href: '/content/ads', icon: FileText, featureName: 'page_access_content' }
       ]
+    },
+    {
+      name: 'Assemblies',
+      href: '/assemblies',
+      icon: Layers,
+      featureName: 'page_access_assemblies'
     },
     {
       name: 'Teams',

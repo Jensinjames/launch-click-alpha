@@ -8,7 +8,7 @@ export { Menu, X, ArrowRight, ChevronDown, ChevronUp, ChevronRight } from "lucid
 export { LayoutDashboard, BarChart3, TrendingUp, TrendingDown, Eye, MousePointer, Activity } from "lucide-react";
 
 // Content & File Icons
-export { FileText, Plus, Download, Upload, Copy } from "lucide-react";
+export { FileText, Plus, Download, Upload, Copy, Layers } from "lucide-react";
 
 // User & Team Icons  
 export { Users, User, Crown, UserPlus } from "lucide-react";

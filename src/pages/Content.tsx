@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, Copy, Eye, Calendar, FileText, Mail, Share2, MoreHorizontal, Heart, Trash2 } from "lucide-react";
+import { Search, Filter, Download, Copy, Eye, Calendar, FileText, Mail, Share2, MoreHorizontal, Heart, Trash2, Layers } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
 import { useUserContent } from "@/hooks/useUserContent";
@@ -15,6 +15,7 @@ import CategoryHeader from "@/components/content/CategoryHeader";
 import { useContentFilters } from "@/hooks/content/useContentFilters";
 import { useContentNavigation } from "@/hooks/content/useContentNavigation";
 import { ContentOperationsService } from "@/services/content/ContentOperationsService";
+import { CreateAssemblyDialog } from "@/components/assembly";
 
 type ContentType = keyof typeof CONTENT_TYPE_ROUTES;
 
@@ -90,6 +91,14 @@ const Content = () => {
                     </div>
                   </div>
                   <div className="flex gap-3">
+                    <CreateAssemblyDialog 
+                      trigger={
+                        <Button variant="outline" size="sm">
+                          <Layers className="h-4 w-4 mr-2" />
+                          Create Assembly
+                        </Button>
+                      }
+                    />
                     <div>
                       <Label htmlFor="content-type-filter" className="sr-only">
                         Filter by content type

@@ -15,6 +15,7 @@ import Pricing from "./pages/Pricing";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Generate = lazy(() => import("./pages/Generate"));
 const Content = lazy(() => import("./pages/Content"));
+const Assemblies = lazy(() => import("./pages/Assemblies"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Billing = lazy(() => import("./pages/Billing"));
 const Teams = lazy(() => import("./pages/Teams"));
@@ -95,6 +96,14 @@ const AppContent = () => {
           element={
             <Suspense fallback={<div>Loading...</div>}>
               <Content />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/assemblies"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <Assemblies />
             </Suspense>
           }
         />
