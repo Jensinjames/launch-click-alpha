@@ -62,7 +62,10 @@ const SECONDARY_FEATURES = [
   'templates',
   'image_generation',
   'teams',
-  'analytics'
+  'analytics',
+  'content_export_pdf',
+  'content_export_bulk',
+  'content_export_docx'
 ];
 
 interface FeatureAccessProviderProps {

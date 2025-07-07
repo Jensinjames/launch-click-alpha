@@ -326,6 +326,54 @@ export type Database = {
         }
         Relationships: []
       }
+      export_jobs: {
+        Row: {
+          completed_at: string | null
+          content_ids: string[]
+          created_at: string
+          error_message: string | null
+          expires_at: string
+          file_size: number | null
+          file_url: string | null
+          id: string
+          job_type: string
+          metadata: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          content_ids?: string[]
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          job_type: string
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          content_ids?: string[]
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          job_type?: string
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feature_hierarchy: {
         Row: {
           category: string

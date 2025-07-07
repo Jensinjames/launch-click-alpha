@@ -16,6 +16,7 @@ import { useContentFilters } from "@/hooks/content/useContentFilters";
 import { useContentNavigation } from "@/hooks/content/useContentNavigation";
 import { ContentOperationsService } from "@/services/content/ContentOperationsService";
 import { CreateAssemblyDialog } from "@/components/assembly";
+import { MultiSelectContent } from "@/components/content/MultiSelectContent";
 
 type ContentType = keyof typeof CONTENT_TYPE_ROUTES;
 
@@ -190,91 +191,12 @@ const Content = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {contentItems.map(item => {
-                  const iconName = ContentOperationsService.getTypeIcon(item.type);
-                  const IconComponent = iconName === 'Mail' ? Mail : 
-                                       iconName === 'Share2' ? Share2 : 
-                                       iconName === 'MoreHorizontal' ? MoreHorizontal : FileText;
-                  const contentText = (item.content as any)?.text || JSON.stringify(item.content, null, 2) || 'No content available';
-                  
-                  return (
-                    <Card key={item.id} className="hover:shadow-lg transition-shadow duration-200">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-3 min-w-0 flex-1">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                              <IconComponent className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-semibold truncate text-foreground text-sm">
-                                {item.title}
-                              </h3>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <Badge variant="outline" className="text-xs">
-                                  {ContentOperationsService.getTypeLabel(item.type)}
-                                </Badge>
-                                {item.is_favorite && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    <Heart className="h-3 w-3 mr-1 fill-current" />
-                                    Favorite
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleToggleFavorite(item.id, item.is_favorite || false)}
-                            className={item.is_favorite ? 'text-red-500' : 'text-muted-foreground'}
-                          >
-                            <Heart className={`h-4 w-4 ${item.is_favorite ? 'fill-current' : ''}`} />
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm mb-4 line-clamp-3 text-muted-foreground">
-                          {contentText.substring(0, 150)}...
-                        </p>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                          <div className="flex items-center space-x-4">
-                            <span className="flex items-center">
-                              <Calendar className="mr-1 h-4 w-4" />
-                              {new Date(item.created_at).toLocaleDateString()}
-                            </span>
-                            {(item.metadata as any)?.creditsCost && (
-                              <span className="flex items-center">
-                                <span className="mr-1">💳</span>
-                                {(item.metadata as any).creditsCost} credits
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => handleCopyContent(item.content)}
-                          >
-                            <Copy className="mr-2 h-4 w-4" />
-                            Copy
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteContent(item.id, item.title)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+              <MultiSelectContent 
+                contentItems={contentItems}
+                onToggleFavorite={handleToggleFavorite}
+                onDeleteContent={handleDeleteContent}
+                onCopyContent={handleCopyContent}
+              />
             )}
           </section>
         </div>
