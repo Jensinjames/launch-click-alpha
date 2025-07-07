@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SidebarItem } from "./SidebarItem";
 import { NestedSidebarItem } from "./NestedSidebarItem";
 import EmergencyLogoutButton from "@/components/auth/EmergencyLogoutButton";
+import AdminAccessIndicator from "@/features/admin-suite/components/AdminAccessIndicator";
 import { cn } from "@/lib/utils";
 import rocketLogo from "@/assets/rocket_svg.svg";
 
@@ -153,6 +154,9 @@ const Sidebar = () => {
 
           {/* User section with ThemeToggle and LogoutButton */}
           <div className="border-t border-border/50 p-4 space-y-2">
+            <div className="flex justify-center">
+              <AdminAccessIndicator showDetails={true} />
+            </div>
             <div className="flex justify-center">
               <ThemeToggle />
             </div>

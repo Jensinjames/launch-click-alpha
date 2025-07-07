@@ -29,7 +29,11 @@ export type SecurityEventType =
   | 'suspicious_multiple_sessions'
   | 'suspicious_rapid_sessions'
   | 'security_initialization_failed'
-  | 'session_ending';
+  | 'session_ending'
+  | 'admin_activity'
+  | 'admin_session_timeout'
+  | 'admin_session_warning'
+  | 'admin_rate_limit_exceeded';
 
 export interface SecurityEventData {
   email?: string;
@@ -48,6 +52,16 @@ export interface SecurityEventData {
   url?: string;
   lastSignIn?: string;
   timeDiff?: number;
+  timestamp?: number;
+  timeSinceActivity?: number;
+  timeRemaining?: number;
+  sessionTimeout?: number;
+  sessionValid?: boolean;
+  requiresRecentAuth?: boolean;
+  action?: string;
+  count?: number;
+  limit?: number;
+  timeWindow?: number;
   metadata?: Record<string, any>;
 }
 

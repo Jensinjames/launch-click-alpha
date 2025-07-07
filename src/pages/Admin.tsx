@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Users, CreditCard, Activity } from "@/lib/icons";
 import { AdminSecurityWrapper } from "@/features/admin/components/AdminSecurityWrapper";
+import AdminRouteGuard from "@/features/admin-suite/components/AdminRouteGuard";
 import { 
   LazyTeamsManagement, 
   LazyCreditsManagement, 
@@ -12,8 +13,9 @@ import {
 
 const Admin = () => {
   return (
-    <AdminSecurityWrapper emergencyMode={true}>
-      <div className="container mx-auto px-4 py-6 space-y-6">
+    <AdminRouteGuard fallbackPath="/dashboard">
+      <AdminSecurityWrapper emergencyMode={true}>
+        <div className="container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center space-x-3">
           <Shield className="h-8 w-8 text-primary" />
           <div>
@@ -56,8 +58,9 @@ const Admin = () => {
             </Suspense>
           </TabsContent>
         </Tabs>
-      </div>
-    </AdminSecurityWrapper>
+        </div>
+      </AdminSecurityWrapper>
+    </AdminRouteGuard>
   );
 };
 
