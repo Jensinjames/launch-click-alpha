@@ -47,6 +47,7 @@ const ESSENTIAL_FEATURES = [
   'page_access_dashboard',
   'page_access_generate',
   'page_access_content',
+  'page_access_assemblies',
   'page_access_teams',
   'page_access_analytics',
   'page_access_integrations',
