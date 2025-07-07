@@ -18,6 +18,30 @@ const Billing = lazy(() => import("./pages/Billing"));
 const Teams = lazy(() => import("./pages/Teams"));
 const Integrations = lazy(() => import("./pages/Integrations"));
 const Settings = lazy(() => import("./pages/Settings"));
+// Admin Suite Components
+const AdminLayout = lazy(() => 
+  import("./features/admin-suite").then(m => ({ default: m.AdminLayout }))
+);
+const AdminDashboard = lazy(() => 
+  import("./features/admin-suite").then(m => ({ default: m.AdminDashboard }))
+);
+const UserManagement = lazy(() => 
+  import("./features/admin-suite").then(m => ({ default: m.UserManagement }))
+);
+const TeamAdministration = lazy(() => 
+  import("./features/admin-suite").then(m => ({ default: m.TeamAdministration }))
+);
+const BillingManagement = lazy(() => 
+  import("./features/admin-suite").then(m => ({ default: m.BillingManagement }))
+);
+const SecurityManagement = lazy(() => 
+  import("./features/admin-suite").then(m => ({ default: m.SecurityManagement }))
+);
+const SystemManagement = lazy(() => 
+  import("./features/admin-suite").then(m => ({ default: m.SystemManagement }))
+);
+
+// Legacy admin page for backward compatibility
 const Admin = lazy(() => import("./pages/Admin"));
 
 // Lazy load development monitor
@@ -110,8 +134,74 @@ const AppContent = () => {
             </Suspense>
           }
         />
+        {/* Admin Suite with Nested Routes */}
         <Route
-          path="/admin"
+          path="/admin/*"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <AdminLayout />
+            </Suspense>
+          }
+        >
+          {/* Admin Dashboard */}
+          <Route
+            index
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <AdminDashboard />
+              </Suspense>
+            }
+          />
+          {/* User Management */}
+          <Route
+            path="users"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <UserManagement />
+              </Suspense>
+            }
+          />
+          {/* Team Administration */}
+          <Route
+            path="teams"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <TeamAdministration />
+              </Suspense>
+            }
+          />
+          {/* Billing Management */}
+          <Route
+            path="billing"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <BillingManagement />
+              </Suspense>
+            }
+          />
+          {/* Security Management */}
+          <Route
+            path="security"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <SecurityManagement />
+              </Suspense>
+            }
+          />
+          {/* System Management */}
+          <Route
+            path="system"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <SystemManagement />
+              </Suspense>
+            }
+          />
+        </Route>
+
+        {/* Legacy Admin Route for Backward Compatibility */}
+        <Route
+          path="/admin-legacy"
           element={
             <Suspense fallback={<div>Loading...</div>}>
               <Admin />
