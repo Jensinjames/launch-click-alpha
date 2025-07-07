@@ -1,4 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DataExportImport } from "./DataExportImport";
+import { Database, Monitor, Settings } from "lucide-react";
 
 export const SystemManagement = () => {
   return (
@@ -6,20 +8,44 @@ export const SystemManagement = () => {
       <div>
         <h1 className="text-3xl font-bold text-foreground">System Management</h1>
         <p className="text-muted-foreground mt-2">
-          Monitor system health, configuration, and maintenance
+          System monitoring, data management, and administrative tools
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>System Administration</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Tabs defaultValue="data-management" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="data-management" className="flex items-center space-x-2">
+            <Database className="h-4 w-4" />
+            <span>Data Management</span>
+          </TabsTrigger>
+          <TabsTrigger value="system-monitoring" className="flex items-center space-x-2">
+            <Monitor className="h-4 w-4" />
+            <span>System Monitoring</span>
+          </TabsTrigger>
+          <TabsTrigger value="configuration" className="flex items-center space-x-2">
+            <Settings className="h-4 w-4" />
+            <span>Configuration</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="data-management">
+          <DataExportImport />
+        </TabsContent>
+
+        <TabsContent value="system-monitoring">
           <div className="text-center text-muted-foreground py-8">
-            <p>System management features will be implemented in Phase 3</p>
+            <Monitor className="h-12 w-12 mx-auto mb-4" />
+            <p>Real-time system monitoring dashboard coming in Phase 4</p>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="configuration">
+          <div className="text-center text-muted-foreground py-8">
+            <Settings className="h-12 w-12 mx-auto mb-4" />
+            <p>System configuration panel coming in Phase 5</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
