@@ -1,4 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/layout/Layout";
 import EnhancedDashboardStats from "@/components/dashboard/EnhancedDashboardStats";
@@ -6,11 +8,29 @@ import ContentCategoryGrid from "@/components/dashboard/ContentCategoryGrid";
 import RecentContentPerformance from "@/components/dashboard/RecentContentPerformance";
 import TeamActivityOverview from "@/components/dashboard/TeamActivityOverview";
 import RecentAssets from "@/components/dashboard/RecentAssets";
+import { OnboardingBanner } from "@/components/onboarding/OnboardingBanner";
 import { useDashboardData } from "@/hooks/dashboard/useDashboardData";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { data, isLoading, error } = useDashboardData();
+  
+  // Check if user has completed onboarding
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('onboarded')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id
+  });
   return <AuthGuard requireAuth={true}>
       <Layout>
         <div className="w-full px-4 lg:px-6">
@@ -23,6 +43,9 @@ const Dashboard = () => {
               Ready to create some amazing marketing content today?
             </p>
           </header>
+
+          {/* Onboarding Banner */}
+          {profile && !profile.onboarded && <OnboardingBanner />}
 
           {/* Enhanced Stats */}
           <EnhancedDashboardStats credits={data.credits} assetsCount={data.recentAssets.length} />

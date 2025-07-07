@@ -33,73 +33,60 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const logEmailDelivery = async (log: EmailDeliveryLog) => {
   try {
-    const { error } = await supabase
-      .from('email_delivery_logs')
-      .insert(log);
-    
-    if (error) {
-      console.error('Failed to log email delivery:', error);
-    }
+    // Simplified logging - just use console for now since email_delivery_logs table may not exist
+    console.log('Email delivery log:', {
+      invitation_id: log.invitation_id,
+      recipient_email: log.recipient_email,
+      status: log.status,
+      retry_count: log.retry_count
+    });
   } catch (error) {
     console.error('Error logging email delivery:', error);
   }
 };
 
-const sendEmailWithRetry = async (
+const sendEmailSimple = async (
   emailData: any, 
   invitationId: string, 
-  email: string, 
-  maxRetries = 3
+  email: string
 ): Promise<{ success: boolean; error?: string }> => {
-  let lastError: any = null;
-  
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`Sending email to ${email}, attempt ${attempt + 1}/${maxRetries + 1}`);
-      
-      const { data, error } = await resend.emails.send(emailData);
-      
-      if (error) {
-        throw new Error(error.message || 'Email sending failed');
-      }
-      
-      // Log successful email
-      await logEmailDelivery({
-        invitation_id: invitationId,
-        recipient_email: email,
-        status: 'sent',
-        provider_response: data,
-        retry_count: attempt
-      });
-      
-      return { success: true };
-      
-    } catch (error: any) {
-      lastError = error;
-      console.error(`Email attempt ${attempt + 1} failed for ${email}:`, error.message);
-      
-      // Log failed attempt
-      await logEmailDelivery({
-        invitation_id: invitationId,
-        recipient_email: email,
-        status: 'failed',
-        provider_response: { error: error.message },
-        retry_count: attempt
-      });
-      
-      // If this isn't the last attempt, wait before retrying
-      if (attempt < maxRetries) {
-        const backoffMs = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
-        console.log(`Retrying in ${backoffMs}ms...`);
-        await sleep(backoffMs);
-      }
+  try {
+    console.log(`Sending email to ${email}`);
+    
+    const { data, error } = await resend.emails.send(emailData);
+    
+    if (error) {
+      throw new Error(error.message || 'Email sending failed');
     }
+    
+    // Log successful email
+    await logEmailDelivery({
+      invitation_id: invitationId,
+      recipient_email: email,
+      status: 'sent',
+      provider_response: data,
+      retry_count: 0
+    });
+    
+    return { success: true };
+    
+  } catch (error: any) {
+    console.error(`Email failed for ${email}:`, error.message);
+    
+    // Log failed attempt
+    await logEmailDelivery({
+      invitation_id: invitationId,
+      recipient_email: email,
+      status: 'failed',
+      provider_response: { error: error.message },
+      retry_count: 0
+    });
+    
+    return { 
+      success: false, 
+      error: error.message || 'Email sending failed' 
+    };
   }
-  
-  return { 
-    success: false, 
-    error: lastError?.message || 'All retry attempts failed' 
-  };
 };
 
 serve(async (req: Request) => {
@@ -240,8 +227,9 @@ serve(async (req: Request) => {
           throw new Error(`Failed to create invitation for ${email}`);
         }
 
-        // Send invitation email
-        const inviteUrl = `${Deno.env.get('SUPABASE_URL')?.replace('/rest/v1', '')}/auth/v1/verify?token=${invitation.token}&type=invite&redirect_to=${encodeURIComponent(`${req.headers.get('origin') || 'https://gbdmxgkjaekiaqpsyeib.supabase.co'}/teams?invitation=${invitation.token}`)}`;
+        // Send invitation email - use dynamic origin
+        const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/')[0] + '//' + req.headers.get('referer')?.split('/')[2] || `${Deno.env.get('SUPABASE_URL')?.replace('/rest/v1', '')}`;
+        const inviteUrl = `${origin}/teams?invitation=${invitation.token}`;
 
         const emailHtml = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -273,8 +261,8 @@ serve(async (req: Request) => {
           </div>
         `;
 
-        // Send email with retry mechanism
-        const emailResult = await sendEmailWithRetry({
+        // Send email - simplified approach
+        const emailResult = await sendEmailSimple({
           from: 'Team Invitations <noreply@resend.dev>',
           to: [email],
           subject: `You're invited to join ${teamData.name}`,
