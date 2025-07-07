@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Menu, X } from "@/lib/icons";
 import rocketLogo from "@/assets/rocket_svg.svg";
-
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   return <nav className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
@@ -12,11 +11,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-3">
-              <img 
-                src={rocketLogo} 
-                alt="Rocket Logo" 
-                className="w-8 h-8 object-contain"
-              />
+              <img src={rocketLogo} alt="Rocket Logo" className="w-8 h-8 object-scale-down" />
               <span className="text-brand-navy font-display text-xl font-semibold">LaunchClick</span>
             </Link>
           </div>
