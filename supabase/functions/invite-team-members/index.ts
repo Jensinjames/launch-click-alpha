@@ -169,27 +169,8 @@ serve(async (req: Request) => {
     
     for (const email of emails) {
       try {
-        // Check if user already exists and is a team member
-        const { data: existingUser } = await supabase.auth.admin.getUserByEmail(email);
-        
-        if (existingUser?.user) {
-          // Check if already a team member
-          const { data: existingMember } = await supabase
-            .from('team_members')
-            .select('id, status')
-            .eq('team_id', team_id)
-            .eq('user_id', existingUser.user.id)
-            .single();
-
-          if (existingMember && existingMember.status === 'active') {
-            results.push({
-              email,
-              status: 'already_member',
-              message: 'User is already a team member'
-            });
-            continue;
-          }
-        }
+        // Note: Simplified flow - we'll check membership after invitation acceptance
+        // This avoids using admin methods that may not be available
 
         // Check for existing pending invitation
         const { data: existingInvitation } = await supabase
