@@ -11,10 +11,12 @@ export const SettingsContent = () => {
     profile,
     notifications,
     privacy,
+    timezone,
     isSaving,
     updateProfile,
     updateNotifications,
     updatePrivacy,
+    setTimezone,
     saveSettings,
     deleteAccount,
   } = useSettingsForm();
@@ -23,7 +25,9 @@ export const SettingsContent = () => {
     <div className="space-y-8">
       <ProfileSettings 
         profile={profile}
+        timezone={timezone}
         onUpdate={updateProfile}
+        onTimezoneUpdate={setTimezone}
         isLoading={isSaving}
       />
 

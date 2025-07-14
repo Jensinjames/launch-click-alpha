@@ -25,9 +25,10 @@ export const useSettingsForm = () => {
   const [profile, setProfile] = useState<UserSettings>({
     fullName: '',
     email: '',
-    company: '',
-    timezone: 'UTC'
+    company: ''
   });
+
+  const [timezone, setTimezone] = useState<string>('UTC');
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
     emailUpdates: true,
@@ -56,8 +57,7 @@ export const useSettingsForm = () => {
           setProfile({
             fullName: settings.profile.full_name || '',
             email: user.email || '',
-            company: settings.profile.company_name || '',
-            timezone: 'UTC' // Default for now
+            company: settings.profile.company_name || ''
           });
         } else {
           // Set defaults from user object
@@ -66,6 +66,11 @@ export const useSettingsForm = () => {
             fullName: user.user_metadata?.full_name || '',
             email: user.email || ''
           }));
+        }
+
+        // Update timezone from preferences
+        if (settings.preferences?.timezone) {
+          setTimezone(settings.preferences.timezone);
         }
 
         // Update notification preferences with proper type checking
@@ -119,6 +124,7 @@ export const useSettingsForm = () => {
     try {
       await Promise.all([
         SettingsService.updateProfile(user.id, profile),
+        SettingsService.updateTimezone(user.id, timezone),
         SettingsService.updateNotificationPreferences(user.id, notifications),
         SettingsService.updatePrivacySettings(user.id, privacy)
       ]);
@@ -150,6 +156,7 @@ export const useSettingsForm = () => {
     profile,
     notifications,
     privacy,
+    timezone,
     isLoading,
     isSaving,
     
@@ -157,6 +164,7 @@ export const useSettingsForm = () => {
     updateProfile,
     updateNotifications,
     updatePrivacy,
+    setTimezone,
     saveSettings,
     deleteAccount
   };

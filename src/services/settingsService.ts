@@ -5,7 +5,6 @@ export interface UserSettings {
   fullName: string;
   email: string;
   company: string;
-  timezone: string;
 }
 
 export interface NotificationSettings {
@@ -70,6 +69,20 @@ export class SettingsService {
           analytics_sharing: settings.analyticsSharing,
           data_export_enabled: settings.dataExport
         }
+      })
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateTimezone(userId: string, timezone: string) {
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .upsert({
+        user_id: userId,
+        timezone: timezone
       })
       .select()
       .maybeSingle();

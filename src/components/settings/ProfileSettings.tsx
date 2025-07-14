@@ -7,11 +7,13 @@ import { UserSettings } from "@/services/settingsService";
 
 interface ProfileSettingsProps {
   profile: UserSettings;
+  timezone: string;
   onUpdate: (updates: Partial<UserSettings>) => void;
+  onTimezoneUpdate: (timezone: string) => void;
   isLoading?: boolean;
 }
 
-export const ProfileSettings = ({ profile, onUpdate, isLoading }: ProfileSettingsProps) => {
+export const ProfileSettings = ({ profile, timezone, onUpdate, onTimezoneUpdate, isLoading }: ProfileSettingsProps) => {
   return (
     <Card>
       <CardHeader>
@@ -70,8 +72,8 @@ export const ProfileSettings = ({ profile, onUpdate, isLoading }: ProfileSetting
             <Label htmlFor="timezone">Timezone</Label>
             <select 
               id="timezone" 
-              value={profile.timezone} 
-              onChange={(e) => onUpdate({ timezone: e.target.value })}
+              value={timezone} 
+              onChange={(e) => onTimezoneUpdate(e.target.value)}
               disabled={isLoading}
               className="w-full h-10 px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
               aria-describedby="timezone-help"
