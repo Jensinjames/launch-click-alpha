@@ -1455,16 +1455,16 @@ export type Database = {
       }
       audit_sensitive_operation: {
         Args: {
-          p_action: string
-          p_table_name: string
-          p_record_id?: string
           p_old_values?: Json
+          p_table_name: string
+          p_action: string
           p_new_values?: Json
+          p_record_id?: string
         }
         Returns: undefined
       }
       bulk_feature_access_check: {
-        Args: { feature_names: string[]; check_user_id?: string }
+        Args: { check_user_id?: string; feature_names: string[] }
         Returns: Json
       }
       can_access_feature: {
@@ -1473,8 +1473,8 @@ export type Database = {
       }
       can_access_template: {
         Args: {
-          template_plan_type: Database["public"]["Enums"]["plan_type"]
           user_id?: string
+          template_plan_type: Database["public"]["Enums"]["plan_type"]
         }
         Returns: boolean
       }
@@ -1484,9 +1484,9 @@ export type Database = {
       }
       check_rate_limit: {
         Args: {
+          time_window_minutes?: number
           identifier: string
           max_attempts?: number
-          time_window_minutes?: number
         }
         Returns: boolean
       }
@@ -1505,7 +1505,7 @@ export type Database = {
       create_team_with_access_control: {
         Args:
           | { p_team_name: string; p_description?: string }
-          | { p_team_name: string; p_user_id: string; p_description?: string }
+          | { p_team_name: string; p_description?: string; p_user_id: string }
         Returns: Json
       }
       emergency_sign_out: {
@@ -1539,9 +1539,9 @@ export type Database = {
       get_feature_usage_with_limits: {
         Args: { p_user_id: string; p_feature_name: string }
         Returns: {
-          usage_count: number
           feature_limit: number
           remaining: number
+          usage_count: number
           period_start: string
         }[]
       }
@@ -1552,19 +1552,19 @@ export type Database = {
       get_user_plan_info: {
         Args: { check_user_id?: string }
         Returns: {
-          plan_type: string
-          credits: number
           team_seats: number
           can_manage_teams: boolean
+          plan_type: string
+          credits: number
         }[]
       }
       get_user_recommendations: {
         Args: { limit_count?: number }
         Returns: {
-          content_id: string
-          title: string
           type: Database["public"]["Enums"]["content_type"]
           score: number
+          title: string
+          content_id: string
         }[]
       }
       get_user_team_seats: {
@@ -1588,7 +1588,7 @@ export type Database = {
         Returns: boolean
       }
       is_owner: {
-        Args: { team_uuid: string; uid?: string }
+        Args: { uid?: string; team_uuid: string }
         Returns: boolean
       }
       is_simple_admin: {
@@ -1604,7 +1604,7 @@ export type Database = {
         Returns: boolean
       }
       is_team_admin: {
-        Args: { team_uuid: string; uid?: string }
+        Args: { uid?: string; team_uuid: string }
         Returns: boolean
       }
       is_team_member_direct: {
@@ -1612,20 +1612,20 @@ export type Database = {
         Returns: boolean
       }
       is_team_owner_direct: {
-        Args: { team_uuid: string; user_uuid?: string }
+        Args: { user_uuid?: string; team_uuid: string }
         Returns: boolean
       }
       log_feature_access: {
         Args: {
           p_feature_name: string
-          p_access_granted: boolean
-          p_user_id?: string
           p_context?: Json
+          p_user_id?: string
+          p_access_granted: boolean
         }
         Returns: undefined
       }
       log_security_event: {
-        Args: { event_type: string; event_data?: Json; user_id_param?: string }
+        Args: { event_type: string; user_id_param?: string; event_data?: Json }
         Returns: undefined
       }
       log_team_activity: {
@@ -1657,8 +1657,8 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           test_name: string
-          status: string
           details: string
+          status: string
         }[]
       }
       test_team_policies: {

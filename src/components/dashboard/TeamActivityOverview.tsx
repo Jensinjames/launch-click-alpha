@@ -135,9 +135,9 @@ const TeamActivityOverview = React.memo(({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       {/* Team Members Overview */}
-      <Card id="team-overview-card" className="surface-elevated">
+      <Card id="team-overview-card" className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 hover:shadow-elegant hover:shadow-primary/5 transition-all duration-300">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
@@ -155,7 +155,7 @@ const TeamActivityOverview = React.memo(({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2 p-4">
+        <CardContent className="space-y-3 p-6">
           <div className="grid grid-cols-1 gap-2">
             {displayTeamMembers.slice(0, 4).map((member) => (
               <div 
@@ -189,7 +189,7 @@ const TeamActivityOverview = React.memo(({
       </Card>
 
       {/* Pending Tasks */}
-      <Card id="pending-tasks-card" className="surface-elevated">
+      <Card id="pending-tasks-card" className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 hover:shadow-elegant hover:shadow-primary/5 transition-all duration-300">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
@@ -207,7 +207,7 @@ const TeamActivityOverview = React.memo(({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2 p-4">
+        <CardContent className="space-y-3 p-6">
           {displayPendingTasks.map((task) => (
             <div 
               key={task.id} 
@@ -242,7 +242,7 @@ const TeamActivityOverview = React.memo(({
       </Card>
 
       {/* Recent Activity */}
-      <Card id="recent-activity-card" className="surface-elevated">
+      <Card id="recent-activity-card" className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 hover:shadow-elegant hover:shadow-primary/5 transition-all duration-300">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-info" />
@@ -250,7 +250,7 @@ const TeamActivityOverview = React.memo(({
           </CardTitle>
           <CardDescription>Latest team updates and changes</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 p-4">
+        <CardContent className="space-y-3 p-6">
           {displayRecentActivity.map((activity) => {
             const ActivityIcon = getActivityIcon(activity.type);
             return (

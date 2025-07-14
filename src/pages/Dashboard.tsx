@@ -33,13 +33,13 @@ const Dashboard = () => {
   });
   return <AuthGuard requireAuth={true}>
       <Layout>
-        <div className="w-full px-4 lg:px-6">
+        <div className="w-full px-6 lg:px-8">
           {/* Welcome Header */}
-          <header id="dashboard-header" className="mb-4">
-            <h1 id="dashboard-title" className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-brand-secondary bg-clip-text text-transparent">
+          <header id="dashboard-header" className="mb-8">
+            <h1 id="dashboard-title" className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/90 to-brand-secondary bg-clip-text text-transparent tracking-tight">
               Welcome back, {user?.user_metadata?.full_name || "User"}! 👋
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-xl text-muted-foreground/80 leading-relaxed">
               Ready to create some amazing marketing content today?
             </p>
           </header>
@@ -51,9 +51,9 @@ const Dashboard = () => {
           <EnhancedDashboardStats credits={data.credits} assetsCount={data.recentAssets.length} />
 
           {/* Main Dashboard Grid - Optimized Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
             {/* Main Content Area - Takes up more space */}
-            <main id="dashboard-main-content" className="lg:col-span-8 space-y-4">
+            <main id="dashboard-main-content" className="lg:col-span-8 space-y-8">
               <ContentCategoryGrid />
               <RecentContentPerformance />
             </main>

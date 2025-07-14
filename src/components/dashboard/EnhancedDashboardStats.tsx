@@ -63,43 +63,43 @@ const EnhancedDashboardStats = React.memo(({
   ], [credits.used, credits.limit, assetsCount]);
 
   return (
-    <section aria-labelledby="dashboard-stats-title" className="mb-6">
+    <section aria-labelledby="dashboard-stats-title" className="mb-8">
       <h2 id="dashboard-stats-title" className="sr-only">Dashboard Statistics</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsData.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
             <Card 
               key={index}
               id={`dashboard-stat-${index}`}
-              className={`surface-elevated hover:shadow-md transition-all duration-200 border-2 ${stat.borderColor} focus-visible cursor-pointer group`}
+              className={`bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 ${stat.borderColor} hover:shadow-elegant hover:shadow-primary/10 hover:scale-[1.02] transition-all duration-300 focus-visible cursor-pointer group relative overflow-hidden`}
               role="img"
               aria-label={`${stat.title}: ${stat.value} (${stat.change})`}
               aria-describedby={`stat-description-${index}`}
               tabIndex={0}
             >
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-3 px-6 pt-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-foreground">
+                  <CardTitle className="text-sm font-medium text-foreground/90">
                     {stat.title}
                   </CardTitle>
-                  <div className={`p-2 rounded-lg ${stat.bgColor} group-hover:scale-110 transition-transform duration-200`} aria-hidden="true">
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.bgColor} to-transparent border border-border/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-sm`} aria-hidden="true">
                     <IconComponent className={`h-5 w-5 ${stat.color}`} />
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
+              <CardContent className="pt-0 px-6 pb-6">
+                <div className="space-y-3">
                   <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-2xl font-bold text-foreground mb-1">
+                      <div className="text-3xl font-bold text-foreground mb-2 tracking-tight">
                         {stat.value}
                       </div>
                       <div 
                         id={`stat-description-${index}`}
-                        className={`text-sm font-medium ${
-                          stat.trend === 'up' ? 'text-success' : 
-                          stat.trend === 'down' ? 'text-error' : 'text-muted-foreground'
+                        className={`text-sm font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1 ${
+                          stat.trend === 'up' ? 'text-success bg-success/10' : 
+                          stat.trend === 'down' ? 'text-error bg-error/10' : 'text-muted-foreground bg-muted/20'
                         }`}
                       >
                         {stat.change}

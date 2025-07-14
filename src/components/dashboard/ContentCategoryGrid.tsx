@@ -100,22 +100,22 @@ const ContentCategoryGrid = React.memo(() => {
   };
 
   return (
-    <section aria-labelledby="content-categories-title" className="space-y-4">
+    <section aria-labelledby="content-categories-title" className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
           <h2 id="content-categories-title" className="text-2xl font-bold text-foreground">Content Categories</h2>
-          <p className="text-muted-foreground">Quick access to your content by type</p>
+          <p className="text-muted-foreground/80">Quick access to your content by type</p>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => {
           const IconComponent = category.icon;
           return (
             <Card 
               key={category.id}
               id={`content-category-${category.id}`}
-              className={`surface-elevated hover:shadow-lg transition-all duration-300 cursor-pointer group border-2 ${category.borderColor} focus-visible`}
+              className={`bg-gradient-to-br from-card to-card/60 backdrop-blur-sm border-2 ${category.borderColor} hover:shadow-elegant hover:shadow-primary/15 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-400 cursor-pointer group focus-visible relative overflow-hidden`}
               onClick={() => handleCategoryClick(category)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -128,12 +128,12 @@ const ContentCategoryGrid = React.memo(() => {
               aria-label={`View ${category.name}: ${category.description}`}
               aria-describedby={`category-description-${category.id}`}
             >
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-4 px-6 pt-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white group-hover:scale-110 transition-transform duration-200`}>
-                        <IconComponent className="h-4 w-4" />
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} text-white group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg`}>
+                        <IconComponent className="h-5 w-5" />
                       </div>
                       {category.recentCount > 0 && (
                         <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
@@ -142,12 +142,12 @@ const ContentCategoryGrid = React.memo(() => {
                       )}
                     </div>
                     
-                    <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                    <CardTitle className="text-lg font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                       {category.name}
                     </CardTitle>
                     <CardDescription 
                       id={`category-description-${category.id}`}
-                      className="text-sm text-muted-foreground mt-1 line-clamp-2"
+                      className="text-sm text-muted-foreground/80 mt-2 line-clamp-2 leading-relaxed"
                     >
                       {category.description}
                     </CardDescription>
@@ -155,22 +155,22 @@ const ContentCategoryGrid = React.memo(() => {
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 px-6 pb-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-foreground">{category.count}</div>
-                      <div className="text-xs text-muted-foreground">Total</div>
+                      <div className="text-2xl font-bold text-foreground tracking-tight">{category.count}</div>
+                      <div className="text-xs text-muted-foreground/60 font-medium">Total</div>
                     </div>
                     {category.recentCount > 0 && (
                       <div className="text-center">
-                        <div className="text-lg font-semibold text-success">+{category.recentCount}</div>
-                        <div className="text-xs text-muted-foreground">This week</div>
+                        <div className="text-lg font-bold text-success">+{category.recentCount}</div>
+                        <div className="text-xs text-muted-foreground/60 font-medium">This week</div>
                       </div>
                     )}
                   </div>
                   
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
+                  <ArrowRight className="h-5 w-5 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-2 transition-all duration-300" />
                 </div>
               </CardContent>
             </Card>

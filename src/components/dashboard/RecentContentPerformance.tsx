@@ -99,31 +99,31 @@ const RecentContentPerformance = React.memo(({ campaigns = [] }: RecentContentPe
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Campaign Performance</h2>
-          <p className="text-muted-foreground">Track your content performance and engagement</p>
+          <p className="text-muted-foreground/80">Track your content performance and engagement</p>
         </div>
-        <Button variant="outline" className="text-primary hover:text-primary">
+        <Button variant="outline" className="text-primary hover:text-primary border-primary/20 hover:bg-primary/5">
           View All Campaigns
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
         {displayCampaigns.map((campaign) => {
           const IconComponent = getTypeIcon(campaign.type);
           const conversionRate = ((campaign.metrics.conversions / campaign.metrics.views) * 100);
           
           return (
-            <Card key={campaign.id} className="surface-elevated hover:shadow-lg transition-all duration-300 cursor-pointer group">
-              <CardHeader className="pb-4">
+            <Card key={campaign.id} className="bg-gradient-to-br from-card to-card/70 backdrop-blur-sm border border-border/50 hover:shadow-elegant hover:shadow-primary/10 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-400 cursor-pointer group relative overflow-hidden">
+              <CardHeader className="pb-5 px-6 pt-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2 rounded-lg bg-gradient-to-r ${getTypeColor(campaign.type)} text-white`}>
-                        <IconComponent className="h-4 w-4" />
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`p-3 rounded-xl bg-gradient-to-r ${getTypeColor(campaign.type)} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                        <IconComponent className="h-5 w-5" />
                       </div>
                       <Badge variant="secondary" className={getStatusColor(campaign.status)}>
                         {campaign.status}
