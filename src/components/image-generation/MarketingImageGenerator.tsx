@@ -9,6 +9,7 @@ import { Loader2, Sparkles, Download, Save, Clock } from 'lucide-react';
 import { useMarketingImageGeneration } from '@/hooks/useMarketingImageGeneration';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useGenerateContext } from '@/contexts/GenerateContext';
+import type { GeneratedImage } from '@/types/generate';
 import { toast } from 'sonner';
 
 interface MarketingImageResult {
@@ -48,12 +49,14 @@ export const MarketingImageGenerator = () => {
       setEstimatedTime(0);
 
       // Auto-add to session images
-      const sessionImage = {
+      const sessionImage: GeneratedImage = {
+        id: `session-${Date.now()}`,
         imageUrl: jobStatus.image_url,
         name: `Marketing Image ${new Date().toLocaleDateString()}`,
         prompt: jobStatus.prompt,
         type: 'marketing',
-        style: style
+        style: style,
+        created_at: new Date().toISOString()
       };
       
       setGeneratedImages([...generatedImages, sessionImage]);

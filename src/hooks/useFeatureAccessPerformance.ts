@@ -1,7 +1,7 @@
 // Feature Access Performance Hook - Separated Performance Tracking
 import { useRef, useEffect } from 'react';
 
-interface PerformanceMetrics {
+export interface PerformanceMetrics {
   loadTime?: number;
   cacheHitRate?: number;
   lastRefresh?: number;
@@ -39,7 +39,7 @@ export const useFeatureAccessPerformance = (
   }, [accessMap, isLoading]);
 
   return {
-    performanceMetrics: performanceMetricsRef.current as Record<string, unknown>,
+    performanceMetrics: performanceMetricsRef.current,
     resetMetrics: () => {
       performanceMetricsRef.current = {};
       startTimeRef.current = performance.now();

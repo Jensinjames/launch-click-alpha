@@ -59,7 +59,7 @@ export const FeatureAccessMonitor = () => {
         
         {error && (
           <div className="text-error text-xs mt-2 p-1 bg-error-light rounded" role="alert">
-            {error.message || 'Unknown error'}
+            {(error as Error)?.message || 'Unknown error'}
           </div>
         )}
       </div>

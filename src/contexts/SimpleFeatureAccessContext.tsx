@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { useFeatureAccessBulk } from '@/hooks/useFeatureAccessBulk';
 import { FeatureAccessService } from '@/services/featureAccessService';
-import { useFeatureAccessPerformance } from '@/hooks/useFeatureAccessPerformance';
+import { useFeatureAccessPerformance, PerformanceMetrics } from '@/hooks/useFeatureAccessPerformance';
 import { useAuth } from '@/hooks/useAuth';
 
 interface FeatureAccessContextType {
@@ -13,7 +13,7 @@ interface FeatureAccessContextType {
   isAuthReady: boolean;
   error: unknown;
   preloadFeatures: (features: string[]) => void;
-  performanceMetrics: Record<string, unknown>;
+  performanceMetrics: PerformanceMetrics;
 }
 
 const FeatureAccessContext = createContext<FeatureAccessContextType | undefined>(undefined);
@@ -109,7 +109,7 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   if (error && !accessMap && Object.keys(accessMap).length === 0) {
     const fallbackValue = {
       ...FeatureAccessService.createFallbackHandler(),
-      performanceMetrics: {} as Record<string, unknown>
+      performanceMetrics: {} as PerformanceMetrics
     };
     return (
       <FeatureAccessContext.Provider value={fallbackValue}>

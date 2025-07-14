@@ -78,12 +78,12 @@ export const GeneratedContentTab = () => {
               <div className="p-4 bg-muted rounded-lg">
                 <h3 className="font-medium mb-2 text-foreground">{generatedContent.title}</h3>
                 <div className="whitespace-pre-wrap text-muted-foreground">
-                  {generatedContent.content?.text || 'No content generated'}
+                  {generatedContent.content || generatedContent.text || 'No content generated'}
                 </div>
               </div>
               <Button 
                 variant="outline" 
-                onClick={() => navigator.clipboard.writeText(generatedContent.content?.text || '')}
+                onClick={() => navigator.clipboard.writeText(generatedContent.content || generatedContent.text || '')}
               >
                 Copy Text to Clipboard
               </Button>
