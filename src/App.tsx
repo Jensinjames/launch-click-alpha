@@ -2,7 +2,7 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AppProviders } from "@/components/providers/AppProviders";
-import { FeatureAccessProvider } from '@/contexts/FeatureAccessContext';
+import { FeatureAccessProvider } from '@/contexts/SimpleFeatureAccessContext';
 import React from 'react';
 import Index from "./pages/Index";
 import Login from "./pages/Login";

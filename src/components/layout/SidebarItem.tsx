@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { LucideIcon } from "@/lib/icons";
-import { useFeatureAccessContext } from "@/contexts/FeatureAccessContext";
+import { useFeatureAccessContext } from "@/contexts/SimpleFeatureAccessContext";
 import { cn } from "@/lib/utils";
 
 interface SidebarItemProps {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import type { GeneratedContent, GeneratedImage, ImageStorageData } from '@/types/generate';
 
 type ContentTemplate = Database['public']['Tables']['content_templates']['Row'];
 
@@ -22,17 +23,17 @@ interface GenerateContextType {
   // Generation state
   isGenerating: boolean;
   setIsGenerating: (generating: boolean) => void;
-  generatedContent: any;
-  setGeneratedContent: (content: any) => void;
-  generatedImages: any[];
-  setGeneratedImages: (images: any[]) => void;
+  generatedContent: GeneratedContent | null;
+  setGeneratedContent: (content: GeneratedContent | null) => void;
+  generatedImages: GeneratedImage[];
+  setGeneratedImages: (images: GeneratedImage[]) => void;
   
   // Tab navigation
   activeTab: string;
   setActiveTab: (tab: string) => void;
   
   // Storage integration
-  saveImageToStorage: (imageData: any) => Promise<void>;
+  saveImageToStorage: (imageData: ImageStorageData) => Promise<void>;
 }
 
 const GenerateContext = createContext<GenerateContextType | undefined>(undefined);
@@ -60,14 +61,14 @@ export const GenerateProvider = ({ children }: GenerateProviderProps) => {
   
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState<any>(null);
-  const [generatedImages, setGeneratedImages] = useState<any[]>([]);
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   
   // Tab navigation
   const [activeTab, setActiveTab] = useState("content");
 
   // Storage integration function
-  const saveImageToStorage = useCallback(async (imageData: any) => {
+  const saveImageToStorage = useCallback(async (imageData: ImageStorageData) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {

@@ -1,5 +1,5 @@
 // Development Performance Monitor for Feature Access
-import { useFeatureAccessContext } from '@/contexts/FeatureAccessContext';
+import { useFeatureAccessContext } from '@/contexts/SimpleFeatureAccessContext';
 import { useState, useEffect } from 'react';
 
 export const FeatureAccessMonitor = () => {
