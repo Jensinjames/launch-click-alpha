@@ -1,20 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { SettingsService, UserSettings, NotificationSettings, PrivacySettings } from '@/services/settingsService';
+import { SettingsService } from '@/services/settingsService';
+import { SettingsTransformService } from '@/services/settingsTransformService';
 import { toast } from 'sonner';
-
-// Type guards for JSONB data validation
-const isObject = (value: any): value is Record<string, any> => {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-};
-
-const getObjectProperty = (obj: any, key: string, defaultValue: any = null) => {
-  if (isObject(obj) && key in obj) {
-    return obj[key];
-  }
-  return defaultValue;
-};
+import type { UserSettings, NotificationSettings, PrivacySettings } from '@/types/settings';
 
 export const useSettingsForm = () => {
   const { user } = useAuth();
@@ -52,47 +42,16 @@ export const useSettingsForm = () => {
       try {
         const settings = await SettingsService.getUserSettings(user.id);
         
-        // Update profile state
-        if (settings.profile) {
-          setProfile({
-            fullName: settings.profile.full_name || '',
-            email: user.email || '',
-            company: settings.profile.company_name || ''
-          });
-        } else {
-          // Set defaults from user object
-          setProfile(prev => ({
-            ...prev,
-            fullName: user.user_metadata?.full_name || '',
-            email: user.email || ''
-          }));
-        }
+        // Transform settings using dedicated service
+        const transformedSettings = SettingsTransformService.transformUserSettings(
+          { profile: settings.profile, preferences: settings.preferences },
+          user.email || ''
+        );
 
-        // Update timezone from preferences
-        if (settings.preferences?.timezone) {
-          setTimezone(settings.preferences.timezone);
-        }
-
-        // Update notification preferences with proper type checking
-        if (settings.preferences?.email_notifications) {
-          const emailNotifs = settings.preferences.email_notifications;
-          setNotifications({
-            emailUpdates: getObjectProperty(emailNotifs, 'content_ready', true),
-            creditAlerts: getObjectProperty(emailNotifs, 'credit_alerts', true),
-            weeklyReport: getObjectProperty(emailNotifs, 'weekly_summary', false),
-            marketingEmails: getObjectProperty(emailNotifs, 'marketing', false)
-          });
-        }
-
-        // Update privacy settings with proper type checking
-        if (settings.preferences?.default_content_settings) {
-          const contentSettings = settings.preferences.default_content_settings;
-          setPrivacy({
-            profileVisible: getObjectProperty(contentSettings, 'profile_visible', true),
-            analyticsSharing: getObjectProperty(contentSettings, 'analytics_sharing', false),
-            dataExport: getObjectProperty(contentSettings, 'data_export_enabled', true)
-          });
-        }
+        setProfile(transformedSettings.profile);
+        setNotifications(transformedSettings.notifications);
+        setPrivacy(transformedSettings.privacy);
+        setTimezone(transformedSettings.timezone);
 
       } catch (error) {
         console.error('Failed to load settings:', error);
@@ -119,6 +78,13 @@ export const useSettingsForm = () => {
 
   const saveSettings = async () => {
     if (!user) return;
+
+    // Validate settings before saving
+    const validationErrors = SettingsTransformService.validateSettings(profile, notifications, privacy);
+    if (validationErrors.length > 0) {
+      toast.error(validationErrors.join(', '));
+      return;
+    }
 
     setIsSaving(true);
     try {

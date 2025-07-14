@@ -4,8 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Star, Clock, Plus, ArrowRight } from "@/lib/icons";
 
+interface AssetItem {
+  id: string;
+  title: string;
+  type: string;
+  created_at: string;
+  is_favorite?: boolean;
+}
+
 interface RecentAssetsProps {
-  assets: any[];
+  assets: AssetItem[];
 }
 
 const RecentAssets = React.memo(({ assets }: RecentAssetsProps) => {
@@ -48,7 +56,7 @@ const RecentAssets = React.memo(({ assets }: RecentAssetsProps) => {
         </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-        {assets.map((asset: any, index) => (
+        {assets.map((asset: AssetItem, index) => (
           <Card key={index} className="bg-gradient-to-br from-card to-card/70 backdrop-blur-sm border border-border/50 hover:shadow-elegant hover:shadow-primary/10 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-400 cursor-pointer group relative overflow-hidden w-full">
             <CardHeader className="pb-4 sm:pb-5 px-4 sm:px-6 pt-4 sm:pt-6">
               <div className="flex justify-between items-start">
