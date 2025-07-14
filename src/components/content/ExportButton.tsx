@@ -47,8 +47,10 @@ export const ExportButton = ({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant={variant} size={size} className="gap-2">
-            <Download className="h-4 w-4" />
-            {showText && 'Export'}
+            <span className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              {showText && 'Export'}
+            </span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md">
