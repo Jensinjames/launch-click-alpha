@@ -396,8 +396,10 @@ export const DataExportImport = () => {
                         {job.status === 'completed' && job.download_url && (
                           <Button variant="outline" size="sm" asChild>
                             <a href={job.download_url} download>
-                              <Download className="h-4 w-4 mr-2" />
-                              Download
+                              <span className="flex items-center">
+                                <Download className="h-4 w-4 mr-2" />
+                                Download
+                              </span>
                             </a>
                           </Button>
                         )}
