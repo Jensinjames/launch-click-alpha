@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Mail, Share2, Plus } from "lucide-react";
 import { useContentNavigation } from "../hooks/useContentNavigation";
-import type { CategoryInfo, ContentType } from "../types";
+import type { CategoryInfo, ContentType, ContentTypeWithAll } from "../types";
 
 interface CategoryHeaderProps {
   categoryInfo: CategoryInfo;
-  contentType: ContentType;
+  contentType: ContentTypeWithAll;
 }
 
 export const CategoryHeader = ({ categoryInfo, contentType }: CategoryHeaderProps) => {

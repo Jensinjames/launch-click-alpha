@@ -1,7 +1,7 @@
 // Content Filters Hook - UI State Management
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import type { ContentType, ContentFilters } from '../types';
+import type { ContentType, ContentTypeWithAll, ContentFilters } from '../types';
 
 export const useContentFilters = (initialType?: string) => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export const useContentFilters = (initialType?: string) => {
   
   // Determine filter type from URL or default to 'all'
   const filterType = useMemo(() => {
-    return (initialType || 'all') as ContentType;
+    return (initialType || 'all') as ContentTypeWithAll;
   }, [initialType]);
 
   const handleSearchChange = useCallback((value: string) => {
@@ -23,7 +23,7 @@ export const useContentFilters = (initialType?: string) => {
     setSortBy(value);
   }, []);
 
-  const handleFilterChange = useCallback((type: ContentType) => {
+  const handleFilterChange = useCallback((type: ContentTypeWithAll) => {
     // Update URL when filter changes
     const newPath = type === 'all' ? '/content' : `/content/${type}`;
     navigate(newPath, { replace: true });

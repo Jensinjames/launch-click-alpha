@@ -53,11 +53,16 @@ export class ContentService {
 
   private static transformDatabaseItems(items: Tables<'generated_content'>[]): ContentItem[] {
     return items.map(item => ({
-      ...item,
-      content: item.content as ContentData,
-      metadata: item.metadata as ContentItem['metadata'],
+      id: item.id,
+      title: item.title,
       type: item.type as ContentItem['type'],
+      content: item.content as ContentData,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
       is_favorite: item.is_favorite || false,
+      metadata: item.metadata as ContentItem['metadata'],
+      user_id: item.user_id,
+      prompt: item.prompt,
       category_path: item.category_path || undefined,
       content_tags: item.content_tags || undefined,
       folder_structure: item.folder_structure as Record<string, unknown> || undefined,
@@ -81,9 +86,16 @@ export class ContentService {
 
   static async createContent(content: Omit<ContentItem, 'id' | 'created_at' | 'updated_at'>): Promise<ContentItem> {
     const dbContent = {
-      ...content,
+      title: content.title,
+      type: content.type,
       content: content.content as any,
+      user_id: content.user_id,
+      prompt: content.prompt,
+      is_favorite: content.is_favorite,
       metadata: content.metadata as any,
+      category_path: content.category_path,
+      content_tags: content.content_tags,
+      folder_structure: content.folder_structure as any,
     };
 
     const { data, error } = await supabase
@@ -101,11 +113,15 @@ export class ContentService {
   }
 
   static async updateContent(id: string, updates: Partial<ContentItem>): Promise<ContentItem> {
-    const dbUpdates = {
-      ...updates,
-      content: updates.content ? updates.content as any : undefined,
-      metadata: updates.metadata ? updates.metadata as any : undefined,
-    };
+    const dbUpdates: any = {};
+    
+    if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.content !== undefined) dbUpdates.content = updates.content as any;
+    if (updates.metadata !== undefined) dbUpdates.metadata = updates.metadata as any;
+    if (updates.is_favorite !== undefined) dbUpdates.is_favorite = updates.is_favorite;
+    if (updates.category_path !== undefined) dbUpdates.category_path = updates.category_path;
+    if (updates.content_tags !== undefined) dbUpdates.content_tags = updates.content_tags;
+    if (updates.folder_structure !== undefined) dbUpdates.folder_structure = updates.folder_structure as any;
 
     const { data, error } = await supabase
       .from(this.TABLE_NAME)

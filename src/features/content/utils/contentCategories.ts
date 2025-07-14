@@ -1,5 +1,5 @@
 // Content Categories Utility - Moved from shared utils
-import type { ContentType, CategoryInfo } from '../types';
+import type { ContentType, ContentTypeWithAll, CategoryInfo } from '../types';
 
 export const CONTENT_TYPE_ROUTES = {
   'email_sequence': 'email-campaigns',
@@ -12,7 +12,7 @@ export const CONTENT_TYPE_ROUTES = {
   'all': 'all'
 } as const;
 
-export const getCategoryInfo = (type: ContentType): CategoryInfo => {
+export const getCategoryInfo = (type: ContentTypeWithAll): CategoryInfo => {
   switch (type) {
     case 'email_sequence':
       return {

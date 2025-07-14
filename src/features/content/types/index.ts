@@ -6,8 +6,9 @@ export type ContentType =
   | 'blog_post'
   | 'ad_copy'
   | 'funnel'
-  | 'strategy_brief'
-  | 'all';
+  | 'strategy_brief';
+
+export type ContentTypeWithAll = ContentType | 'all';
 
 export interface ContentItem {
   id: string;
@@ -49,7 +50,7 @@ export interface ContentMetadata {
 }
 
 export interface ContentFilters {
-  type: ContentType;
+  type: ContentTypeWithAll;
   search: string;
   sortBy: 'newest' | 'oldest' | 'favorites' | 'title';
   tags?: string[];
@@ -74,7 +75,7 @@ export interface CategoryInfo {
 }
 
 export interface ContentQueryParams {
-  type?: ContentType;
+  type?: ContentTypeWithAll;
   search?: string;
   sortBy?: ContentFilters['sortBy'];
   limit?: number;

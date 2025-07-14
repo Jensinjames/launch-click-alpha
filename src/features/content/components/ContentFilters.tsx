@@ -6,14 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter, Layers, X } from "lucide-react";
 import { CreateAssemblyDialog } from "@/components/assembly";
-import type { ContentType, ContentFilters as ContentFiltersType } from "../types";
+import type { ContentType, ContentTypeWithAll, ContentFilters as ContentFiltersType } from "../types";
 
 interface ContentFiltersProps {
   searchQuery: string;
-  filterType: ContentType;
+  filterType: ContentTypeWithAll;
   sortBy: ContentFiltersType['sortBy'];
   onSearchChange: (value: string) => void;
-  onFilterChange: (type: ContentType) => void;
+  onFilterChange: (type: ContentTypeWithAll) => void;
   onSortChange: (sortBy: ContentFiltersType['sortBy']) => void;
   onClearFilters: () => void;
 }

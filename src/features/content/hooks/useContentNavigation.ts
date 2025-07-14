@@ -1,7 +1,7 @@
 // Content Navigation Hook - Navigation Logic
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ContentType } from '../types';
+import type { ContentType, ContentTypeWithAll } from '../types';
 
 export const useContentNavigation = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ export const useContentNavigation = () => {
     navigate('/generate');
   }, [navigate]);
 
-  const navigateToContent = useCallback((type?: ContentType) => {
+  const navigateToContent = useCallback((type?: ContentTypeWithAll) => {
     if (type && type !== 'all') {
       navigate(`/content/${type}`);
     } else {

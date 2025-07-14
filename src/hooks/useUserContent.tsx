@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
-
-type GeneratedContent = Database['public']['Tables']['generated_content']['Row'];
+import { ContentService } from '@/features/content/services/ContentService';
+import type { ContentItem, ContentQueryParams } from '@/features/content/types';
 
 export const useUserContent = (filters?: {
   type?: string;
@@ -14,51 +13,18 @@ export const useUserContent = (filters?: {
 
   return useQuery({
     queryKey: ['user-content', user?.id, filters],
-    queryFn: async (): Promise<GeneratedContent[]> => {
+    queryFn: async (): Promise<ContentItem[]> => {
       if (!user?.id) {
         throw new Error('User not authenticated');
       }
 
-      let query = supabase
-        .from('generated_content')
-        .select('*')
-        .eq('user_id', user.id);
+      const params: ContentQueryParams = {
+        type: filters?.type as any,
+        search: filters?.search,
+        sortBy: filters?.sortBy,
+      };
 
-      // Apply filters
-      if (filters?.type && filters.type !== 'all') {
-        query = query.eq('type', filters.type as any);
-      }
-
-      if (filters?.search) {
-        query = query.or(`title.ilike.%${filters.search}%,prompt.ilike.%${filters.search}%`);
-      }
-
-      // Apply sorting
-      switch (filters?.sortBy) {
-        case 'oldest':
-          query = query.order('created_at', { ascending: true });
-          break;
-        case 'title':
-          query = query.order('title', { ascending: true });
-          break;
-        case 'favorites':
-          query = query.order('is_favorite', { ascending: false })
-                      .order('created_at', { ascending: false });
-          break;
-        case 'newest':
-        default:
-          query = query.order('created_at', { ascending: false });
-          break;
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching user content:', error);
-        throw new Error('Failed to fetch content');
-      }
-
-      return data || [];
+      return ContentService.getContent(params);
     },
     enabled: !!user?.id,
     staleTime: 30 * 1000, // 30 seconds
