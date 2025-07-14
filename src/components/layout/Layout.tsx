@@ -11,17 +11,17 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <ErrorBoundaryProvider>
-      <div className="min-h-screen flex bg-background">
+      <div className="min-h-screen flex flex-col lg:flex-row bg-background">
         {/* Skip links for accessibility */}
         <SkipLink href="#main-content">Skip to main content</SkipLink>
         <SkipLink href="#sidebar-nav">Skip to navigation</SkipLink>
         
         <Sidebar />
         
-        <div className="flex-1 lg:ml-64">
+        <div className="flex-1 w-full lg:ml-0">
           <main 
             id="main-content"
-            className="p-6 lg:p-8 focus-visible"
+            className="p-4 sm:p-6 lg:p-8 focus-visible w-full"
             tabIndex={-1}
             role="main"
             aria-label="Main content"

@@ -87,12 +87,12 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
+      <div className="lg:hidden fixed top-3 left-3 z-50">
         <Button
           variant="outline"
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-card shadow-md border-border hover:bg-accent"
+          className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg"
           aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         >
           {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -111,28 +111,28 @@ const Sidebar = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-sm border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl",
+          "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 lg:w-64 bg-card/95 backdrop-blur-sm border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl",
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
         aria-label="Main navigation"
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center px-6 py-8 border-b border-border/50">
-            <div className="p-2.5 bg-gradient-to-r from-primary to-primary/80 rounded-xl shadow-lg">
+          <div className="flex items-center px-4 sm:px-6 py-6 sm:py-8 border-b border-border/50">
+            <div className="p-2 sm:p-2.5 bg-gradient-to-r from-primary to-primary/80 rounded-xl shadow-lg">
               <img 
                 src={rocketLogo} 
                 alt="Rocket Logo" 
-                className="h-7 w-7 object-contain"
+                className="h-6 w-6 sm:h-7 sm:w-7 object-contain"
               />
             </div>
-            <span className="ml-3 font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent my-0 px-0 py-0 text-xl">
+            <span className="ml-2 sm:ml-3 font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent text-lg sm:text-xl lg:text-lg">
               Launch Click
             </span>
           </div>
 
           {/* Navigation */}
-          <nav role="navigation" aria-label="Main menu" className="flex-1 space-y-2 py-[21px] my-0 px-0">
+          <nav role="navigation" aria-label="Main menu" className="flex-1 space-y-1 sm:space-y-2 py-4 sm:py-6 px-2 sm:px-4 lg:px-0">
             {navigation.map((item) => (
               item.children ? (
                 <NestedSidebarItem
@@ -159,7 +159,7 @@ const Sidebar = () => {
           </nav>
 
           {/* User section with ThemeToggle and LogoutButton */}
-          <div className="border-t border-border/50 p-4 space-y-2">
+          <div className="border-t border-border/50 p-3 sm:p-4 space-y-2">
             <div className="flex justify-center">
               <AdminAccessIndicator showDetails={true} />
             </div>
@@ -169,7 +169,7 @@ const Sidebar = () => {
             <EmergencyLogoutButton
               variant="ghost"
               showConfirmation={true}
-              className="w-full justify-start text-foreground hover:text-accent-foreground hover:bg-accent"
+              className="w-full justify-start text-foreground hover:text-accent-foreground hover:bg-accent text-sm sm:text-base"
             />
           </div>
         </div>

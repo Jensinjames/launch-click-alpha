@@ -33,13 +33,13 @@ const Dashboard = () => {
   });
   return <AuthGuard requireAuth={true}>
       <Layout>
-        <div className="w-full px-6 lg:px-8">
-          {/* Welcome Header */}
-          <header id="dashboard-header" className="mb-8">
-            <h1 id="dashboard-title" className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/90 to-brand-secondary bg-clip-text text-transparent tracking-tight">
-              Welcome back, {user?.user_metadata?.full_name || "User"}! 👋
+        <div className="w-full px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+          {/* Welcome Header - Mobile First */}
+          <header id="dashboard-header" className="space-y-2 sm:space-y-3">
+            <h1 id="dashboard-title" className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-primary via-primary/90 to-brand-secondary bg-clip-text text-transparent tracking-tight">
+              Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}! 👋
             </h1>
-            <p className="text-xl text-muted-foreground/80 leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground/80 leading-relaxed">
               Ready to create some amazing marketing content today?
             </p>
           </header>
@@ -50,15 +50,15 @@ const Dashboard = () => {
           {/* Enhanced Stats */}
           <EnhancedDashboardStats credits={data.credits} assetsCount={data.recentAssets.length} />
 
-          {/* Main Dashboard Grid - Optimized Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
-            {/* Main Content Area - Takes up more space */}
-            <main id="dashboard-main-content" className="lg:col-span-8 space-y-8">
+          {/* Main Dashboard Grid - Mobile First */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            {/* Main Content Area */}
+            <main id="dashboard-main-content" className="lg:col-span-8 space-y-6 sm:space-y-8">
               <ContentCategoryGrid />
               <RecentContentPerformance />
             </main>
 
-            {/* Right Sidebar - Better space utilization */}
+            {/* Right Sidebar */}
             <aside id="dashboard-sidebar" className="lg:col-span-4">
               <TeamActivityOverview />
             </aside>

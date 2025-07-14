@@ -18,11 +18,11 @@ export const AdminLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       <AdminSidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full lg:ml-0">
         <AdminHeader />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-6 overflow-auto w-full">
           <Outlet />
         </main>
       </div>

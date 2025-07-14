@@ -63,44 +63,44 @@ const EnhancedDashboardStats = React.memo(({
   ], [credits.used, credits.limit, assetsCount]);
 
   return (
-    <section aria-labelledby="dashboard-stats-title" className="mb-8">
+    <section aria-labelledby="dashboard-stats-title" className="w-full">
       <h2 id="dashboard-stats-title" className="sr-only">Dashboard Statistics</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {statsData.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
             <Card 
               key={index}
               id={`dashboard-stat-${index}`}
-              className={`bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 ${stat.borderColor} hover:shadow-elegant hover:shadow-primary/10 hover:scale-[1.02] transition-all duration-300 focus-visible cursor-pointer group relative overflow-hidden`}
+              className={`bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 ${stat.borderColor} hover:shadow-elegant hover:shadow-primary/10 hover:scale-[1.02] transition-all duration-300 focus-visible cursor-pointer group relative overflow-hidden w-full`}
               role="img"
               aria-label={`${stat.title}: ${stat.value} (${stat.change})`}
               aria-describedby={`stat-description-${index}`}
               tabIndex={0}
             >
-              <CardHeader className="pb-3 px-6 pt-6">
+              <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-foreground/90">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-foreground/90 flex-1 min-w-0 truncate">
                     {stat.title}
                   </CardTitle>
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.bgColor} to-transparent border border-border/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-sm`} aria-hidden="true">
-                    <IconComponent className={`h-5 w-5 ${stat.color}`} />
+                  <div className={`p-2 sm:p-3 rounded-xl bg-gradient-to-br ${stat.bgColor} to-transparent border border-border/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-sm flex-shrink-0`} aria-hidden="true">
+                    <IconComponent className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0 px-6 pb-6">
-                <div className="space-y-3">
+              <CardContent className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
+                <div className="space-y-2 sm:space-y-3">
                   <div className="flex items-end justify-between">
-                    <div>
-                      <div className="text-3xl font-bold text-foreground mb-2 tracking-tight">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-1 sm:mb-2 tracking-tight truncate">
                         {stat.value}
                       </div>
                       <div 
                         id={`stat-description-${index}`}
-                        className={`text-sm font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1 ${
+                        className={`text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1 ${
                           stat.trend === 'up' ? 'text-success bg-success/10' : 
                           stat.trend === 'down' ? 'text-error bg-error/10' : 'text-muted-foreground bg-muted/20'
-                        }`}
+                        } truncate max-w-full`}
                       >
                         {stat.change}
                       </div>
@@ -110,7 +110,7 @@ const EnhancedDashboardStats = React.memo(({
                     <div className="space-y-1">
                       <Progress 
                         value={stat.progress} 
-                        className="h-2" 
+                        className="h-1.5 sm:h-2" 
                         aria-label={`${stat.title} progress: ${stat.progress.toFixed(1)}%`}
                       />
                       <div className="text-xs text-muted-foreground">
