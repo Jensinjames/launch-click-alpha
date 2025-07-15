@@ -4,14 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, Clock, CheckCircle, AlertCircle, Plus, ArrowRight } from "@/lib/icons";
-
-interface TeamMember {
-  id: string;
-  name: string;
-  avatar?: string;
-  role: string;
-  status: 'online' | 'away' | 'offline';
-}
+import { CardSkeleton } from "@/components/ui/loading-skeleton";
+import { useDashboardContent, TeamMember, RecentActivity } from "@/hooks/useDashboardContent";
 
 interface PendingTask {
   id: string;
@@ -22,15 +16,6 @@ interface PendingTask {
   type: 'review' | 'content' | 'approval';
 }
 
-interface RecentActivity {
-  id: string;
-  user: TeamMember;
-  action: string;
-  target: string;
-  timestamp: string;
-  type: 'created' | 'edited' | 'completed' | 'commented';
-}
-
 interface TeamActivityOverviewProps {
   teamMembers?: TeamMember[];
   pendingTasks?: PendingTask[];
@@ -38,75 +23,20 @@ interface TeamActivityOverviewProps {
 }
 
 const TeamActivityOverview = React.memo(({ 
-  teamMembers = [], 
-  pendingTasks = [], 
-  recentActivity = [] 
+  teamMembers, 
+  pendingTasks, 
+  recentActivity 
 }: TeamActivityOverviewProps) => {
-  // Mock data for demonstration
-  const mockTeamMembers: TeamMember[] = [
-    { id: '1', name: 'Sarah Chen', role: 'Content Manager', status: 'online' },
-    { id: '2', name: 'Mike Rodriguez', role: 'Designer', status: 'away' },
-    { id: '3', name: 'Emily Davis', role: 'Marketing Lead', status: 'online' },
-    { id: '4', name: 'James Wilson', role: 'Copywriter', status: 'offline' }
-  ];
-
-  const mockPendingTasks: PendingTask[] = [
-    {
-      id: '1',
-      title: 'Review Q2 Email Campaign',
-      assignee: mockTeamMembers[0],
-      dueDate: '2024-01-20',
-      priority: 'high',
-      type: 'review'
-    },
-    {
-      id: '2',
-      title: 'Approve Social Media Content',
-      assignee: mockTeamMembers[2],
-      dueDate: '2024-01-18',
-      priority: 'medium',
-      type: 'approval'
-    },
-    {
-      id: '3',
-      title: 'Create Landing Page Copy',
-      assignee: mockTeamMembers[3],
-      dueDate: '2024-01-22',
-      priority: 'low',
-      type: 'content'
-    }
-  ];
-
-  const mockRecentActivity: RecentActivity[] = [
-    {
-      id: '1',
-      user: mockTeamMembers[0],
-      action: 'created',
-      target: 'Summer Newsletter Template',
-      timestamp: '2 hours ago',
-      type: 'created'
-    },
-    {
-      id: '2',
-      user: mockTeamMembers[1],
-      action: 'edited',
-      target: 'Product Launch Email',
-      timestamp: '4 hours ago',
-      type: 'edited'
-    },
-    {
-      id: '3',
-      user: mockTeamMembers[2],
-      action: 'completed',
-      target: 'Social Media Campaign',
-      timestamp: '6 hours ago',
-      type: 'completed'
-    }
-  ];
-
-  const displayTeamMembers = teamMembers.length > 0 ? teamMembers : mockTeamMembers;
-  const displayPendingTasks = pendingTasks.length > 0 ? pendingTasks : mockPendingTasks;
-  const displayRecentActivity = recentActivity.length > 0 ? recentActivity : mockRecentActivity;
+  const { teamActivity } = useDashboardContent();
+  
+  // Use provided data or fetch from hook
+  const displayRecentActivity = recentActivity || teamActivity.data;
+  const isLoading = !recentActivity && teamActivity.isLoading;
+  const hasError = !recentActivity && teamActivity.error;
+  
+  // For now, use empty arrays for team members and tasks since we don't have real data yet
+  const displayTeamMembers = teamMembers || [];
+  const displayPendingTasks = pendingTasks || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

@@ -4,72 +4,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, MousePointer, TrendingUp, Mail, Share2, FileText, ArrowRight } from "@/lib/icons";
 import { Progress } from "@/components/ui/progress";
-
-interface CampaignData {
-  id: string;
-  title: string;
-  type: 'email' | 'social' | 'landing';
-  status: 'active' | 'draft' | 'completed';
-  metrics: {
-    views: number;
-    clicks: number;
-    conversions: number;
-    openRate?: number;
-    ctr: number;
-  };
-  createdAt: string;
-}
+import { ContentCardSkeleton } from "@/components/ui/loading-skeleton";
+import { useDashboardContent, CampaignData } from "@/hooks/useDashboardContent";
 
 interface RecentContentPerformanceProps {
   campaigns?: CampaignData[];
 }
 
-const RecentContentPerformance = React.memo(({ campaigns = [] }: RecentContentPerformanceProps) => {
-  // Mock data for demonstration
-  const mockCampaigns: CampaignData[] = [
-    {
-      id: '1',
-      title: 'Summer Product Launch Email',
-      type: 'email',
-      status: 'active',
-      metrics: {
-        views: 2847,
-        clicks: 342,
-        conversions: 28,
-        openRate: 24.3,
-        ctr: 12.0
-      },
-      createdAt: '2024-01-15'
-    },
-    {
-      id: '2',
-      title: 'Social Media Campaign Q1',
-      type: 'social',
-      status: 'completed',
-      metrics: {
-        views: 8934,
-        clicks: 1247,
-        conversions: 89,
-        ctr: 14.0
-      },
-      createdAt: '2024-01-12'
-    },
-    {
-      id: '3',
-      title: 'Landing Page - New Features',
-      type: 'landing',
-      status: 'active',
-      metrics: {
-        views: 1543,
-        clicks: 298,
-        conversions: 34,
-        ctr: 19.3
-      },
-      createdAt: '2024-01-10'
-    }
-  ];
-
-  const displayCampaigns = campaigns.length > 0 ? campaigns : mockCampaigns;
+const RecentContentPerformance = React.memo(({ campaigns }: RecentContentPerformanceProps) => {
+  const { contentPerformance } = useDashboardContent();
+  
+  // Use provided campaigns or fetch from hook
+  const displayCampaigns = campaigns || contentPerformance.data;
+  const isLoading = !campaigns && contentPerformance.isLoading;
+  const hasError = !campaigns && contentPerformance.error;
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -97,6 +45,69 @@ const RecentContentPerformance = React.memo(({ campaigns = [] }: RecentContentPe
       default: return 'bg-muted text-muted-foreground';
     }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6 sm:space-y-8 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Campaign Performance</h2>
+            <p className="text-sm sm:text-base text-muted-foreground/80">Track your content performance and engagement</p>
+          </div>
+          <Button variant="outline" className="text-primary hover:text-primary border-primary/20 hover:bg-primary/5 self-start sm:self-auto">
+            <span className="hidden sm:inline">View All Campaigns</span>
+            <span className="sm:hidden">View All</span>
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <ContentCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no campaigns
+  if (!isLoading && displayCampaigns.length === 0) {
+    return (
+      <div className="space-y-6 sm:space-y-8 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Campaign Performance</h2>
+            <p className="text-sm sm:text-base text-muted-foreground/80">Track your content performance and engagement</p>
+          </div>
+        </div>
+        
+        <Card className="bg-gradient-to-br from-card to-card/70 backdrop-blur-sm border border-border/50 text-center p-8">
+          <CardContent>
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 bg-muted/50 rounded-full">
+                <TrendingUp className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-foreground mb-2">No Content Performance Data</h3>
+                <p className="text-muted-foreground mb-4">
+                  {hasError 
+                    ? "We couldn't load your performance data. Please try again." 
+                    : "Start creating content to see performance metrics here."
+                  }
+                </p>
+                {hasError && (
+                  <Button onClick={() => contentPerformance.refetch()} variant="outline">
+                    Try Again
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 w-full">
