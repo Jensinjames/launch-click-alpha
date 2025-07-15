@@ -56,7 +56,7 @@ export const useDashboardContent = () => {
             title,
             type,
             created_at,
-            content_performance_summary (
+            content_performance_summary!limit(1) (
               total_views,
               total_clicks,
               total_conversions,
