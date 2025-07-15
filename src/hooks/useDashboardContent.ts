@@ -56,7 +56,7 @@ export const useDashboardContent = () => {
             title,
             type,
             created_at,
-            content_performance_summary!limit(1) (
+            content_performance_summary (
               total_views,
               total_clicks,
               total_conversions,
@@ -76,12 +76,22 @@ export const useDashboardContent = () => {
           type: mapContentTypeToDisplay(item.type),
           status: 'active', // TODO: Add status field to content table
           metrics: {
-            views: item.content_performance_summary?.total_views || 0,
-            clicks: item.content_performance_summary?.total_clicks || 0,
-            conversions: item.content_performance_summary?.total_conversions || 0,
-            ctr: item.content_performance_summary?.engagement_rate || 0,
+            views: Array.isArray(item.content_performance_summary) 
+              ? (item.content_performance_summary[0]?.total_views || 0)
+              : (item.content_performance_summary?.total_views || 0),
+            clicks: Array.isArray(item.content_performance_summary)
+              ? (item.content_performance_summary[0]?.total_clicks || 0)
+              : (item.content_performance_summary?.total_clicks || 0),
+            conversions: Array.isArray(item.content_performance_summary)
+              ? (item.content_performance_summary[0]?.total_conversions || 0)
+              : (item.content_performance_summary?.total_conversions || 0),
+            ctr: Array.isArray(item.content_performance_summary)
+              ? (item.content_performance_summary[0]?.engagement_rate || 0)
+              : (item.content_performance_summary?.engagement_rate || 0),
             openRate: item.type === 'email_sequence' ? 
-              item.content_performance_summary?.engagement_rate : undefined
+              (Array.isArray(item.content_performance_summary)
+                ? (item.content_performance_summary[0]?.engagement_rate || 0)
+                : (item.content_performance_summary?.engagement_rate || 0)) : undefined
           },
           createdAt: item.created_at
         }));
