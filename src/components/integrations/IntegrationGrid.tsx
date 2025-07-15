@@ -1,7 +1,18 @@
 
+import { useState } from "react";
 import IntegrationCard from "./IntegrationCard";
+import N8nConnectionModal from "./N8nConnectionModal";
 
 const IntegrationGrid = () => {
+  const [isN8nModalOpen, setIsN8nModalOpen] = useState(false);
+  
+  const handleIntegrationConnect = (integrationId: string) => {
+    if (integrationId === "n8n") {
+      setIsN8nModalOpen(true);
+    }
+    // Handle other integrations here
+  };
+
   const integrations = [
     {
       id: "mailchimp",
@@ -45,7 +56,7 @@ const IntegrationGrid = () => {
       category: "Automation",
       description: "Self-hosted workflow automation platform",
       icon: "🔗",
-      status: "coming-soon" as const,
+      status: "available" as const,
       color: "bg-purple-100"
     },
     {
@@ -60,14 +71,25 @@ const IntegrationGrid = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      {integrations.map((integration) => (
-        <IntegrationCard
-          key={integration.id}
-          integration={integration}
-        />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {integrations.map((integration) => (
+          <IntegrationCard
+            key={integration.id}
+            integration={integration}
+            onConnect={handleIntegrationConnect}
+          />
+        ))}
+      </div>
+      
+      <N8nConnectionModal
+        isOpen={isN8nModalOpen}
+        onClose={() => setIsN8nModalOpen(false)}
+        onSuccess={() => {
+          // Refresh integrations or update state as needed
+        }}
+      />
+    </>
   );
 };
 

@@ -1692,6 +1692,7 @@ export type Database = {
         | "airtable"
         | "zapier"
         | "mailerlite"
+        | "n8n"
       invitation_status: "pending" | "accepted" | "expired" | "cancelled"
       plan_type: "starter" | "pro" | "growth" | "elite"
       stripe_order_status: "pending" | "completed" | "canceled"
@@ -1852,6 +1853,7 @@ export const Constants = {
         "airtable",
         "zapier",
         "mailerlite",
+        "n8n",
       ],
       invitation_status: ["pending", "accepted", "expired", "cancelled"],
       plan_type: ["starter", "pro", "growth", "elite"],
