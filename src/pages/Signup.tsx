@@ -46,6 +46,7 @@ const Signup = () => {
               onChange={setFullName}
               required
               label="Full Name"
+              autoComplete="name"
             />
             
             <FormField
@@ -56,6 +57,7 @@ const Signup = () => {
               onChange={setEmail}
               required
               label="Email"
+              autoComplete="email"
             />
             
             <PasswordField
@@ -66,6 +68,7 @@ const Signup = () => {
               showStrengthIndicator={true}
               onValidationChange={setIsPasswordValid}
               required
+              autoComplete="new-password"
             />
             
             <Button 

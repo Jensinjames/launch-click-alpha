@@ -54,14 +54,18 @@ export const useSignUpMutation = () => {
     },
     onSuccess: (data) => {
       if (data.user && !data.user.email_confirmed_at) {
-        toast.success('Account created! Please check your email to confirm your account before signing in.', {
-          duration: 5000,
+        toast.success('Account created! Please check your email (including spam folder) to confirm your account before signing in.', {
+          duration: 7000,
         });
       } else if (data.user && data.user.email_confirmed_at) {
-        toast.success('Account created and confirmed! You can now sign in.');
-        navigate('/dashboard');
+        toast.success('Account created and confirmed! Redirecting to dashboard...', {
+          duration: 3000,
+        });
+        setTimeout(() => navigate('/dashboard'), 1000);
       } else {
-        toast.success('Account created successfully!');
+        toast.success('Account created successfully! Please check your email to confirm your account.', {
+          duration: 7000,
+        });
       }
     },
     onError: (error: any) => {

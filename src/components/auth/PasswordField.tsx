@@ -16,6 +16,7 @@ interface PasswordFieldProps {
   required?: boolean;
   name?: string;
   id?: string;
+  autoComplete?: string;
 }
 
 export const PasswordField = ({ 
@@ -27,7 +28,8 @@ export const PasswordField = ({
   onValidationChange,
   required = false,
   name = "password",
-  id = "password"
+  id = "password",
+  autoComplete = "current-password"
 }: PasswordFieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -47,7 +49,7 @@ export const PasswordField = ({
           placeholder={placeholder}
           required={required}
           className="pr-12"
-          autoComplete="current-password"
+          autoComplete={autoComplete}
           aria-describedby={showStrengthIndicator ? `${id}-strength` : undefined}
         />
         <Button
