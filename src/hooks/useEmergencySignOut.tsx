@@ -1,13 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { authLogger } from '@/services/logger/domainLoggers';
 
 export const useEmergencySignOut = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
-      console.log('[Emergency SignOut] Starting simplified logout...');
+      await authLogger.userAction('emergency_signout_start', 'emergency_signout', { 
+        hook: 'useEmergencySignOut' 
+      });
       
       try {
         // Quick local cleanup first
@@ -22,9 +25,13 @@ export const useEmergencySignOut = () => {
         
         try {
           await Promise.race([signOutPromise, timeoutPromise]);
-          console.log('[Emergency SignOut] Supabase signout successful');
+          await authLogger.success('Emergency supabase signout successful', false, { 
+            hook: 'useEmergencySignOut' 
+          });
         } catch (timeoutError) {
-          console.log('[Emergency SignOut] Supabase signout timed out, proceeding with local cleanup');
+          await authLogger.warning('Emergency supabase signout timed out, proceeding with local cleanup', { 
+            hook: 'useEmergencySignOut' 
+          });
         }
         
         // Clear all localStorage
@@ -39,14 +46,21 @@ export const useEmergencySignOut = () => {
           try {
             localStorage.removeItem(key);
           } catch (e) {
-            console.warn('Failed to remove localStorage key:', key);
+            authLogger.warning('Failed to remove localStorage key', { 
+              key, 
+              hook: 'useEmergencySignOut' 
+            });
           }
         });
         
-        console.log('[Emergency SignOut] Emergency logout completed');
+        await authLogger.success('Emergency logout completed', false, { 
+          hook: 'useEmergencySignOut' 
+        });
         
       } catch (error) {
-        console.error('[Emergency SignOut] Error during emergency logout:', error);
+        await authLogger.error(error as Error, { 
+          hook: 'useEmergencySignOut' 
+        });
         // Continue anyway - we need to get the user out
       }
     },

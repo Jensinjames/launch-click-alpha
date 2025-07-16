@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LogOut, Loader2 } from 'lucide-react';
 import { useEmergencySignOut } from '@/hooks/useEmergencySignOut';
+import { authLogger } from '@/services/logger/domainLoggers';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -33,24 +34,42 @@ export const EmergencyLogoutButton = ({
   const signOut = useEmergencySignOut();
 
   const handleDirectLogout = async () => {
-    console.log('[EmergencyLogoutButton] Direct logout initiated');
+    await authLogger.userAction('emergency_logout_start', 'emergency_logout', { 
+      type: 'direct',
+      component: 'EmergencyLogoutButton' 
+    });
     
     try {
       await signOut.mutateAsync();
-      console.log('[EmergencyLogoutButton] Direct logout completed successfully');
+      await authLogger.success('Emergency logout completed successfully', false, { 
+        type: 'direct',
+        component: 'EmergencyLogoutButton' 
+      });
     } catch (error) {
-      console.error('[EmergencyLogoutButton] Direct logout failed:', error);
+      await authLogger.error(error as Error, { 
+        type: 'direct',
+        component: 'EmergencyLogoutButton' 
+      });
     }
   };
 
   const handleConfirmedLogout = async () => {
-    console.log('[EmergencyLogoutButton] Confirmed logout initiated');
+    await authLogger.userAction('emergency_logout_start', 'emergency_logout', { 
+      type: 'confirmed',
+      component: 'EmergencyLogoutButton' 
+    });
     
     try {
       await signOut.mutateAsync();
-      console.log('[EmergencyLogoutButton] Confirmed logout completed successfully');
+      await authLogger.success('Emergency logout completed successfully', false, { 
+        type: 'confirmed',
+        component: 'EmergencyLogoutButton' 
+      });
     } catch (error) {
-      console.error('[EmergencyLogoutButton] Confirmed logout failed:', error);
+      await authLogger.error(error as Error, { 
+        type: 'confirmed',
+        component: 'EmergencyLogoutButton' 
+      });
     }
   };
 

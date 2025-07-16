@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { authLogger } from '@/services/logger/domainLoggers';
 import rocketLogo from "@/assets/rocket_svg.svg";
 
 interface AuthGuardProps {
@@ -24,14 +25,21 @@ const AuthGuard = ({
 
     if (requireAuth && !user) {
       // User should be authenticated but isn't
-      console.log('AuthGuard: Redirecting to login - user not authenticated');
+      authLogger.userAction('redirect_to_login', 'auth_guard', { 
+        from: location.pathname,
+        reason: 'user_not_authenticated' 
+      });
       navigate('/login', { 
         state: { from: location.pathname },
         replace: true 
       });
     } else if (!requireAuth && user && redirectTo) {
       // User is authenticated but shouldn't be (e.g., on login page)
-      console.log('AuthGuard: Redirecting authenticated user to:', redirectTo);
+      authLogger.userAction('redirect_authenticated_user', 'auth_guard', { 
+        from: location.pathname,
+        to: redirectTo,
+        userId: user.id 
+      });
       navigate(redirectTo, { replace: true });
     }
   }, [user, loading, requireAuth, navigate, location.pathname, redirectTo]);

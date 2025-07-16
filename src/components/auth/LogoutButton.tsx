@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LogOut, Loader2 } from 'lucide-react';
 import { useAuthMutations } from '@/hooks/useAuthMutations';
+import { authLogger } from '@/services/logger/domainLoggers';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -34,24 +35,42 @@ export const LogoutButton = ({
   const { signOut } = useAuthMutations();
 
   const handleDirectLogout = async () => {
-    console.log('[LogoutButton] Direct logout initiated');
+    await authLogger.userAction('logout_start', 'logout', { 
+      type: 'direct',
+      component: 'LogoutButton' 
+    });
     
     try {
       await signOut.mutateAsync();
-      console.log('[LogoutButton] Direct logout completed successfully');
+      await authLogger.success('Logout completed successfully', false, { 
+        type: 'direct',
+        component: 'LogoutButton' 
+      });
     } catch (error) {
-      console.error('[LogoutButton] Direct logout failed:', error);
+      await authLogger.error(error as Error, { 
+        type: 'direct',
+        component: 'LogoutButton' 
+      });
     }
   };
 
   const handleConfirmedLogout = async () => {
-    console.log('[LogoutButton] Confirmed logout initiated');
+    await authLogger.userAction('logout_start', 'logout', { 
+      type: 'confirmed',
+      component: 'LogoutButton' 
+    });
     
     try {
       await signOut.mutateAsync();
-      console.log('[LogoutButton] Confirmed logout completed successfully');
+      await authLogger.success('Logout completed successfully', false, { 
+        type: 'confirmed',
+        component: 'LogoutButton' 
+      });
     } catch (error) {
-      console.error('[LogoutButton] Confirmed logout failed:', error);
+      await authLogger.error(error as Error, { 
+        type: 'confirmed',
+        component: 'LogoutButton' 
+      });
     }
   };
 
