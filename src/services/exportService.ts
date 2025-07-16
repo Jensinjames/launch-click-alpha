@@ -50,9 +50,9 @@ export class ExportService {
       // Call edge function to process export
       const { data, error } = await supabase.functions.invoke('bulk-export-zip', {
         body: {
-          job_id: jobId,
-          content_ids: contentIds,
-          format
+          contentIds: contentIds,
+          format,
+          includeMetadata: true
         }
       });
 
