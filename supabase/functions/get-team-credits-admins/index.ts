@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
         status,
         created_at,
         joined_at,
-        profiles!fk_team_members_user (
+        profiles!user_id (
           id,
           email,
           full_name,
