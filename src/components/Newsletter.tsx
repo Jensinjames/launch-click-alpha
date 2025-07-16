@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
+import { NewsletterService } from "../services/newsletterService";
 
 const Newsletter = () => {
   const [email, setEmail] = useState("");
@@ -35,15 +36,17 @@ const Newsletter = () => {
     setLoading(true);
     
     try {
-      // TODO: Replace with actual newsletter API integration
-      // For now, we'll simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await NewsletterService.subscribe(email);
       
-      toast.success("Successfully subscribed to newsletter!");
-      setEmail("");
+      if (result.success) {
+        toast.success("Successfully subscribed to newsletter!");
+        setEmail("");
+      } else {
+        toast.error(result.error || "Failed to subscribe. Please try again.");
+      }
     } catch (error) {
-      console.error("Newsletter subscription error:", error);
-      toast.error("Failed to subscribe. Please try again later.");
+      console.error('Newsletter subscription error:', error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

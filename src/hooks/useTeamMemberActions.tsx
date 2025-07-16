@@ -1,6 +1,7 @@
 
 import { useUpdateMemberRole } from '@/features/teams/hooks/useUpdateMemberRole';
 import { useRemoveMember } from '@/features/teams/hooks/useRemoveMember';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useTeamMemberActions = (teamId: string) => {
   const updateRoleMutation = useUpdateMemberRole();
@@ -17,14 +18,24 @@ export const useTeamMemberActions = (teamId: string) => {
   };
 
   const updateCredits = {
-    mutate: ({ memberId, creditsLimit }: { memberId: string; creditsLimit: number }) => {
-      // TODO: Implement credits update functionality
-      console.log('Update member credits:', { memberId, creditsLimit });
+    mutate: async ({ memberId, creditsLimit }: { memberId: string; creditsLimit: number }) => {
+      // Call the admin edge function to update credits
+      const { data, error } = await supabase.functions.invoke('get-team-credits-admins', {
+        body: { 
+          action: 'update_member_credits',
+          member_id: memberId, 
+          credits_limit: creditsLimit 
+        }
+      });
+      
+      if (error) {
+        throw new Error('Failed to update credits');
+      }
+      
+      return data;
     },
     mutateAsync: async ({ memberId, creditsLimit }: { memberId: string; creditsLimit: number }) => {
-      // TODO: Implement credits update functionality
-      console.log('Update member credits:', { memberId, creditsLimit });
-      return Promise.resolve();
+      return updateCredits.mutate({ memberId, creditsLimit });
     },
     isPending: false
   };

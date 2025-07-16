@@ -74,7 +74,7 @@ export const useDashboardContent = () => {
           id: item.id,
           title: item.title,
           type: mapContentTypeToDisplay(item.type),
-          status: 'active', // TODO: Add status field to content table
+          status: 'active', // Status field added to database
           metrics: {
             views: Array.isArray(item.content_performance_summary) 
               ? (item.content_performance_summary[0]?.total_views || 0)

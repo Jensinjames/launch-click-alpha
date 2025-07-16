@@ -1,9 +1,12 @@
 // Export Service - Complete Implementation
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+type ExportJobStatus = Database['public']['Tables']['export_jobs']['Row']['status'];
 
 export interface ExportJobData {
   id: string;
-  status: string;
+  status: ExportJobStatus;
   file_url?: string;
   error_message?: string;
   progress: number;
@@ -12,8 +15,10 @@ export interface ExportJobData {
 export class ExportService {
   static async createExportJob(contentIds: string[], format: 'pdf' | 'zip' | 'csv' = 'zip'): Promise<ExportJobData> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        throw new Error('User not authenticated');
+      }
 
       const { data: job, error } = await supabase
         .from('export_jobs')
@@ -21,8 +26,8 @@ export class ExportService {
           content_ids: contentIds,
           job_type: 'bulk_export',
           status: 'pending',
-          metadata: { format },
-          user_id: user.id
+          user_id: user.user.id,
+          metadata: { format }
         })
         .select()
         .single();
@@ -31,12 +36,12 @@ export class ExportService {
         throw new Error('Failed to create export job');
       }
 
-      // Trigger export processing
-      await this.processExport(job.id, contentIds, format);
+      // Trigger export processing in background
+      this.processExport(job.id, contentIds, format).catch(console.error);
 
       return {
         id: job.id,
-        status: 'processing',
+        status: job.status,
         progress: 0
       };
     } catch (error) {
@@ -48,7 +53,7 @@ export class ExportService {
   private static async processExport(jobId: string, contentIds: string[], format: string): Promise<void> {
     try {
       // Call edge function to process export
-      const { data, error } = await supabase.functions.invoke('bulk-export-zip', {
+      const { error } = await supabase.functions.invoke('bulk-export-zip', {
         body: {
           job_id: jobId,
           content_ids: contentIds,
@@ -80,8 +85,8 @@ export class ExportService {
       return {
         id: job.id,
         status: job.status,
-        file_url: job.file_url,
-        error_message: job.error_message,
+        file_url: job.file_url || undefined,
+        error_message: job.error_message || undefined,
         progress: job.status === 'completed' ? 100 : 
                  job.status === 'processing' ? 50 : 
                  job.status === 'failed' ? 0 : 10
@@ -92,7 +97,7 @@ export class ExportService {
     }
   }
 
-  private static async updateJobStatus(jobId: string, status: string, errorMessage?: string): Promise<void> {
+  private static async updateJobStatus(jobId: string, status: ExportJobStatus, errorMessage?: string): Promise<void> {
     await supabase
       .from('export_jobs')
       .update({ 

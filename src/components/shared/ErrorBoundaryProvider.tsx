@@ -30,10 +30,11 @@ export class ErrorBoundaryProvider extends Component<Props, State> {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.props.onError?.(error, errorInfo);
     
-    // Log to external service in production
+    // Log to monitoring service in production
     if (import.meta.env.PROD) {
-      // TODO: Integrate with error logging service
-      console.error('Production error:', { error, errorInfo });
+      import('@/services/monitoringService').then(({ MonitoringService }) => {
+        MonitoringService.reportError(error, { errorInfo }).catch(console.error);
+      });
     }
   }
 

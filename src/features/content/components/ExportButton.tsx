@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { ExportService } from "@/services/exportService";
 
 interface ExportButtonProps {
   contentId: string;
@@ -18,8 +19,21 @@ export const ExportButton = ({
 }: ExportButtonProps) => {
   const handleExport = async () => {
     try {
-      // TODO: Implement actual export functionality
-      toast.success(`Exporting "${contentTitle}"`);
+      const result = await ExportService.exportSingleContent(contentId, 'pdf');
+      
+      if (result?.file_url) {
+        // Download the file
+        const link = document.createElement('a');
+        link.href = result.file_url;
+        link.download = `${contentTitle}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast.success(`Successfully exported "${contentTitle}"`);
+      } else {
+        toast.error('Export failed. Please try again.');
+      }
     } catch (error) {
       console.error('Export error:', error);
       toast.error('Failed to export content');

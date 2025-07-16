@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { ExportService } from "@/services/exportService";
 
 interface BulkExportButtonProps {
   selectedContentIds: string[];
@@ -14,12 +15,23 @@ export const BulkExportButton = ({
 }: BulkExportButtonProps) => {
   const handleBulkExport = async () => {
     try {
-      // TODO: Implement actual bulk export functionality
-      toast.success(`Exporting ${selectedContentIds.length} items`);
+      const job = await ExportService.createExportJob(selectedContentIds, 'zip');
+      
+      toast.success(`Export job created! Processing ${selectedContentIds.length} items...`);
+      
+      // Monitor job status (simplified)
+      setTimeout(async () => {
+        const status = await ExportService.getJobStatus(job.id);
+        if (status?.status === 'completed' && status.file_url) {
+          toast.success('Export completed! Download started.');
+          window.open(status.file_url, '_blank');
+        }
+      }, 5000);
+      
       onExportComplete?.();
     } catch (error) {
       console.error('Bulk export error:', error);
-      toast.error('Failed to export content');
+      toast.error('Failed to start export job');
     }
   };
 
