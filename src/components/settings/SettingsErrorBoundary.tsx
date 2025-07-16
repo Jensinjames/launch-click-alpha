@@ -2,6 +2,8 @@ import React, { Component, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { performanceLogger } from '@/services/logger/domainLoggers';
+import { toast } from '@/hooks/use-toast';
 
 interface Props {
   children: ReactNode;
@@ -25,7 +27,20 @@ export class SettingsErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Settings Error Boundary caught an error:', error, errorInfo);
+    // Use structured logging for error boundaries
+    performanceLogger.error(error, {
+      boundary: 'SettingsErrorBoundary',
+      errorInfo: errorInfo.componentStack,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Notify user of the error
+    toast({
+      variant: "destructive",
+      title: "Settings Error",
+      description: "Something went wrong while loading your settings. Please try again."
+    });
+    
     this.setState({ errorInfo });
   }
 

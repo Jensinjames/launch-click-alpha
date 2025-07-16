@@ -3,6 +3,8 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { performanceLogger } from '@/services/logger/domainLoggers';
+import { toast } from '@/hooks/use-toast';
 
 interface Props {
   children: ReactNode;
@@ -27,8 +29,22 @@ export class ErrorBoundaryProvider extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Use structured logging for error boundaries
+    performanceLogger.error(error, {
+      boundary: 'ErrorBoundaryProvider',
+      errorInfo: errorInfo.componentStack,
+      retryCount: this.state.retryCount,
+      timestamp: new Date().toISOString()
+    });
+    
     this.props.onError?.(error, errorInfo);
+    
+    // Notify user of the error
+    toast({
+      variant: "destructive",
+      title: "Application Error",
+      description: "Something went wrong. Please try again or reload the page."
+    });
     
     // Log to monitoring service in production
     if (import.meta.env.PROD) {
@@ -41,7 +57,12 @@ export class ErrorBoundaryProvider extends Component<Props, State> {
             includeReportAction: false
           },
           { errorInfo }
-        ).catch(console.error);
+        ).catch((monitoringError) => {
+          performanceLogger.error(monitoringError, {
+            context: 'monitoring_service_fallback',
+            originalError: error.message
+          });
+        });
       });
     }
   }
