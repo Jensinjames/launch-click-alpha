@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TeamAdminData, TeamMemberWithCredits } from '@/types/team';
+import { teamsLogger } from '@/services/logger/domainLoggers';
 
 // Simplified helper to try edge function first, fallback to direct query
 const getTeamDataWithFallback = async (teamId: string): Promise<TeamAdminData> => {
@@ -15,9 +16,7 @@ const getTeamDataWithFallback = async (teamId: string): Promise<TeamAdminData> =
     if (data) return data as TeamAdminData;
   } catch (error) {
     // Use teams logger for structured logging
-    import('@/services/logger/domainLoggers').then(({ teamsLogger }) => {
-      teamsLogger.warning('Edge function failed, using fallback', { error: (error as Error).message });
-    });
+    teamsLogger.warning('Edge function failed, using fallback', { error: (error as Error).message });
   }
   
   // Fallback to direct database query
@@ -27,9 +26,7 @@ const getTeamDataWithFallback = async (teamId: string): Promise<TeamAdminData> =
 // Fallback function to get team data using direct database queries
 const getFallbackTeamData = async (teamId: string): Promise<TeamAdminData> => {
   // Use teams logger for structured logging
-  import('@/services/logger/domainLoggers').then(({ teamsLogger }) => {
-    teamsLogger.info('Using fallback method to fetch team data', { teamId });
-  });
+  teamsLogger.info('Using fallback method to fetch team data', { teamId });
   
   // Get team members with their profiles and credits
   const { data: teamMembers, error: membersError } = await supabase
