@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTeamMembersWithCredits } from "@/hooks/useTeamMembersWithCredits";
 import { useTeamSelection } from "@/features/teams/hooks/useTeamSelection";
 import { TeamPermissions } from "@/utils/teamPermissions";
+import { canUserPerformAction, getRoleDisplayName, getRoleDescription } from "@/shared/utils/permissionHelpers";
 
 const Teams = () => {
   const { user } = useAuth();
@@ -33,9 +34,10 @@ const Teams = () => {
     return selectedTeam?.role || 'viewer';
   }, [selectedTeamId, userTeams]);
 
-  // Only fetch team data if user is owner or admin
-  const canAccessAdminData = currentUserRole === 'owner' || currentUserRole === 'admin';
-  const teamIdForQuery = canAccessAdminData ? selectedTeamId : null;
+  // Check permissions using role-based system
+  const canViewTeamData = canUserPerformAction(currentUserRole, 'canViewContent');
+  const canManageTeam = canUserPerformAction(currentUserRole, 'canManageMembers');
+  const teamIdForQuery = canViewTeamData ? selectedTeamId : null;
 
   const {
     data: teamData,
@@ -92,7 +94,7 @@ const Teams = () => {
                   </div>
                 </CardContent>
               </Card>
-            ) : !teamData && !canAccessAdminData ? (
+            ) : !teamData && !canViewTeamData ? (
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center">
@@ -103,12 +105,12 @@ const Teams = () => {
                       onTeamChange={handleTeamChange} 
                     />
                     <div className="mt-8">
-                      <h3 className="text-lg font-semibold mb-2">Limited Access</h3>
+                      <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
                       <p className="text-muted-foreground mb-4">
-                        You are a member of this team, but detailed team management features are restricted to owners and administrators.
+                        You don't have permission to view this team's information.
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Contact your team owner or administrator for access to team management features.
+                        Please contact your team administrator to request access.
                       </p>
                     </div>
                   </div>
