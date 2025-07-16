@@ -47,12 +47,8 @@ const SystemManagement = lazy(() =>
 // Legacy admin page for backward compatibility
 const Admin = lazy(() => import("./pages/Admin"));
 
-// Lazy load development monitor
-const FeatureAccessMonitor = lazy(() => 
-  import('@/components/dev/FeatureAccessMonitor').then(m => ({ 
-    default: m.FeatureAccessMonitor 
-  }))
-);
+// Import development monitor directly (not lazy loaded)
+import { FeatureAccessMonitor } from '@/components/dev/FeatureAccessMonitor';
 
 // App content wrapper to get current route
 const AppContent = () => {
@@ -225,11 +221,7 @@ const AppContent = () => {
       </Routes>
       
       {/* Development performance monitor */}
-      {import.meta.env.DEV && (
-        <Suspense fallback={null}>
-          <FeatureAccessMonitor />
-        </Suspense>
-      )}
+      {import.meta.env.DEV && <FeatureAccessMonitor />}
     </FeatureAccessProvider>
   );
 };
