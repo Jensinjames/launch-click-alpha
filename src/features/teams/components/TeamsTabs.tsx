@@ -9,7 +9,7 @@ import { OptimizedTeamMembersList } from "./OptimizedTeamMembersList";
 import { TeamAnalytics } from "./TeamAnalytics";
 import { BulkActions } from "./BulkActions";
 import { InviteMembersDialog } from "./InviteMembersDialog";
-import { canUserPerformAction, getRoleDisplayName, getRoleDescription } from "@/shared/utils/permissionHelpers";
+import { TeamsBusinessLogicService } from "@/services/TeamsBusinessLogicService";
 import type { TeamRole } from "@/shared/utils/permissionHelpers";
 
 interface TeamsTabsProps {
@@ -22,10 +22,9 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
   const { members } = teamData;
   const role = currentUserRole as TeamRole;
   
-  // Permission checks
-  const canViewAnalytics = canUserPerformAction(role, 'canViewAnalytics');
-  const canManageMembers = canUserPerformAction(role, 'canManageMembers');
-  const canInviteMembers = canUserPerformAction(role, 'canInviteMembers');
+  // Use business logic service for permission checks
+  const permissions = TeamsBusinessLogicService.getPermissionSummary(role);
+  const roleInfo = TeamsBusinessLogicService.getRoleManagementInfo(role);
 
   return (
     <div className="w-full space-y-6">
@@ -36,8 +35,8 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
             <div className="flex items-center space-x-3">
               <Shield className="h-5 w-5 text-primary" />
               <div>
-                <h4 className="font-semibold text-sm">Your Role: {getRoleDisplayName(role)}</h4>
-                <p className="text-xs text-muted-foreground">{getRoleDescription(role)}</p>
+                <h4 className="font-semibold text-sm">Your Role: {roleInfo.displayName}</h4>
+                <p className="text-xs text-muted-foreground">{roleInfo.description}</p>
               </div>
             </div>
             <Badge variant="outline" className="text-xs">
@@ -56,7 +55,7 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
           <TabsTrigger 
             value="analytics" 
             className="flex items-center space-x-2"
-            disabled={!canViewAnalytics}
+            disabled={!permissions.canViewAnalytics}
           >
             <BarChart3 className="h-4 w-4" />
             <span>Analytics</span>
@@ -64,7 +63,7 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
           <TabsTrigger 
             value="bulk" 
             className="flex items-center space-x-2"
-            disabled={!canManageMembers}
+            disabled={!permissions.canManageMembers}
           >
             <Settings2 className="h-4 w-4" />
             <span>Bulk Actions</span>
@@ -74,7 +73,7 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
       <TabsContent value="members" className="space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Team Members</h3>
-          {canInviteMembers ? (
+          {permissions.canInviteMembers ? (
             <InviteMembersDialog teamId={selectedTeamId} currentUserRole={currentUserRole} />
           ) : (
             <div className="text-xs text-muted-foreground">
@@ -90,7 +89,7 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
       </TabsContent>
 
         <TabsContent value="analytics">
-          {canViewAnalytics ? (
+          {permissions.canViewAnalytics ? (
             <TeamAnalytics teamData={teamData} />
           ) : (
             <Card>
@@ -108,7 +107,7 @@ export const TeamsTabs = ({ teamData, selectedTeamId, currentUserRole }: TeamsTa
         </TabsContent>
 
         <TabsContent value="bulk">
-          {canManageMembers ? (
+          {permissions.canManageMembers ? (
             <Card>
               <CardHeader>
                 <CardTitle>Bulk Member Management</CardTitle>

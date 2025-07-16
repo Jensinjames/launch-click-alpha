@@ -14,8 +14,7 @@ import { TeamsTabs } from "@/features/teams/components/TeamsTabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useTeamMembersWithCredits } from "@/hooks/useTeamMembersWithCredits";
 import { useTeamSelection } from "@/features/teams/hooks/useTeamSelection";
-import { TeamPermissions } from "@/utils/teamPermissions";
-import { canUserPerformAction, getRoleDisplayName, getRoleDescription } from "@/shared/utils/permissionHelpers";
+import { TeamsBusinessLogicService } from "@/services/TeamsBusinessLogicService";
 
 const Teams = () => {
   const { user } = useAuth();
@@ -27,17 +26,20 @@ const Teams = () => {
     hasTeams
   } = useTeamSelection();
 
-  // Get current user's role in the selected team
-  const currentUserRole = React.useMemo(() => {
-    if (!selectedTeamId || !userTeams) return 'viewer';
-    const selectedTeam = userTeams.find(team => team.id === selectedTeamId);
-    return selectedTeam?.role || 'viewer';
-  }, [selectedTeamId, userTeams]);
+  // Use business logic service for all team access calculations
+  const teamAccessResult = React.useMemo(() => {
+    if (!user?.id) return null;
+    
+    return TeamsBusinessLogicService.calculateTeamAccess({
+      userTeams,
+      selectedTeamId,
+      userId: user.id
+    });
+  }, [selectedTeamId, userTeams, user?.id]);
 
-  // Check permissions using role-based system
-  const canViewTeamData = canUserPerformAction(currentUserRole, 'canViewContent');
-  const canManageTeam = canUserPerformAction(currentUserRole, 'canManageMembers');
-  const teamIdForQuery = canViewTeamData ? selectedTeamId : null;
+  // Get current user's role and permissions
+  const currentUserRole = teamAccessResult?.userRole || 'viewer';
+  const teamIdForQuery = teamAccessResult?.teamIdForQuery || null;
 
   const {
     data: teamData,
@@ -46,103 +48,106 @@ const Teams = () => {
     refetch
   } = useTeamMembersWithCredits(teamIdForQuery);
 
+  // Use business logic service for validation
+  const validationResult = React.useMemo(() => {
+    if (!teamAccessResult) return { isValid: false, errorType: 'data_error' as const };
+    
+    return TeamsBusinessLogicService.validateTeamState(
+      hasTeams,
+      selectedTeamId,
+      teamData,
+      error,
+      teamAccessResult
+    );
+  }, [hasTeams, selectedTeamId, teamData, error, teamAccessResult]);
+
+  const renderContent = () => {
+    if (teamsLoading || isLoading) {
+      return (
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-muted rounded w-2/3 mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-24 bg-muted rounded"></div>
+            ))}
+          </div>
+          <div className="h-96 bg-muted rounded"></div>
+        </div>
+      );
+    }
+
+    if (!validationResult.isValid) {
+      return (
+        <Card className={validationResult.errorType === 'access_denied' ? 'border-destructive/20 bg-destructive/5' : ''}>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <h3 className={`text-lg font-semibold mb-2 ${validationResult.errorType === 'access_denied' ? 'text-destructive' : ''}`}>
+                {validationResult.errorType === 'no_teams' ? 'No Teams Found' :
+                 validationResult.errorType === 'access_denied' ? 'Access Denied' :
+                 validationResult.errorType === 'no_selection' ? 'No Team Selected' :
+                 'Error'}
+              </h3>
+              <p className={`mb-4 ${validationResult.errorType === 'access_denied' ? 'text-destructive/80' : 'text-muted-foreground'}`}>
+                {validationResult.errorMessage}
+              </p>
+              
+              {validationResult.shouldShowCreateTeam && (
+                <FeatureGate featureName="team_create_basic" mode="component" graceful={true} fallback={
+                  <p className="text-sm text-muted-foreground">
+                    Basic team creation available to all users.
+                  </p>
+                }>
+                  <CreateTeamDialog onSuccess={() => window.location.reload()} />
+                </FeatureGate>
+              )}
+              
+              {validationResult.errorType === 'access_denied' && (
+                <Button variant="outline" onClick={() => refetch()}>
+                  Try Again
+                </Button>
+              )}
+              
+              {validationResult.errorType === 'no_selection' && (
+                <>
+                  <TeamsHeader />
+                  <TeamSelector 
+                    userTeams={userTeams} 
+                    selectedTeamId={selectedTeamId} 
+                    onTeamChange={handleTeamChange} 
+                  />
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return (
+      <>
+        <TeamsHeader />
+        <TeamSelector 
+          userTeams={userTeams} 
+          selectedTeamId={selectedTeamId} 
+          onTeamChange={handleTeamChange} 
+        />
+        <TeamStats statistics={teamData!.statistics} />
+        <TeamsTabs 
+          teamData={teamData!} 
+          selectedTeamId={selectedTeamId!} 
+          currentUserRole={currentUserRole}
+        />
+      </>
+    );
+  };
+
   return (
     <AuthGuard requireAuth={true}>
       <FeatureGate featureName="page_access_teams" mode="page">
         <Layout>
           <div className="max-w-7xl mx-auto space-y-8">
-            {teamsLoading || isLoading ? (
-              <div className="animate-pulse">
-                <div className="h-8 bg-muted rounded w-1/3 mb-4"></div>
-                <div className="h-4 bg-muted rounded w-2/3 mb-8"></div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-24 bg-muted rounded"></div>
-                  ))}
-                </div>
-                <div className="h-96 bg-muted rounded"></div>
-              </div>
-            ) : !hasTeams ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold mb-2">No Teams Found</h3>
-                    <p className="mb-4 text-muted-foreground">
-                      You're not a member of any teams yet. Create a new team or ask to be invited to an existing one.
-                    </p>
-                    <FeatureGate featureName="team_create_basic" mode="component" graceful={true} fallback={
-                      <p className="text-sm text-muted-foreground">
-                        Basic team creation available to all users.
-                      </p>
-                    }>
-                      <CreateTeamDialog onSuccess={() => window.location.reload()} />
-                    </FeatureGate>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : error ? (
-              <Card className="border-destructive/20 bg-destructive/5">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-destructive mb-2">Access Denied</h3>
-                    <p className="text-destructive/80 mb-4">
-                      {error.message || 'You do not have permission to access this team\'s data.'}
-                    </p>
-                    <Button variant="outline" onClick={() => refetch()}>
-                      Try Again
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : !teamData && !canViewTeamData ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <TeamsHeader />
-                    <TeamSelector 
-                      userTeams={userTeams} 
-                      selectedTeamId={selectedTeamId} 
-                      onTeamChange={handleTeamChange} 
-                    />
-                    <div className="mt-8">
-                      <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
-                      <p className="text-muted-foreground mb-4">
-                        You don't have permission to view this team's information.
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Please contact your team administrator to request access.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : !teamData ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold mb-2">No Team Selected</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Please select a team to manage.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                <TeamsHeader />
-                <TeamSelector 
-                  userTeams={userTeams} 
-                  selectedTeamId={selectedTeamId} 
-                  onTeamChange={handleTeamChange} 
-                />
-                <TeamStats statistics={teamData.statistics} />
-                <TeamsTabs 
-                  teamData={teamData} 
-                  selectedTeamId={selectedTeamId!} 
-                  currentUserRole={currentUserRole}
-                />
-              </>
-            )}
+            {renderContent()}
           </div>
         </Layout>
       </FeatureGate>
