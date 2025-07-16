@@ -32,7 +32,7 @@ export class FeatureAccessChecker {
       };
     }
 
-    console.log('[FeatureAccessChecker] Checking access for:', featureName, 'user:', userId);
+    
 
     try {
       const { data: hasAccess, error: accessError } = await supabase.rpc('can_access_with_contract', {
@@ -41,7 +41,7 @@ export class FeatureAccessChecker {
       });
 
       if (accessError) {
-        console.error('[FeatureAccessChecker] Error checking feature access:', accessError);
+        
         return {
           hasAccess: false,
           reason: 'Failed to check feature access: ' + accessError.message
@@ -53,7 +53,7 @@ export class FeatureAccessChecker {
         reason: hasAccess ? undefined : `Feature '${featureName}' is not available in your current plan`
       };
     } catch (error) {
-      console.error('[FeatureAccessChecker] Error in checkAccess:', error);
+      
       return {
         hasAccess: false,
         reason: 'Failed to check feature access'
@@ -81,7 +81,7 @@ export class FeatureAccessChecker {
       });
 
       if (error) {
-        console.error('[FeatureAccessChecker] Bulk access check error:', error);
+        
         // Fallback to individual checks
         return await this.checkBulkAccessFallback(userId, featureNames);
       }
@@ -96,7 +96,7 @@ export class FeatureAccessChecker {
 
       return results;
     } catch (error) {
-      console.error('[FeatureAccessChecker] Error in checkBulkAccess:', error);
+      
       return await this.checkBulkAccessFallback(userId, featureNames);
     }
   }
@@ -108,7 +108,7 @@ export class FeatureAccessChecker {
     userId: string,
     featureNames: string[]
   ): Promise<Record<string, FeatureAccessInfo>> {
-    console.warn('[FeatureAccessChecker] Using fallback individual checks');
+    
     const results: Record<string, FeatureAccessInfo> = {};
     
     const batchSize = 3;

@@ -18,7 +18,6 @@ export const useFeatureAccess = (featureName: string) => {
       });
 
       if (error) {
-        console.error('[FeatureAccess] RPC error:', error);
         return false;
       }
 

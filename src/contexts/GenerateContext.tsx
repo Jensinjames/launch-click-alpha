@@ -90,14 +90,10 @@ export const GenerateProvider = ({ children }: GenerateProviderProps) => {
         });
 
       if (error) {
-        console.error('Failed to save image to storage:', error);
         throw error;
       }
-      
-      console.log('Image saved to storage:', data);
     } catch (error) {
-      console.error('Error saving image:', error);
-      // Don't throw to avoid blocking UI - just log for now
+      // Don't throw to avoid blocking UI
     }
   }, []);
 

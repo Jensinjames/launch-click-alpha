@@ -32,7 +32,7 @@ export class FeatureGatingService {
       throw new Error('User ID and feature name are required');
     }
 
-    console.log('[FeatureGatingService] Checking access for:', featureName, 'user:', userId);
+    
 
     try {
       // 1. Check if feature is enabled using new hierarchy-aware function
@@ -42,7 +42,7 @@ export class FeatureGatingService {
       });
 
       if (accessError) {
-        console.error('[FeatureGatingService] Error checking feature access:', accessError);
+        
         throw new Error('Failed to check feature access: ' + accessError.message);
       }
 
@@ -60,13 +60,13 @@ export class FeatureGatingService {
       });
 
       if (usageError) {
-        console.error('[FeatureGatingService] Error getting feature usage:', usageError);
+        
         throw new Error('Failed to get feature usage information: ' + usageError.message);
       }
 
       const usage = usageData?.[0];
       if (!usage) {
-        console.warn('[FeatureGatingService] No usage data found, returning default');
+        
         // Return permissive defaults when data is missing
         return {
           used: 0,
@@ -81,7 +81,7 @@ export class FeatureGatingService {
       const limit = usage.feature_limit;
       const wouldExceed = limit !== null && (currentUsage + incrementBy) > limit;
 
-      console.log('[FeatureGatingService] Usage check:', { currentUsage, limit, wouldExceed });
+      
 
       // 3. Check if increment would exceed limit
       if (wouldExceed) {
@@ -110,7 +110,7 @@ export class FeatureGatingService {
           );
 
         if (incrementError) {
-          console.error('[FeatureGatingService] Error incrementing feature usage:', incrementError);
+          
           throw new Error('Failed to update usage tracking');
         }
       }
@@ -125,7 +125,7 @@ export class FeatureGatingService {
         canUse: limit === null || finalUsage < limit,
       };
     } catch (error) {
-      console.error('[FeatureGatingService] Error in checkAndIncrementUsage:', error);
+      
       
       if (error instanceof QuotaError) {
         throw error; // Re-throw quota errors
@@ -168,7 +168,7 @@ export class FeatureGatingService {
       if (promise.status === 'fulfilled') {
         const { featureName, result } = promise.value;
         if ('error' in result) {
-          console.error(`Error getting usage for ${featureName}:`, result.error);
+          
         } else {
           results[featureName] = result;
         }
@@ -206,7 +206,7 @@ export class FeatureGatingService {
       .eq('period_start', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
 
     if (error) {
-      console.error('Error resetting feature usage:', error);
+      
       throw new Error('Failed to reset feature usage');
     }
   }

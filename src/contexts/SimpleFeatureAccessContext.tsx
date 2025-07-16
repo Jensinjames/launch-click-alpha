@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { useFeatureAccessBulk } from '@/hooks/useFeatureAccessBulk';
 import { FeatureAccessService } from '@/services/featureAccessService';
-import { useFeatureAccessPerformance, PerformanceMetrics } from '@/hooks/useFeatureAccessPerformance';
+
 import { useAuth } from '@/hooks/useAuth';
 
 interface FeatureAccessContextType {
@@ -13,7 +13,6 @@ interface FeatureAccessContextType {
   isAuthReady: boolean;
   error: unknown;
   preloadFeatures: (features: string[]) => void;
-  performanceMetrics: PerformanceMetrics;
 }
 
 const FeatureAccessContext = createContext<FeatureAccessContextType | undefined>(undefined);
@@ -51,8 +50,6 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     error
   } = useFeatureAccessBulk(optimizedFeatures);
 
-  // Track performance metrics with separate hook
-  const { performanceMetrics } = useFeatureAccessPerformance(accessMap, isLoading);
 
   // Core feature access functions
   const hasAccess = useCallback((featureName: string) => {
@@ -60,11 +57,7 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
       return false;
     }
     
-    const result = FeatureAccessService.hasFeatureAccess(featureName, accessMap);
-    
-    // FeatureAccess check completed
-    
-    return result;
+    return FeatureAccessService.hasFeatureAccess(featureName, accessMap);
   }, [accessMap, shouldStartFeatureChecks]);
 
   const canUseAny = useCallback((features: string[]) => {
@@ -76,7 +69,7 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   }, [accessMap]);
 
   const preloadFeaturesFn = useCallback((features: string[]) => {
-    // FeatureAccess preload requested
+    // Preload functionality can be implemented if needed
   }, []);
 
   // Context value
@@ -88,7 +81,6 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     isAuthReady: !authLoading,
     error,
     preloadFeatures: preloadFeaturesFn,
-    performanceMetrics,
   }), [
     hasAccess, 
     canUseAny, 
@@ -97,16 +89,12 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     authLoading, 
     error, 
     preloadFeaturesFn, 
-    shouldStartFeatureChecks,
-    performanceMetrics
+    shouldStartFeatureChecks
   ]);
 
   // Handle critical errors with fallback
   if (error && !accessMap && Object.keys(accessMap).length === 0) {
-    const fallbackValue = {
-      ...FeatureAccessService.createFallbackHandler(),
-      performanceMetrics: {} as PerformanceMetrics
-    };
+    const fallbackValue = FeatureAccessService.createFallbackHandler();
     return (
       <FeatureAccessContext.Provider value={fallbackValue}>
         {children}

@@ -12,7 +12,7 @@ export const useFeatureQuota = (featureName: string) => {
         throw new Error('User not authenticated');
       }
 
-      console.log('[FeatureQuota] Checking quota for:', featureName, 'user:', user.id);
+      
 
       try {
         // Add timeout to prevent hanging
@@ -24,7 +24,6 @@ export const useFeatureQuota = (featureName: string) => {
         
         return await Promise.race([quotaPromise, timeoutPromise]);
       } catch (error) {
-        console.error('[FeatureQuota] Error checking quota:', error);
         // Emergency fallback - return basic usage info
         return {
           used: 0,

@@ -37,7 +37,7 @@ export const useFeatureAccessBulk = (featureNames: string[]) => {
         );
       }
     } catch (error) {
-      console.error('[FeatureAccessBulk] Background refresh failed:', error);
+      // Background refresh failed silently
     }
   }, [user?.id, featureNames, queryClient]);
 
@@ -48,27 +48,19 @@ export const useFeatureAccessBulk = (featureNames: string[]) => {
         return {};
       }
 
-      const startTime = performance.now();
-      
       try {
-        // Use new bulk function - reduces 9 RPC calls to 1
         const { data, error } = await supabase.rpc('bulk_feature_access_check', {
           feature_names: featureNames,
           check_user_id: user.id
         });
 
-        const endTime = performance.now();
-        console.log(`[FeatureAccessBulk] Bulk check completed in ${endTime - startTime}ms for ${featureNames.length} features`);
-
         if (error) {
-          console.error('[FeatureAccessBulk] Bulk RPC error:', error);
           // Fallback to individual calls on bulk failure
           return await fallbackIndividualCalls(featureNames, user.id);
         }
 
         return (data as FeatureAccessResult) || {};
       } catch (error) {
-        console.error('[FeatureAccessBulk] Query failed, using fallback:', error);
         return await fallbackIndividualCalls(featureNames, user.id);
       }
     },
@@ -97,7 +89,6 @@ export const useFeatureAccessBulk = (featureNames: string[]) => {
 
 // Fallback function for individual calls if bulk fails
 async function fallbackIndividualCalls(featureNames: string[], userId: string): Promise<FeatureAccessResult> {
-  console.warn('[FeatureAccessBulk] Using fallback individual calls');
   const results: FeatureAccessResult = {};
   
   // Batch individual calls with concurrency limit to avoid overwhelming DB

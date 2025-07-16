@@ -3,7 +3,7 @@ import { useFeatureAccessContext } from '@/contexts/SimpleFeatureAccessContext';
 import { useState, useEffect } from 'react';
 
 export const FeatureAccessMonitor = () => {
-  const { performanceMetrics, isLoading, error } = useFeatureAccessContext();
+  const { isLoading, error } = useFeatureAccessContext();
   const [isVisible, setIsVisible] = useState(false);
 
   // Only show in development mode
@@ -34,28 +34,10 @@ export const FeatureAccessMonitor = () => {
           </span>
         </div>
         
-        {performanceMetrics.loadTime && (
-          <div className="flex justify-between">
-            <span>Load Time:</span>
-            <span className="font-medium">{performanceMetrics.loadTime.toFixed(2)}ms</span>
-          </div>
-        )}
-        
-        {performanceMetrics.cacheHitRate && (
-          <div className="flex justify-between">
-            <span>Cache Rate:</span>
-            <span className="font-medium">{(performanceMetrics.cacheHitRate * 100).toFixed(1)}%</span>
-          </div>
-        )}
-        
-        {performanceMetrics.lastRefresh && (
-          <div className="flex justify-between">
-            <span>Last Refresh:</span>
-            <span className="font-medium">
-              {new Date(performanceMetrics.lastRefresh).toLocaleTimeString()}
-            </span>
-          </div>
-        )}
+        <div className="flex justify-between">
+          <span>Timestamp:</span>
+          <span className="font-medium">{new Date().toLocaleTimeString()}</span>
+        </div>
         
         {error && (
           <div className="text-error text-xs mt-2 p-1 bg-error-light rounded" role="alert">
