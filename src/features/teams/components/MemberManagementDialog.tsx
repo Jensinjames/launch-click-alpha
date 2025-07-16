@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings, CreditCard, Trash2 } from "lucide-react";
 import { TeamMemberWithCredits } from "@/hooks/useTeamMembersWithCredits";
-import { useTeamMemberActions } from "@/hooks/useTeamMemberActions";
+import { useTeamMemberActions } from "@/features/teams/hooks/useTeamMemberActions";
 
 interface MemberManagementDialogProps {
   member: TeamMemberWithCredits;

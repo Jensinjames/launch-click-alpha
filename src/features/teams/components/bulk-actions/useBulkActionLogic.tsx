@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useTeamMemberActions } from "@/hooks/useTeamMemberActions";
+import { useTeamMemberActions } from "@/features/teams/hooks/useTeamMemberActions";
 import { TeamMemberWithCredits } from "@/hooks/useTeamMembersWithCredits";
 import { toast } from "sonner";
 

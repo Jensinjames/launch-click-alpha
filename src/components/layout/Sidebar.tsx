@@ -82,7 +82,7 @@ const Sidebar = () => {
 
   const isActive = (href: string) => location.pathname === href;
 
-  console.log('[Sidebar] Rendering sidebar, current location:', location.pathname);
+  // Rendering sidebar, current location: pathname
 
   return (
     <>

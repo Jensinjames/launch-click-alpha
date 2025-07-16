@@ -62,9 +62,7 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
     
     const result = FeatureAccessService.hasFeatureAccess(featureName, accessMap);
     
-    if (import.meta.env.DEV) {
-      console.log(`[FeatureAccess] Check '${featureName}':`, result);
-    }
+    // FeatureAccess check completed
     
     return result;
   }, [accessMap, shouldStartFeatureChecks]);
@@ -78,9 +76,7 @@ export const FeatureAccessProvider: React.FC<FeatureAccessProviderProps> = ({
   }, [accessMap]);
 
   const preloadFeaturesFn = useCallback((features: string[]) => {
-    if (import.meta.env.DEV) {
-      console.log('[FeatureAccess] Preload requested for:', features);
-    }
+    // FeatureAccess preload requested
   }, []);
 
   // Context value

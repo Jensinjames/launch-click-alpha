@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Memoized cleanup function
   const performCleanup = useCallback(() => {
-    console.log('[AuthProvider] Performing cleanup...');
+    // AuthProvider performing cleanup
     setUser(null);
     setSession(null);
     
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       );
       keysToRemove.forEach(key => localStorage.removeItem(key));
     } catch (error) {
-      console.warn('[AuthProvider] Storage cleanup failed:', error);
+      // AuthProvider storage cleanup failed
     }
   }, []);
 
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[AuthProvider] Auth state changed:', event, session?.user?.id);
+        // AuthProvider auth state changed
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -54,12 +54,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Handle auth events efficiently
         switch (event) {
           case 'SIGNED_IN':
-            console.log('[AuthProvider] User signed in successfully');
+            // AuthProvider user signed in successfully
             secureLog('info', 'User signed in', { userId: session?.user?.id });
             break;
             
           case 'SIGNED_OUT':
-            console.log('[AuthProvider] User signed out - clearing state');
+            // AuthProvider user signed out - clearing state
             secureLog('info', 'User signed out');
             performCleanup();
             break;
@@ -74,19 +74,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
-        console.error('[AuthProvider] Error getting session:', error);
+        // AuthProvider error getting session
         secureLog('error', 'Error getting session', error);
         // Don't show toast for initial session check failures
       }
       
-      console.log('[AuthProvider] Initial session check:', session?.user?.id || 'No session');
+      // AuthProvider initial session check completed
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
     return () => {
-      console.log('[AuthProvider] Cleaning up auth subscription');
+      // AuthProvider cleaning up auth subscription
       subscription.unsubscribe();
     };
   }, [performCleanup]);

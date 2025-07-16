@@ -20,7 +20,7 @@ export const SidebarItem = ({ name, href, icon: Icon, featureName, isActive, onN
   const canAccess = isLoading || hasFeatureAccess;
   const needsUpgrade = !isLoading && !hasFeatureAccess;
   
-  console.log(`[SidebarItem] ${name} (${featureName}):`, { hasFeatureAccess, canAccess, isLoading });
+  // SidebarItem feature access check completed
 
   return (
     <Link

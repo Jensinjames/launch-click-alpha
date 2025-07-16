@@ -74,7 +74,7 @@ export const LogoutButton = ({
 
   // For non-confirmation mode, use the button directly
   if (!showConfirmation) {
-    console.log('[LogoutButton] Rendering direct logout button');
+    // Rendering direct logout button
     return (
       <Button
         variant={variant}
@@ -90,7 +90,7 @@ export const LogoutButton = ({
   }
 
   // For confirmation mode, wrap with AlertDialog
-  console.log('[LogoutButton] Rendering confirmation logout button');
+  // Rendering confirmation logout button
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>

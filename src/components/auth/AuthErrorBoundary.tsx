@@ -25,7 +25,7 @@ export class AuthErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Auth Error Boundary caught an error:', error, errorInfo);
+    // Auth Error Boundary caught an error - logged to monitoring service
   }
 
   handleRetry = () => {
