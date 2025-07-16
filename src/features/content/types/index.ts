@@ -10,7 +10,7 @@ export type ContentType =
 
 export type ContentTypeWithAll = ContentType | 'all';
 
-export type SortOption = 'newest' | 'oldest' | 'favorites' | 'title' | 'created_at' | 'updated_at';
+export type SortOption = 'newest' | 'oldest' | 'favorites' | 'title';
 
 export interface ContentItem {
   id: string;

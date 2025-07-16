@@ -29,13 +29,13 @@ export class MonitoringService {
         .insert({
           action: 'monitoring_event',
           table_name: data.event_type,
-          new_values: {
+          new_values: JSON.parse(JSON.stringify({
             level: data.level,
             message: data.message,
             metadata: data.metadata || {},
             session_id: this.sessionId,
             timestamp: new Date().toISOString()
-          },
+          })),
           user_id: data.user_id
         });
 

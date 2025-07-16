@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface ExportJobData {
   id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: string;
   file_url?: string;
   error_message?: string;
   progress: number;
@@ -12,13 +12,17 @@ export interface ExportJobData {
 export class ExportService {
   static async createExportJob(contentIds: string[], format: 'pdf' | 'zip' | 'csv' = 'zip'): Promise<ExportJobData> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data: job, error } = await supabase
         .from('export_jobs')
         .insert({
           content_ids: contentIds,
           job_type: 'bulk_export',
           status: 'pending',
-          metadata: { format }
+          metadata: { format },
+          user_id: user.id
         })
         .select()
         .single();
