@@ -33,7 +33,15 @@ export class ErrorBoundaryProvider extends Component<Props, State> {
     // Log to monitoring service in production
     if (import.meta.env.PROD) {
       import('@/services/monitoringService').then(({ MonitoringService }) => {
-        MonitoringService.reportError(error, { errorInfo }).catch(console.error);
+        MonitoringService.reportError(
+          error, 
+          'system', 
+          { 
+            showToast: false,
+            includeReportAction: false
+          },
+          { errorInfo }
+        ).catch(console.error);
       });
     }
   }

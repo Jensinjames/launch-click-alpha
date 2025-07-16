@@ -66,7 +66,15 @@ export const useErrorHandler = (options: UseErrorHandlerOptions = {}) => {
   const reportError = useCallback(async (appError: AppError) => {
     try {
       const { MonitoringService } = await import('@/services/monitoringService');
-      await MonitoringService.reportError(new Error(appError.message), { appError });
+      await MonitoringService.reportError(
+        new Error(appError.message), 
+        'system', 
+        { 
+          showToast: false,
+          includeReportAction: false
+        },
+        { appError }
+      );
       toast.success('Error reported. Thank you!');
     } catch (error) {
       console.error('Failed to report error:', error);
