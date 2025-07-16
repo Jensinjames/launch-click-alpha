@@ -1455,16 +1455,16 @@ export type Database = {
       }
       audit_sensitive_operation: {
         Args: {
-          p_old_values?: Json
           p_table_name: string
-          p_action: string
+          p_old_values?: Json
           p_new_values?: Json
+          p_action: string
           p_record_id?: string
         }
         Returns: undefined
       }
       bulk_feature_access_check: {
-        Args: { check_user_id?: string; feature_names: string[] }
+        Args: { feature_names: string[]; check_user_id?: string }
         Returns: Json
       }
       can_access_feature: {
@@ -1484,9 +1484,9 @@ export type Database = {
       }
       check_rate_limit: {
         Args: {
-          time_window_minutes?: number
           identifier: string
           max_attempts?: number
+          time_window_minutes?: number
         }
         Returns: boolean
       }
@@ -1505,7 +1505,7 @@ export type Database = {
       create_team_with_access_control: {
         Args:
           | { p_team_name: string; p_description?: string }
-          | { p_team_name: string; p_description?: string; p_user_id: string }
+          | { p_user_id: string; p_team_name: string; p_description?: string }
         Returns: Json
       }
       emergency_sign_out: {
@@ -1540,9 +1540,9 @@ export type Database = {
         Args: { p_user_id: string; p_feature_name: string }
         Returns: {
           feature_limit: number
-          remaining: number
-          usage_count: number
           period_start: string
+          usage_count: number
+          remaining: number
         }[]
       }
       get_team_member_count: {
@@ -1562,9 +1562,9 @@ export type Database = {
         Args: { limit_count?: number }
         Returns: {
           type: Database["public"]["Enums"]["content_type"]
+          content_id: string
           score: number
           title: string
-          content_id: string
         }[]
       }
       get_user_team_seats: {
@@ -1576,7 +1576,7 @@ export type Database = {
         Returns: boolean
       }
       invalidate_user_sessions: {
-        Args: { target_user_id: string; reason?: string }
+        Args: { reason?: string; target_user_id: string }
         Returns: undefined
       }
       is_admin_or_super: {
@@ -1617,27 +1617,27 @@ export type Database = {
       }
       log_feature_access: {
         Args: {
-          p_feature_name: string
-          p_context?: Json
           p_user_id?: string
+          p_feature_name: string
           p_access_granted: boolean
+          p_context?: Json
         }
         Returns: undefined
       }
       log_security_event: {
-        Args: { event_type: string; user_id_param?: string; event_data?: Json }
+        Args: { user_id_param?: string; event_data?: Json; event_type: string }
         Returns: undefined
       }
       log_team_activity: {
-        Args: { p_team_id: string; p_action: string; p_details?: Json }
+        Args: { p_action: string; p_team_id: string; p_details?: Json }
         Returns: undefined
       }
       log_user_activity: {
         Args: {
-          p_action: string
           p_resource_type?: string
-          p_resource_id?: string
           p_metadata?: Json
+          p_action: string
+          p_resource_id?: string
         }
         Returns: undefined
       }
@@ -1656,8 +1656,8 @@ export type Database = {
       test_team_members_rls_fix: {
         Args: Record<PropertyKey, never>
         Returns: {
-          test_name: string
           details: string
+          test_name: string
           status: string
         }[]
       }

@@ -10,7 +10,7 @@ import { ContentGrid } from "./ContentGrid";
 import { useContentFilters } from "../hooks/useContentFilters";
 import { useContentNavigation } from "../hooks/useContentNavigation";
 import { useContentOperations } from "../hooks/useContentOperations";
-import type { ContentType, ContentTypeWithAll } from "../types";
+import type { ContentType, ContentTypeWithAll, SortOption } from "../types";
 
 export const ContentPage = () => {
   const { type: urlType } = useParams<{ type?: string }>();
@@ -37,7 +37,7 @@ export const ContentPage = () => {
   const { data: contentItems = [], isLoading, error } = useUserContent({
     type: filterType === 'all' ? undefined : filterType,
     search: searchQuery,
-    sortBy: sortBy as any // TODO: Fix type mismatch
+    sortBy: sortBy as SortOption
   });
 
   // Get category information for dynamic header

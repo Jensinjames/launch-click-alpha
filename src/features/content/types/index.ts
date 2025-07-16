@@ -10,6 +10,8 @@ export type ContentType =
 
 export type ContentTypeWithAll = ContentType | 'all';
 
+export type SortOption = 'newest' | 'oldest' | 'favorites' | 'title' | 'created_at' | 'updated_at';
+
 export interface ContentItem {
   id: string;
   title: string;
@@ -52,7 +54,7 @@ export interface ContentMetadata {
 export interface ContentFilters {
   type: ContentTypeWithAll;
   search: string;
-  sortBy: 'newest' | 'oldest' | 'favorites' | 'title';
+  sortBy: SortOption;
   tags?: string[];
   dateRange?: {
     start: string;
@@ -77,7 +79,7 @@ export interface CategoryInfo {
 export interface ContentQueryParams {
   type?: ContentTypeWithAll;
   search?: string;
-  sortBy?: ContentFilters['sortBy'];
+  sortBy?: SortOption;
   limit?: number;
   offset?: number;
 }

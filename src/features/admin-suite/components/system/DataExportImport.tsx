@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { DataType, ExportFormat, DateRange, ImportOperation, ValidationLevel } from "@/types/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +14,9 @@ import { Download, Upload, FileText, Database, Shield, AlertTriangle } from "luc
 import { toast } from "sonner";
 
 interface ExportOptions {
-  format: 'csv' | 'json' | 'xlsx';
-  data_type: 'users' | 'teams' | 'content' | 'analytics' | 'audit_logs';
-  date_range: 'all' | '7d' | '30d' | '90d' | 'custom';
+  format: ExportFormat;
+  data_type: DataType;
+  date_range: DateRange;
   include_pii: boolean;
   gdpr_compliant: boolean;
   custom_start_date?: string;
@@ -23,9 +24,9 @@ interface ExportOptions {
 }
 
 interface ImportOptions {
-  operation: 'create' | 'update' | 'upsert';
-  data_type: 'users' | 'teams' | 'user_plans';
-  validation_level: 'strict' | 'lenient';
+  operation: ImportOperation;
+  data_type: DataType;
+  validation_level: ValidationLevel;
   dry_run: boolean;
 }
 
@@ -44,14 +45,14 @@ export const DataExportImport = () => {
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: 'csv',
-    data_type: 'users',
+    data_type: 'all',
     date_range: '30d',
     include_pii: false,
     gdpr_compliant: true
   });
   const [importOptions, setImportOptions] = useState<ImportOptions>({
-    operation: 'create',
-    data_type: 'users',
+    operation: 'insert',
+    data_type: 'all',
     validation_level: 'strict',
     dry_run: true
   });
@@ -232,7 +233,7 @@ export const DataExportImport = () => {
                   <Label htmlFor="data-type">Data Type</Label>
                   <Select
                     value={exportOptions.data_type}
-                    onValueChange={(value) => setExportOptions(prev => ({ ...prev, data_type: value as any }))}
+                    onValueChange={(value: DataType) => setExportOptions(prev => ({ ...prev, data_type: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -251,7 +252,7 @@ export const DataExportImport = () => {
                   <Label htmlFor="format">Export Format</Label>
                   <Select
                     value={exportOptions.format}
-                    onValueChange={(value) => setExportOptions(prev => ({ ...prev, format: value as any }))}
+                    onValueChange={(value: ExportFormat) => setExportOptions(prev => ({ ...prev, format: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -268,7 +269,7 @@ export const DataExportImport = () => {
                   <Label htmlFor="date-range">Date Range</Label>
                   <Select
                     value={exportOptions.date_range}
-                    onValueChange={(value) => setExportOptions(prev => ({ ...prev, date_range: value as any }))}
+                    onValueChange={(value: DateRange) => setExportOptions(prev => ({ ...prev, date_range: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -461,7 +462,7 @@ export const DataExportImport = () => {
                   <Label htmlFor="import-data-type">Data Type</Label>
                   <Select
                     value={importOptions.data_type}
-                    onValueChange={(value) => setImportOptions(prev => ({ ...prev, data_type: value as any }))}
+                    onValueChange={(value: DataType) => setImportOptions(prev => ({ ...prev, data_type: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -478,7 +479,7 @@ export const DataExportImport = () => {
                   <Label htmlFor="operation">Operation</Label>
                   <Select
                     value={importOptions.operation}
-                    onValueChange={(value) => setImportOptions(prev => ({ ...prev, operation: value as any }))}
+                    onValueChange={(value: ImportOperation) => setImportOptions(prev => ({ ...prev, operation: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -495,7 +496,7 @@ export const DataExportImport = () => {
                   <Label htmlFor="validation">Validation Level</Label>
                   <Select
                     value={importOptions.validation_level}
-                    onValueChange={(value) => setImportOptions(prev => ({ ...prev, validation_level: value as any }))}
+                    onValueChange={(value: ValidationLevel) => setImportOptions(prev => ({ ...prev, validation_level: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
