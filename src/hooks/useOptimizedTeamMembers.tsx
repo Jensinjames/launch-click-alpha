@@ -14,7 +14,10 @@ const getTeamDataWithFallback = async (teamId: string): Promise<TeamAdminData> =
     if (error) throw error;
     if (data) return data as TeamAdminData;
   } catch (error) {
-    console.warn('Edge function failed, using fallback:', error);
+    // Use teams logger for structured logging
+    import('@/services/logger/domainLoggers').then(({ teamsLogger }) => {
+      teamsLogger.warning('Edge function failed, using fallback', { error: (error as Error).message });
+    });
   }
   
   // Fallback to direct database query
@@ -23,7 +26,10 @@ const getTeamDataWithFallback = async (teamId: string): Promise<TeamAdminData> =
 
 // Fallback function to get team data using direct database queries
 const getFallbackTeamData = async (teamId: string): Promise<TeamAdminData> => {
-  console.log('Using fallback method to fetch team data...');
+  // Use teams logger for structured logging
+  import('@/services/logger/domainLoggers').then(({ teamsLogger }) => {
+    teamsLogger.info('Using fallback method to fetch team data', { teamId });
+  });
   
   // Get team members with their profiles and credits
   const { data: teamMembers, error: membersError } = await supabase
