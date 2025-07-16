@@ -23,6 +23,9 @@ export const addSecurityHeaders = () => {
     isDevelopment
       ? `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`
       : `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    isDevelopment
+      ? `style-src-elem 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`
+      : `style-src-elem 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
     isDevelopment 
       ? "img-src 'self' data: https: blob: http://localhost:*"

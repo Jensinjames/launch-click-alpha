@@ -19,7 +19,10 @@ export const ExportButton = ({
 }: ExportButtonProps) => {
   const handleExport = async () => {
     try {
+      toast.loading('Generating PDF export...', { id: 'export-loading' });
       const result = await ExportService.exportSingleContent(contentId, 'pdf');
+      
+      toast.dismiss('export-loading');
       
       if (result?.file_url) {
         // Download the file
@@ -34,9 +37,18 @@ export const ExportButton = ({
       } else {
         toast.error('Export failed. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
+      toast.dismiss('export-loading');
       console.error('Export error:', error);
-      toast.error('Failed to export content');
+      
+      // Enhanced error messaging
+      if (error?.message?.includes('Pro plan')) {
+        toast.error('PDF export requires Pro plan or higher. Please upgrade your account.');
+      } else if (error?.message?.includes('Authentication')) {
+        toast.error('Please log in to export content.');
+      } else {
+        toast.error('Failed to export content. Please try again.');
+      }
     }
   };
 
