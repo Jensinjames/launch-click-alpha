@@ -72,26 +72,16 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Query team members with their profiles and credits - using explicit foreign key relationship
+    // Query team members with their profiles and credits - simplified approach
     const { data: teamMembers, error: membersError } = await supabaseClient
       .from('team_members')
       .select(`
         id,
+        user_id,
         role,
         status,
         created_at,
-        joined_at,
-        profiles!user_id (
-          id,
-          email,
-          full_name,
-          avatar_url
-        ),
-        user_credits!inner (
-          monthly_limit,
-          credits_used,
-          reset_at
-        )
+        joined_at
       `)
       .eq('team_id', teamId)
 
@@ -99,6 +89,35 @@ Deno.serve(async (req) => {
       console.error('Error fetching team members:', membersError)
       return new Response(
         JSON.stringify({ error: 'Failed to fetch team members' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get profiles separately
+    const userIds = teamMembers.map(m => m.user_id)
+    const { data: profiles, error: profilesError } = await supabaseClient
+      .from('profiles')
+      .select('id, email, full_name, avatar_url')
+      .in('id', userIds)
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch member profiles' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get credits separately
+    const { data: credits, error: creditsError } = await supabaseClient
+      .from('user_credits')
+      .select('user_id, monthly_limit, credits_used, reset_at')
+      .in('user_id', userIds)
+
+    if (creditsError) {
+      console.error('Error fetching credits:', creditsError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch member credits' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -119,23 +138,28 @@ Deno.serve(async (req) => {
     }
 
     // Transform the data for frontend consumption
-    const transformedMembers = teamMembers.map(member => ({
-      id: member.id,
-      user_id: member.profiles.id,
-      name: member.profiles.full_name || 'Unknown',
-      email: member.profiles.email,
-      avatar_url: member.profiles.avatar_url,
-      role: member.role,
-      status: member.status,
-      created_at: member.created_at,
-      joined_at: member.joined_at,
-      credits: {
-        monthly_limit: member.user_credits.monthly_limit,
-        credits_used: member.user_credits.credits_used,
-        credits_remaining: member.user_credits.monthly_limit - member.user_credits.credits_used,
-        reset_at: member.user_credits.reset_at
+    const transformedMembers = teamMembers.map(member => {
+      const profile = profiles.find(p => p.id === member.user_id)
+      const credit = credits.find(c => c.user_id === member.user_id)
+      
+      return {
+        id: member.id,
+        user_id: member.user_id,
+        name: profile?.full_name || 'Unknown',
+        email: profile?.email || 'Unknown',
+        avatar_url: profile?.avatar_url,
+        role: member.role,
+        status: member.status,
+        created_at: member.created_at,
+        joined_at: member.joined_at,
+        credits: {
+          monthly_limit: credit?.monthly_limit || 0,
+          credits_used: credit?.credits_used || 0,
+          credits_remaining: (credit?.monthly_limit || 0) - (credit?.credits_used || 0),
+          reset_at: credit?.reset_at
+        }
       }
-    }))
+    })
 
     // Calculate team statistics
     const totalMembers = transformedMembers.length

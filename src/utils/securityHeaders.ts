@@ -23,9 +23,7 @@ export const addSecurityHeaders = () => {
     isDevelopment
       ? `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`
       : `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
-    isDevelopment
-      ? `style-src-elem 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`
-      : `style-src-elem 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    // style-src-elem removed to prevent conflicts with Vite injected styles
     "font-src 'self' https://fonts.gstatic.com",
     isDevelopment 
       ? "img-src 'self' data: https: blob: http://localhost:*"
@@ -63,9 +61,7 @@ export const addSecurityHeaders = () => {
     { httpEquiv: 'X-XSS-Protection', content: '1; mode=block' },
     { httpEquiv: 'Referrer-Policy', content: 'strict-origin-when-cross-origin' },
     { httpEquiv: 'Permissions-Policy', content: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
-    { httpEquiv: 'Cross-Origin-Embedder-Policy', content: 'require-corp' },
-    { httpEquiv: 'Cross-Origin-Opener-Policy', content: 'same-origin' },
-    { httpEquiv: 'Cross-Origin-Resource-Policy', content: 'same-origin' }
+    // COEP/COOP headers removed to prevent conflicts with development server
   ];
 
   securityTags.forEach(({ httpEquiv, content }) => {
