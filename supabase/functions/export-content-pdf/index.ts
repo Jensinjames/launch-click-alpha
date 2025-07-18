@@ -274,12 +274,15 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
     
-    const { contentId, format = 'pdf', template = 'default' }: ExportRequest = requestBody;
+    // Handle both contentId and content_id parameter names for compatibility
+    const contentId = requestBody.contentId || requestBody.content_id;
+    const format = requestBody.format || 'pdf';
+    const template = requestBody.template || 'default';
 
     if (!contentId) {
       console.error(`[${requestId}] Missing contentId in request:`, requestBody);
       return new Response(
-        JSON.stringify({ error: 'Content ID is required', requestId }),
+        JSON.stringify({ error: 'Content ID is required (use contentId or content_id)', requestId }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

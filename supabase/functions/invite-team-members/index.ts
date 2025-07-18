@@ -26,7 +26,11 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+const resendApiKey = Deno.env.get('RESEND_API_KEY');
+if (!resendApiKey) {
+  console.error('RESEND_API_KEY environment variable is not set');
+}
+const resend = new Resend(resendApiKey || 'demo-key');
 
 // Exponential backoff helper
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -241,6 +245,17 @@ serve(async (req: Request) => {
             </div>
           </div>
         `;
+
+        // Check if Resend API is configured before sending
+        if (!resendApiKey || resendApiKey === 'demo-key') {
+          console.error('RESEND_API_KEY not configured - email cannot be sent');
+          results.push({
+            email,
+            status: 'error',
+            message: 'Email service not configured. Please contact administrator.'
+          });
+          continue;
+        }
 
         // Send email - simplified approach
         const emailResult = await sendEmailSimple({

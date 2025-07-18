@@ -77,6 +77,35 @@ export const addSecurityHeaders = () => {
   });
 };
 
+// Enable text editing features like spell check
+export const enableTextEditing = () => {
+  // Enable spell check for text inputs and textareas
+  const enableSpellCheck = () => {
+    const textElements = document.querySelectorAll('input[type="text"], input[type="email"], textarea');
+    textElements.forEach((element) => {
+      (element as HTMLElement).setAttribute('spellcheck', 'true');
+      (element as HTMLElement).setAttribute('autocomplete', 'on');
+    });
+  };
+
+  // Run on load and observe for dynamic content
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enableSpellCheck);
+  } else {
+    enableSpellCheck();
+  }
+
+  // Create observer for dynamically added elements
+  const observer = new MutationObserver(() => {
+    enableSpellCheck();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+};
+
 // Initialize security headers on app start
 export const initializeSecurity = () => {
   // Only apply security headers once to avoid duplicates
@@ -86,6 +115,7 @@ export const initializeSecurity = () => {
   }
   
   addSecurityHeaders();
+  enableTextEditing(); // Enable text editing features
   
   // Mark as initialized
   const marker = document.createElement('meta');
