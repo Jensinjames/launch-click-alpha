@@ -1,0 +1,78 @@
+name: Summarize Failed Commits
+
+on:
+  workflow_run:
+    workflows: [CI, Build, Test] # Replace with your actual workflow names
+    types:
+      - completed
+
+jobs:
+  summarize-failed-commits:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download workflow run logs
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          path: ./logs
+
+      - name: Get commit info for failed run
+        uses: actions/github-script@v7
+        id: get_commit
+        with:
+          script: |
+            const run = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id
+            });
+            const sha = run.data.head_sha;
+            const commit = await github.rest.repos.getCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha
+            });
+            const author = commit.data.commit.author.name;
+            const message = commit.data.commit.message;
+            const url = commit.data.html_url;
+            core.setOutput('author', author);
+            core.setOutput('message', message);
+            core.setOutput('url', url);
+
+      - name: Create or update failure summary issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { author, message, url } = process.env;
+            const issue_title = `🚨 Commit Failed: ${message.split('\n')[0]}`;
+            const body = `A commit by **${author}** failed CI.\n\n- **Commit message:** ${message}\n- [View Commit](${url})`;
+            // Find open summary issue or create a new one
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'commit-failure-summary'
+            });
+            if (issues.data.length > 0) {
+              // Add a comment to the existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body
+              });
+            } else {
+              // Create a new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issue_title,
+                body,
+                labels: ['commit-failure-summary']
+              });
+            }
+        env:
+          author: ${{ steps.get_commit.outputs.author }}
+          message: ${{ steps.get_commit.outputs.message }}
+          url: ${{ steps.get_commit.outputs.url }}

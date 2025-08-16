@@ -205,11 +205,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in search-templates:', error);
+    console.error('Error in search-templates:', error.message);
+    console.error('Stack trace:', error.stack);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Search failed',
-        details: error.stack 
+        error: error.message || 'Search failed'
       }),
       { 
         status: 500,
